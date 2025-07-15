@@ -11,3 +11,5 @@ def test_character_move(character_name):
 
 if __name__ == "__main__":
     test_character_move("bitzy")
+    test_character_move("hadamard")
+    test_character_move("cnot")
