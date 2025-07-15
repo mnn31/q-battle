@@ -4,10 +4,9 @@ from characters.bitzy.quantum_move import (
     quantum_move_bitzy_shock,
     quantum_move_bitzy_dualize,
     quantum_move_bitzy_bit_flip,
-    ability_superhijack,
     BitzyQuantumState
 )
-from characters.bitzy.classical_move import classical_move_bitzy
+from characters.bitzy.ability import ability_superhijack
 
 app = Flask(__name__)
 
@@ -38,12 +37,6 @@ def run_bitzy_bit_flip():
 @app.route("/api/bitzy/superhijack", methods=["GET"])
 def run_bitzy_superhijack():
     result = ability_superhijack(bitzy_state)
-    return jsonify(result)
-
-# Bitzy's classical move endpoint
-@app.route("/api/bitzy/classical", methods=["GET"])
-def run_bitzy_classical():
-    result = classical_move_bitzy()
     return jsonify(result)
 
 # State query endpoint
