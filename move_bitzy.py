@@ -9,4 +9,4 @@ def quantum_move_bitzy():
 
     sim = Aer.get_backend('qasm_simulator')
     result = sim.run(qc, shots=1).result().get_counts()
-    return result 
+    return result
