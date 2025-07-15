@@ -1,6 +1,10 @@
 from flask import Flask, jsonify
 from characters.bitzy.quantum_move import quantum_move_bitzy
 from characters.bitzy.classical_move import classical_move_bitzy, quirk_bitzy
+from routes import game_api  
+
+app = Flask(__name__)
+app.register_blueprint(game_api)
 
 app = Flask(__name__)
 
