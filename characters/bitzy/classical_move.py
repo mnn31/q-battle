@@ -1,15 +1,12 @@
 import random
 
 def classical_move_bitzy():
-    """Bitzy's classical move: Shadow Step"""
-    return {"damage": 15, "move": "Shadow Step"}
+    """Bitzy's classical move: Basic attack"""
+    return {"damage": 15, "move": "Basic Attack"}
 
-def quirk_bitzy():
-    """Bitzy's unique quirk: Mood Swing"""
-    mood_effects = [
-        "Bitzy is feeling confident! +5 damage",
-        "Bitzy seems distracted... -5 damage", 
-        "Bitzy is in a mysterious mood...",
-        "Bitzy's quantum nature is unstable!"
-    ]
-    return {"quirk": random.choice(mood_effects), "mood_swing": random.randint(-5, 5)} 
+def ability_superhijack(enemy_qubit_state="|0⟩"):
+    """SUPERHIJACK: Additional 10 damage if enemy qubit is |1⟩"""
+    if enemy_qubit_state == "|1⟩":
+        return {"bonus_damage": 10, "message": "SUPERHIJACK deals 10 bonus damage!"}
+    else:
+        return {"bonus_damage": 0, "message": "SUPERHIJACK: No bonus damage."} 
