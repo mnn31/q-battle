@@ -13,10 +13,28 @@ from characters.bitzy.quantum_move import (
     BitzyQuantumState
 )
 from characters.bitzy.ability import ability_superhijack
+from characters.neutrinette.quantum_move import (
+    quantum_move_neutrinette_q_photon_geyser,
+    quantum_move_neutrinette_glitch_claw,
+    quantum_move_neutrinette_entangle,
+    quantum_move_neutrinette_switcheroo,
+    NeutrinetteQuantumState
+)
+from characters.neutrinette.ability import ability_quantum_afterburn
+from characters.resona.quantum_move import (
+    quantum_move_resona_q_metronome,
+    quantum_move_resona_wave_crash,
+    quantum_move_resona_metal_noise,
+    quantum_move_resona_shift_gear,
+    ResonaQuantumState
+)
+from characters.resona.ability import ability_quantum_waveform
 
 #Store game data like hp, moves, turn, and also same for enemy 
 game_state = {}
 bitzy_state = BitzyQuantumState()
+neutrinette_state = NeutrinetteQuantumState()
+resona_state = ResonaQuantumState()
 
 def start_game():
     global game_state, bitzy_state
