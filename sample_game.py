@@ -32,14 +32,20 @@ from characters.resona.quantum_move import (
 )
 from characters.resona.ability import ability_quantum_waveform
 
+from characters.boss.SingulonStats import SingulonQuantumState
+from characters.boss.Moves import (
+    quantum_move_singulon_dualize,
+    quantum_move_singulon_haze,
+    quantum_move_singulon_bullet_muons,
+    quantum_move_singulon_q_prismatic_laser
+)
+
 class SampleGame:
     def __init__(self):
         self.player_state = None
-        self.boss_state = {
-            "hp": 100,
-            "qubit_state": "|0⟩",
-            "name": "QUANTUM BOSS"  # Placeholder until Rohan designs
-        }
+        self.boss_state = SingulonQuantumState()
+        self.boss_state.hp = 400  # Set boss HP
+        self.boss_name = "Singulon"
         self.turn = 1
         self.battle_log = []
         
@@ -113,7 +119,7 @@ class SampleGame:
     
     def display_battle_start(self):
         """Display battle introduction"""
-        print(f"\nYou are fighting {self.boss_state['name']}!")
+        print(f"\nYou are fighting {self.boss_name}!")
         print(f"\nYour ability is {self.ability_name}, which does {self.ability_desc}")
         print("\n" + "="*50)
     
@@ -121,14 +127,14 @@ class SampleGame:
         """Display current turn information"""
         print(f"\n----Turn {self.turn}----")
         print(f"Your HP: {self.player_hp}")
-        print(f"Boss's HP: {self.boss_state['hp']}")
+        print(f"Boss's HP: {self.boss_state.hp}")
         print(f"\nYour move choices are:")
         
         for i, (move_name, move_desc) in enumerate(self.moves, 1):
             print(f"{i}. {move_name} - {move_desc}")
         
         print(f"\nYour Qubit: {self.player_state.qubit_state}")
-        print(f"Boss's Qubit: {self.boss_state['qubit_state']}")  # For testing
+        print(f"Boss's Qubit: {self.boss_state.qubit_state}")  # For testing
         print("\nSelect one to perform (1-4): ")
     
     def get_player_move(self):
@@ -155,42 +161,42 @@ class SampleGame:
             if move_name == "Q-THUNDER":
                 result = move_func(self.player_state)
             elif move_name == "SHOCK":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
+                result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "DUALIZE":
                 result = move_func(self.player_state)
             elif move_name == "BIT-FLIP":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
-                self.boss_state["qubit_state"] = result["enemy_qubit_state"]
+                result = move_func(self.player_state, self.boss_state.qubit_state)
+                self.boss_state.qubit_state = result["enemy_qubit_state"]
                 
         elif self.character_name == "Neutrinette":
             if move_name == "Q-PHOTON GEYSER":
-                result = move_func(self.player_state, self.player_hp, self.boss_state["hp"], self.player_state.is_entangled)
+                result = move_func(self.player_state, self.player_hp, self.boss_state.hp, self.player_state.is_entangled)
                 if result.get("enemy_hp_cost", 0) > 0:
-                    self.boss_state["hp"] -= result["enemy_hp_cost"]
+                    self.boss_state.hp -= result["enemy_hp_cost"]
             elif move_name == "GLITCH CLAW":
                 result = move_func(self.player_state, self.player_hp)
                 if result.get("heal", 0) > 0:
                     self.player_hp = min(80, self.player_hp + result["heal"])
             elif move_name == "ENTANGLE":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
+                result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "SWITCHEROO":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
-                self.boss_state["qubit_state"] = result["enemy_qubit_state"]
+                result = move_func(self.player_state, self.boss_state.qubit_state)
+                self.boss_state.qubit_state = result["enemy_qubit_state"]
                 
         elif self.character_name == "Resona":
             if move_name == "Q-METRONOME":
-                result = move_func(self.player_state, self.player_hp, self.boss_state["qubit_state"])
+                result = move_func(self.player_state, self.player_hp, self.boss_state.qubit_state)
             elif move_name == "WAVE CRASH":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
+                result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "METAL NOISE":
-                result = move_func(self.player_state, self.boss_state["qubit_state"])
+                result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "SHIFT GEAR":
                 result = move_func(self.player_state)
         
         # Apply damage
         if result.get("success", True):
             damage = result.get("damage", 0)
-            self.boss_state["hp"] -= damage
+            self.boss_state.hp -= damage
             
             # Handle HP costs
             if result.get("hp_cost", 0) > 0:
@@ -206,35 +212,48 @@ class SampleGame:
         
         # Show HP at end of turn
         print(f"\nYour HP: {self.player_hp}")
-        print(f"Boss's HP: {self.boss_state['hp']}")
+        print(f"Boss's HP: {self.boss_state.hp}")
     
     def execute_boss_move(self):
-        """Execute boss move (placeholder until Rohan designs)"""
-        # Placeholder boss moves - Rohan will replace this
+        """Execute Singulon boss move"""
+        # Singulon's moves
         boss_moves = [
-            ("QUANTUM BLAST", "Deals 15 damage"),
-            ("STATE SHIFT", "Changes your qubit state"),
-            ("QUANTUM DISRUPT", "Deals 10 damage and disrupts quantum state")
+            ("DUALIZE", quantum_move_singulon_dualize),
+            ("HAZE", quantum_move_singulon_haze),
+            ("BULLET MUONS", quantum_move_singulon_bullet_muons),
+            ("Q-PRISMATIC LASER", quantum_move_singulon_q_prismatic_laser)
         ]
         
-        move_name, move_desc = random.choice(boss_moves)
-        damage = random.randint(10, 20)
+        move_name, move_func = random.choice(boss_moves)
         
-        self.player_hp -= damage
-        print(f"The boss used {move_name}: {move_desc}")
-        print(f"Dealt {damage} damage!")
+        # Execute the move
+        if move_name == "Q-PRISMATIC LASER":
+            result = move_func(self.boss_state, self.player_state.qubit_state)
+        else:
+            result = move_func(self.boss_state)
+        
+        # Apply damage to player
+        if result.get("success", True):
+            damage = result.get("damage", 0)
+            self.player_hp -= damage
+            
+            print(f"Singulon used {move_name}: {result['message']}")
+            if damage > 0:
+                print(f"Dealt {damage} damage!")
+        else:
+            print(f"Singulon used {move_name}: {result['message']}")
         
         # Show HP at end of boss turn
         print(f"\nYour HP: {self.player_hp}")
-        print(f"Boss's HP: {self.boss_state['hp']}")
+        print(f"Boss's HP: {self.boss_state.hp}")
     
     def check_battle_end(self):
         """Check if battle has ended"""
         if self.player_hp <= 0:
-            print(f"\nYou fainted! {self.boss_state['name']} wins!")
+            print(f"\nYou fainted! {self.boss_name} wins!")
             return True
-        elif self.boss_state["hp"] <= 0:
-            print(f"\n{self.boss_state['name']} fainted! You win!")
+        elif self.boss_state.hp <= 0:
+            print(f"\n{self.boss_name} fainted! You win!")
             return True
         return False
     
