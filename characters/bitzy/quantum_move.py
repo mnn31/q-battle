@@ -4,9 +4,15 @@ import random
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'quantum_gates'))
 
 from basic_gates import (
-    hadamard_gate, x_gate, cnot_gate, create_superposition, 
+    hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
     measure_qubit, run_quantum_circuit, calculate_damage
 )
+
+def simple_damage(base_power, qmove=False):
+    if qmove:
+        return min(int(base_power * 0.8), 60)
+    else:
+        return min(int(base_power * 0.4), 30)
 
 class BitzyQuantumState:
     """Manages Bitzy's quantum state throughout battle"""
@@ -26,13 +32,13 @@ def quantum_move_bitzy_q_thunder(quantum_state):
             "qubit_state": quantum_state.qubit_state
         }
     
-    # Create superposition circuit and measure
+    # Create circuit to measure superposition state
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (90 base power)
-    damage = calculate_damage(quantum_state.attack_stat, 90, defense=quantum_state.defense)
+    # Calculate damage (90 base power) - reduced scaling
+    damage = simple_damage(90, qmove=True)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -49,40 +55,34 @@ def quantum_move_bitzy_q_thunder(quantum_state):
     }
 
 def quantum_move_bitzy_shock(quantum_state, enemy_qubit_state="|0⟩"):
-    """SHOCK: Base damage + bonus if qubits are in different states"""
-    # Create circuit to measure current qubit state
+    """SHOCK: Deals damage with bonus if qubits are in different states"""
+    # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Determine current qubit state
-    if "1" in result:
-        current_state = "|1⟩"
-    else:
-        current_state = "|0⟩"
+    # Calculate base damage (30) - reduced scaling
+    base_damage = 30
+    total_damage = simple_damage(base_damage)
     
-    # Calculate base damage (20 base power)
-    base_damage = calculate_damage(quantum_state.attack_stat, 20, defense=quantum_state.defense)
-    
-    # Check if states are different
-    if current_state != enemy_qubit_state:
-        bonus_damage = calculate_damage(quantum_state.attack_stat, 30, defense=quantum_state.defense)
-        total_damage = base_damage + bonus_damage
-        message = f"SHOCK deals {total_damage} damage! (Bonus for different states)"
+    # Check if qubits are in different states
+    if quantum_state.qubit_state != enemy_qubit_state:
+        bonus_damage = simple_damage(20)
+        total_damage += bonus_damage
+        message = f"SHOCK deals {total_damage} damage! (+{bonus_damage} different states bonus)"
     else:
-        total_damage = base_damage
-        message = f"SHOCK deals {total_damage} damage."
+        message = f"SHOCK deals {total_damage} damage!"
     
     return {
         "success": True,
         "damage": total_damage,
         "message": message,
-        "qubit_state": current_state,
+        "qubit_state": quantum_state.qubit_state,
         "quantum_result": result
     }
 
 def quantum_move_bitzy_dualize(quantum_state):
-    """DUALIZE: Puts qubit in superposition if not already"""
+    """DUALIZE: Puts the qubit in a state of SUPERPOSITION if it wasn't previously"""
     if quantum_state.qubit_state == "superposition":
         return {
             "success": False,
@@ -91,40 +91,45 @@ def quantum_move_bitzy_dualize(quantum_state):
             "qubit_state": quantum_state.qubit_state
         }
     
-    # Create superposition
+    # Create superposition using Hadamard gate
+    qc = hadamard_gate(0)
+    result = run_quantum_circuit(qc, shots=1)
+    
     quantum_state.qubit_state = "superposition"
     
     return {
         "success": True,
         "damage": 0,
         "message": "DUALIZE puts qubit in superposition!",
-        "qubit_state": quantum_state.qubit_state
+        "qubit_state": quantum_state.qubit_state,
+        "quantum_result": result
     }
 
 def quantum_move_bitzy_bit_flip(quantum_state, enemy_qubit_state="|0⟩"):
     """BIT-FLIP: Flips the enemy's qubit state"""
-    # Determine new enemy state
+    # Create X gate circuit
+    qc = x_gate(0)
+    result = run_quantum_circuit(qc, shots=1)
+    
+    # Flip the enemy qubit state
     if enemy_qubit_state == "|0⟩":
         new_enemy_state = "|1⟩"
     elif enemy_qubit_state == "|1⟩":
         new_enemy_state = "|0⟩"
-    else:
-        # If enemy is in superposition, collapse to random state
-        if random.random() < 0.5:
-            new_enemy_state = "|0⟩"
-        else:
-            new_enemy_state = "|1⟩"
+    else:  # superposition
+        new_enemy_state = "|0⟩"  # Collapse to |0⟩
     
     return {
         "success": True,
         "damage": 0,
         "message": f"BIT-FLIP changes enemy qubit from {enemy_qubit_state} to {new_enemy_state}!",
         "qubit_state": quantum_state.qubit_state,
-        "enemy_qubit_state": new_enemy_state
+        "enemy_qubit_state": new_enemy_state,
+        "quantum_result": result
     }
 
 def ability_superhijack(quantum_state, enemy_qubit_state="|0⟩"):
-    """SUPERHIJACK: Additional 10 damage if enemy qubit is |1⟩"""
+    """SUPERHIJACK: Additional 10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩"""
     if enemy_qubit_state == "|1⟩":
         bonus_damage = 10
         return {
@@ -134,7 +139,7 @@ def ability_superhijack(quantum_state, enemy_qubit_state="|0⟩"):
     else:
         return {
             "bonus_damage": 0,
-            "message": "SUPERHIJACK: No bonus damage."
+            "message": "SUPERHIJACK: No bonus damage (enemy qubit not |1⟩)."
         }
 
 # Legacy function for backward compatibility

@@ -197,10 +197,23 @@ class SampleGame:
         # Apply damage
         if result.get("success", True):
             damage = result.get("damage", 0)
+            
+            # Apply ability bonus damage
+            if self.character_name == "Bitzy":
+                if self.boss_state.qubit_state == "|1⟩":
+                    damage += 10
+                    print("SUPERHIJACK: +10 bonus damage!")
+            elif self.character_name == "Neutrinette":
+                if self.player_state.is_entangled:
+                    damage += 10
+                    print("QUANTUM AFTERBURN: +10 bonus damage!")
+            
             self.boss_state.hp -= damage
+            
             # Handle HP costs
             if result.get("hp_cost", 0) > 0:
                 self.player_hp -= result["hp_cost"]
+            
             print(f"You used {move_name}: {result['message']}")
             if damage > 0:
                 print(f"Dealt {damage} damage!")
@@ -208,6 +221,7 @@ class SampleGame:
                 print(f"Lost {result['hp_cost']} HP!")
         else:
             print(f"You used {move_name}: {result['message']}")
+        
         # Clamp HP to 0 for display
         player_hp_display = max(0, self.player_hp)
         boss_hp_display = max(0, self.boss_state.hp)
