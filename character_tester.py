@@ -2,6 +2,8 @@ import requests
 import json
 
 def test_character_moves(character_name):
+    print(f"-> Entered test_character_moves for {character_name}")
+
     """Test individual moves for any character"""
     print(f"\n=== TESTING {character_name.upper()} INDIVIDUAL MOVES ===\n")
     
@@ -17,25 +19,42 @@ def test_character_moves(character_name):
             ("SUPERHIJACK", "superhijack"),
             ("State", "state")
         ]
+    elif character_name == "neutrinette":
+        moves = [
+            ("Q-PHOTON GEYSER", "q-photon-geyser"),
+            ("GLITCH CLAW", "glitch-claw"),
+            ("ENTANGLE", "entangle"),
+            ("SWITCHEROO", "switcheroo"),
+            ("QUANTUM AFTERBURN", "quantum-afterburn"),
+            ("STATE", "state")
+        ]
     else:
-        # Generic moves for other characters (to be expanded)
         moves = [
             ("Quantum Move", ""),
             ("State", "state")
         ]
+
     
     for move_name, endpoint in moves:
         print(f"Testing {move_name}...")
         try:
-            if endpoint:
-                response = requests.get(f"{base_url}/{endpoint}")
+            if character_name == "neutrinette" and endpoint == "q-photon-geyser":
+                params = {"current_hp": 80, "enemy_hp": 100, "is_entangled": "false"}
+                response = requests.get(f"{base_url}/{endpoint}", params=params)
+            elif character_name == "neutrinette" and endpoint == "quantum-afterburn":
+                params = {"enemy_qubit_state": "|1⟩"}
+                response = requests.get(f"{base_url}/{endpoint}", params=params)
             else:
-                response = requests.get(f"{base_url}")
+                if endpoint:
+                    response = requests.get(f"{base_url}/{endpoint}")
+                else:
+                    response = requests.get(f"{base_url}")
             result = response.json()
             print(f"   Result: {result}")
         except requests.RequestException as e:
             print(f"   Error: {e}")
         print()
+
 
 def test_game_integration(character_name="bitzy"):
     """Test the integrated game with any character's quantum moves"""
@@ -83,23 +102,94 @@ def test_game_integration(character_name="bitzy"):
     print(f"   Turn: {final_state['turn']}")
     print(f"   Game log: {final_state['log']}")
 
+
+def test_neutrinette_moves():
+    print("\n=== TESTING NEUTRINETTE INDIVIDUAL MOVES ===\n")
+    
+    base_url = "http://127.0.0.1:5000/api/neutrinette"
+    
+    moves = [
+        ("Q-PHOTON GEYSER", "q-photon-geyser"),
+        ("GLITCH CLAW", "glitch-claw"),
+        ("ENTANGLE", "entangle"),
+        ("SWITCHEROO", "switcheroo"),
+        ("QUANTUM AFTERBURN", "quantum-afterburn"),
+        ("STATE", "state")
+    ]
+    
+    for move_name, endpoint in moves:
+        print(f"Testing {move_name}...")
+        try:
+            if endpoint == "q-photon-geyser":
+                # Example: pass query params like current_hp, enemy_hp, is_entangled if needed
+                params = {"current_hp": 80, "enemy_hp": 100, "is_entangled": "false"}
+                response = requests.get(f"{base_url}/{endpoint}", params=params)
+            elif endpoint == "quantum-afterburn":
+                # Example: pass enemy_qubit_state if needed
+                params = {"enemy_qubit_state": "|1⟩"}
+                response = requests.get(f"{base_url}/{endpoint}", params=params)
+            else:
+                response = requests.get(f"{base_url}/{endpoint}")
+            
+            result = response.json()
+            print(f"   Result: {result}")
+        except requests.RequestException as e:
+            print(f"   Error: {e}")
+        print()
+
+def test_neutrinette_integration():
+    print("-> Entered test_neutrinette_integration")
+    print("=== TESTING NEUTRINETTE INTEGRATED GAME ===\n")
+    base_url = "http://127.0.0.1:5000"
+    
+    # Example: start game or reset state
+    try:
+        print("Starting new game...")
+        response = requests.get(f"{base_url}/start")
+        data = response.json()
+        print(f"  Message: {data.get('message', '')}")
+        print()
+        
+        # Example sequence of moves
+        moves = ["entangle", "q-photon-geyser", "glitch-claw", "switcheroo"]
+        for move in moves:
+            print(f"Using {move}...")
+            response = requests.post(f"{base_url}/move", json={"move": move})
+            result = response.json()
+            print(f"  Result: {result}")
+            print()
+        
+        print("Fetching final state...")
+        response = requests.get(f"{base_url}/state")
+        state = response.json()
+        print(f"  State: {state}")
+        
+    except requests.RequestException as e:
+        print(f"Error during integration test: {e}")
+
 def test_all_characters():
     """Test all available characters"""
     print("=== TESTING ALL QUANTUMONS ===\n")
+
     
-    # List of characters to test
-    characters = ["bitzy"]  # Add more characters here as we build them
+    characters = ["bitzy", "neutrinette"]
     
     for character in characters:
+        print(f"\n--- Starting tests for: {character} ---")
         print(f"\n{'='*50}")
         print(f"TESTING {character.upper()}")
         print(f"{'='*50}")
         
-        # Test individual moves
+        # Run individual moves for the character
         test_character_moves(character)
         
-        # Test integrated game
-        test_game_integration(character)
+        # Run appropriate integration test
+        if character == "bitzy":
+            test_game_integration(character)
+        elif character == "neutrinette":
+            test_neutrinette_integration()
+
+
 
 if __name__ == "__main__":
     try:
@@ -107,8 +197,10 @@ if __name__ == "__main__":
         test_all_characters()
         
         # Or test specific character
-        # test_character_moves("bitzy")
-        # test_game_integration("bitzy")
+        test_character_moves("bitzy")
+        test_game_integration("bitzy")
+        test_character_moves("neutrinette")
+        test_game_integration("neutrinette")
         
     except requests.exceptions.ConnectionError:
         print("ERROR: Flask app is not running!")
