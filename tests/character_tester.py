@@ -1,6 +1,16 @@
 import requests
 import json
 
+# Start game with Bitzy
+def start_bitzy_game():
+    response = requests.get("http://localhost:5000/start", params={"character": "bitzy"})
+    return response.json()
+
+# Start game with Neutrinette
+def start_neutrinette_game():
+    response = requests.get("http://localhost:5000/start", params={"character": "neutrinette"})
+    return response.json()
+
 def test_character_moves(character_name):
     print(f"-> Entered test_character_moves for {character_name}")
 
@@ -138,34 +148,27 @@ def test_neutrinette_moves():
         print()
 
 def test_neutrinette_integration():
-    print("-> Entered test_neutrinette_integration")
-    print("=== TESTING NEUTRINETTE INTEGRATED GAME ===\n")
+    print("=== TESTING NEUTRINETTE INTEGRATED GAME ===")
     base_url = "http://127.0.0.1:5000"
-    
-    # Example: start game or reset state
-    try:
-        print("Starting new game...")
-        response = requests.get(f"{base_url}/start")
-        data = response.json()
-        print(f"  Message: {data.get('message', '')}")
-        print()
-        
-        # Example sequence of moves
-        moves = ["entangle", "q-photon-geyser", "glitch-claw", "switcheroo"]
-        for move in moves:
-            print(f"Using {move}...")
-            response = requests.post(f"{base_url}/move", json={"move": move})
-            result = response.json()
-            print(f"  Result: {result}")
-            print()
-        
-        print("Fetching final state...")
-        response = requests.get(f"{base_url}/state")
-        state = response.json()
-        print(f"  State: {state}")
-        
-    except requests.RequestException as e:
-        print(f"Error during integration test: {e}")
+
+    # Start game with Neutrinette explicitly
+    response = requests.get(f"{base_url}/start", params={"character": "neutrinette"})
+    data = response.json()
+    print(f"Message: {data.get('message')}\n")
+
+    moves_to_test = ["entangle", "q-photon-geyser", "glitch-claw", "switcheroo", "quantum-afterburn"]
+
+    for move in moves_to_test:
+        print(f"Using {move}...")
+        response = requests.post(f"{base_url}/move", json={"move": move})
+        result = response.json()
+        print(f"Result: {result}\n")
+
+    response = requests.get(f"{base_url}/state")
+    state = response.json()
+    print(f"Final State: {state}")
+
+
 
 def test_all_characters():
     """Test all available characters"""
