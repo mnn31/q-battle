@@ -7,7 +7,6 @@ from characters.bitzy.quantum_move import (
     BitzyQuantumState
 )
 from characters.bitzy.ability import ability_superhijack
-from characters.bitzy.classical_move import classical_move_bitzy, quirk_bitzy
 from routes import game_api
 
 app = Flask(__name__)

@@ -7,6 +7,7 @@
 - **HP**: 90
 - **Attack**: 75
 - **Defense**: 50 (placeholder for future implementation)
+- **Speed**: 8 (placeholder for future implementation)
 
 ## Ability: SUPERHIJACK
 Deals an additional 10 damage to the opponent if the enemy's qubit is in the state of 1.

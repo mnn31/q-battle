@@ -30,6 +30,13 @@ def cnot_gate(control=0, target=1):
     qc.measure([control, target], [control, target])
     return qc
 
+def swap_gate(qubit1=0, qubit2=1):
+    """Apply SWAP gate between two qubits"""
+    qc = QuantumCircuit(max(qubit1, qubit2) + 1, max(qubit1, qubit2) + 1)
+    qc.swap(qubit1, qubit2)
+    qc.measure([qubit1, qubit2], [qubit1, qubit2])
+    return qc
+
 def ry_gate(qubit=0, theta=math.pi/4):
     """Apply Ry rotation gate for biased quantum states"""
     qc = QuantumCircuit(qubit + 1, qubit + 1)

@@ -14,6 +14,7 @@ class BitzyQuantumState:
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
         self.attack_stat = 75
         self.defense = 50  # placeholder
+        self.speed = 8  # placeholder
 
 def quantum_move_bitzy_q_thunder(quantum_state):
     """Q-THUNDER: Requires superposition, deals massive damage and collapses qubit"""
