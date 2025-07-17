@@ -121,8 +121,3 @@ q-battle/
 - We’re building this as a fun, beginner-friendly intro to quantum computing through games!
 
 ---
-
-Let me know if you want me to also generate:
-- A matching `requirements.txt`
-- An issue list for GitHub (e.g. for tasks like "Make entangle move")
-- Or help auto-generate a `tests/` folder setup.
