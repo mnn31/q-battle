@@ -5,23 +5,23 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'quantum_gat
 
 from basic_gates import (
     hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
-    measure_qubit, run_quantum_circuit, calculate_damage
+    measure_qubit, run_quantum_circuit, calculate_damage, apply_damage_roll
 )
 
 def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
-    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
-    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    """RPG-style damage formula: (Attack + Base Power) * 0.9 / (Defense * 0.05 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.9 / (defender_defense * 0.05 + 1)
     return max(1, int(damage))  # Minimum 1 damage
 
 class BitzyQuantumState:
     """Manages Bitzy's quantum state throughout battle"""
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
-        self.attack_stat = 75
-        self.defense = 60
+        self.attack_stat = 60  # Reduced by 10
+        self.defense = 85  # Increased by 5
         self.speed = 8
 
-def quantum_move_bitzy_q_thunder(quantum_state, defender_defense=50):
+def quantum_move_bitzy_q_thunder(quantum_state, defender_defense=50, enemy_qubit_state="|0⟩"):
     """Q-THUNDER: Requires superposition, deals massive damage and collapses qubit"""
     if quantum_state.qubit_state != "superposition":
         return {
@@ -37,7 +37,15 @@ def quantum_move_bitzy_q_thunder(quantum_state, defender_defense=50):
     result = run_quantum_circuit(qc, shots=1)
     
     # Calculate damage (90 base power) with proper RPG formula
-    damage = calculate_damage_rpg(quantum_state.attack_stat, 90, defender_defense)
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 90, defender_defense)
+    damage = base_damage
+    
+    # Apply ability bonus (SUPERHIJACK) if enemy qubit is |1⟩
+    if enemy_qubit_state == "|1⟩":
+        damage += 10
+    
+    # Apply damage roll to final damage
+    damage = apply_damage_roll(damage)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -66,11 +74,14 @@ def quantum_move_bitzy_shock(quantum_state, enemy_qubit_state="|0⟩", defender_
     
     # Check if qubits are in different states
     if quantum_state.qubit_state != enemy_qubit_state:
-        bonus_damage = calculate_damage_rpg(quantum_state.attack_stat, 20, defender_defense)
+        bonus_damage = 20  # Flat 20 damage bonus
         total_damage += bonus_damage
         message = f"SHOCK deals {total_damage} damage! (+{bonus_damage} different states bonus)"
     else:
         message = f"SHOCK deals {total_damage} damage!"
+    
+    # Apply damage roll to final damage
+    total_damage = apply_damage_roll(total_damage)
     
     return {
         "success": True,

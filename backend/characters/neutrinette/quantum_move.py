@@ -5,20 +5,20 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'quantum_gat
 
 from basic_gates import (
     hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
-    measure_qubit, run_quantum_circuit, calculate_damage
+    measure_qubit, run_quantum_circuit, calculate_damage, apply_damage_roll
 )
 
 def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
-    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
-    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    """RPG-style damage formula: (Attack + Base Power) * 0.9 / (Defense * 0.05 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.9 / (defender_defense * 0.05 + 1)
     return max(1, int(damage))  # Minimum 1 damage
 
 class NeutrinetteQuantumState:
     """Manages Neutrinette's quantum state throughout battle"""
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
-        self.attack_stat = 80
-        self.defense = 50
+        self.attack_stat = 70  # Reduced by 10
+        self.defense = 55  # Increased by 5
         self.speed = 7
         self.is_entangled = False  # Track entanglement state
 
@@ -40,8 +40,9 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (75 base power) with proper RPG formula
-    damage = calculate_damage_rpg(quantum_state.attack_stat, 75, defender_defense)
+    # Calculate damage (75 base power) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 75, defender_defense)
+    damage = apply_damage_roll(base_damage)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -83,8 +84,9 @@ def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80, defender_
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (40 base power) with proper RPG formula
-    damage = calculate_damage_rpg(quantum_state.attack_stat, 40, defender_defense)
+    # Calculate damage (40 base power) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 40, defender_defense)
+    damage = apply_damage_roll(base_damage)
     
     # 30% chance to heal (based on quantum randomness)
     heal_chance = random.random()
