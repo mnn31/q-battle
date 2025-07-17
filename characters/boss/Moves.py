@@ -41,7 +41,7 @@ def quantum_move_singulon_haze(quantum_state):
     }
 
 def quantum_move_singulon_bullet_muons(quantum_state, defender_defense=50):
-    """BULLET MUONS: Base damage 70 if boss's qubit is in state of |0⟩, else fails"""
+    """BULLET MUONS: Base damage 120 if boss's qubit is in state of |0⟩, else fails"""
     if quantum_state.qubit_state != "|0⟩":
         return {
             "success": False,
@@ -49,7 +49,7 @@ def quantum_move_singulon_bullet_muons(quantum_state, defender_defense=50):
             "message": "BULLET MUONS failed! Singulon's qubit must be in |0⟩ state.",
             "qubit_state": quantum_state.qubit_state
         }
-    damage = calculate_damage_rpg(quantum_state.attack_stat, 70, defender_defense)
+    damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
     return {
         "success": True,
         "damage": damage,
@@ -58,13 +58,13 @@ def quantum_move_singulon_bullet_muons(quantum_state, defender_defense=50):
     }
 
 def quantum_move_singulon_q_prismatic_laser(quantum_state, player_qubit_state="|0⟩", defender_defense=50):
-    """Q-PRISMATIC LASER: If both qubits are in superposition, deals 80 damage, else 20 damage"""
+    """Q-PRISMATIC LASER: If both qubits are in superposition, deals 150 damage, else 60 damage"""
     if quantum_state.qubit_state == "superposition" and player_qubit_state == "superposition":
-        base_damage = 80
+        base_damage = 150
         message = "Q-PRISMATIC LASER deals massive damage! (Both qubits in superposition)"
         damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
     else:
-        base_damage = 20
+        base_damage = 60
         message = "Q-PRISMATIC LASER deals reduced damage. (Qubits not both in superposition)"
         damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
     return {
