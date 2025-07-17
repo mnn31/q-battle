@@ -8,6 +8,12 @@ from basic_gates import (
     measure_qubit, run_quantum_circuit, calculate_damage
 )
 
+def simple_damage(base_power, qmove=False):
+    if qmove:
+        return min(int(base_power * 0.8), 60)
+    else:
+        return min(int(base_power * 0.4), 30)
+
 class ResonaQuantumState:
     """Manages Resona's quantum state throughout battle"""
     def __init__(self):
@@ -34,14 +40,14 @@ def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_st
     # Determine collapse result with waveform bonus
     if "1" in result:
         quantum_state.qubit_state = "|1⟩"
-        # Calculate damage: 100% max HP + waveform bonus
-        damage = current_hp + damage_bonus
+        # Calculate damage: 100% max HP + waveform bonus (reduced scaling)
+        damage = simple_damage(current_hp + damage_bonus, qmove=True)
         message = f"Q-METRONOME deals {damage} damage! (|1⟩ state + {damage_bonus} waveform bonus)"
     else:
         quantum_state.qubit_state = "|0⟩"
-        # Calculate damage: 10 base + waveform bonus
+        # Calculate damage: 10 base + waveform bonus (reduced scaling)
         base_damage = 10 + damage_bonus
-        damage = calculate_damage(quantum_state.attack_stat, base_damage, defense=quantum_state.defense)
+        damage = simple_damage(base_damage)
         message = f"Q-METRONOME deals {damage} damage! (|0⟩ state + {damage_bonus} waveform bonus)"
     
     # Gain waveform stack from collapse
@@ -71,12 +77,12 @@ def quantum_move_resona_wave_crash(quantum_state, enemy_qubit_state="|0⟩"):
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate base damage (20)
+    # Calculate base damage (20) - reduced scaling
     base_damage = 20
-    total_damage = calculate_damage(quantum_state.attack_stat, base_damage, defense=quantum_state.defense)
+    total_damage = simple_damage(base_damage)
     
-    # Add superposition bonus
-    total_damage += superposition_bonus
+    # Add superposition bonus (reduced scaling)
+    total_damage += simple_damage(superposition_bonus)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -106,7 +112,7 @@ def quantum_move_resona_metal_noise(quantum_state, enemy_qubit_state="|0⟩"):
     """METAL NOISE: Prevents enemy state changes, conditional damage"""
     # Check enemy qubit state for conditional damage
     if enemy_qubit_state == "|0⟩":
-        damage = calculate_damage(quantum_state.attack_stat, 20, defense=quantum_state.defense)
+        damage = simple_damage(20)
         message = f"METAL NOISE deals {damage} damage! (enemy in |0⟩ state)"
         return {
             "success": True,

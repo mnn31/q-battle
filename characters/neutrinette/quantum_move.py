@@ -8,6 +8,12 @@ from basic_gates import (
     measure_qubit, run_quantum_circuit, calculate_damage
 )
 
+def simple_damage(base_power, qmove=False):
+    if qmove:
+        return min(int(base_power * 0.8), 60)
+    else:
+        return min(int(base_power * 0.4), 30)
+
 class NeutrinetteQuantumState:
     """Manages Neutrinette's quantum state throughout battle"""
     def __init__(self):
@@ -35,8 +41,8 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (75 base power)
-    damage = calculate_damage(quantum_state.attack_stat, 75, defense=quantum_state.defense)
+    # Calculate damage (75 base power) - reduced scaling
+    damage = simple_damage(75, qmove=True)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -44,9 +50,9 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     else:
         quantum_state.qubit_state = "|0⟩"
     
-    # Handle entanglement effects
+    # Handle entanglement effects - boss loses exactly the same HP
     if is_entangled:
-        enemy_hp_cost = int(current_hp * 0.20)  # Enemy loses 20% of Neutrinette's current HP
+        enemy_hp_cost = hp_cost  # Boss loses exactly the same amount
         message = f"Q-PHOTON GEYSER deals {damage} damage! (Cost: {hp_cost} HP, Enemy loses {enemy_hp_cost} HP due to entanglement!)"
         return {
             "success": True,
@@ -78,8 +84,8 @@ def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80):
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (40 base power)
-    damage = calculate_damage(quantum_state.attack_stat, 40, defense=quantum_state.defense)
+    # Calculate damage (40 base power) - reduced scaling
+    damage = simple_damage(40)
     
     # 30% chance to heal (based on quantum randomness)
     heal_chance = random.random()
