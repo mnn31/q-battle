@@ -15,28 +15,30 @@ from characters.bitzy.quantum_move import (
 from characters.bitzy.ability import ability_superhijack
 
 #Store game data like hp, moves, turn, and also same for enemy 
-game_state = {}
+game_state = {
+    "player": None,
+    "enemy": None,
+    "turn": "player",
+    "log": [],
+    "character": None  # <- track the current character
+}
 bitzy_state = BitzyQuantumState()
 
-def start_game():
-    global game_state, bitzy_state
-    game_state = {
-        "player": {
-            "hp": 90,  # Bitzy's HP
-            "moves": ["Q-THUNDER", "SHOCK", "DUALIZE", "BIT-FLIP"],
-            "character": "Bitzy"
-        },
-        "enemy": {
-            "hp": 100,
-            "qubit_state": "|0⟩"  # Enemy qubit state for BIT-FLIP
-        },
-        "turn": "player",
-        "log": []
-    }
-    # Reset Bitzy's quantum state
-    bitzy_state.qubit_state = "|0⟩"
+def start_game(character="Bitzy"):
+    global game_state
+
+    # create player and enemy here based on character
+    player = create_player(character)  # assumes you have this
+    enemy = create_enemy()
+
+    game_state["player"] = player
+    game_state["enemy"] = enemy
+    game_state["turn"] = "player"
+    game_state["log"] = []
+    game_state["character"] = character  # <-- track which one
+
     return {
-        "message": "Game started with Bitzy!",
+        "message": f"Game started with {character}!",
         "state": game_state
     }
 
@@ -156,17 +158,20 @@ singulon_state = SingulonQuantumState()
 
 def start_game(character="Bitzy"):
     global game_state, bitzy_state, neutrinette_state, resona_state, singulon_state
-    
+    print(f"[ENGINE] start_game called with: {character}")
     # Set up character-specific data
     if character == "Bitzy":
+        print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = bitzy_state
         hp = 90
         moves = ["Q-THUNDER", "SHOCK", "DUALIZE", "BIT-FLIP"]
     elif character == "Neutrinette":
+        print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = neutrinette_state
         hp = 80
         moves = ["Q-PHOTON GEYSER", "GLITCH CLAW", "ENTANGLE", "SWITCHEROO"]
     elif character == "Resona":
+        print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = resona_state
         hp = 95
         moves = ["Q-METRONOME", "WAVE CRASH", "METAL NOISE", "SHIFT GEAR"]
