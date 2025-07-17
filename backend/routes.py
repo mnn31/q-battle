@@ -1,6 +1,6 @@
 #Turns files from Game_Engine.py into JSON file to send to front end 
 from flask import Blueprint, request, jsonify
-from Game_Engine import start_game, process_move, get_game_state
+from .Game_Engine import start_game, process_move, get_game_state
 
 game_api = Blueprint('game_api', __name__)
 

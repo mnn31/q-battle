@@ -1,29 +1,30 @@
-from flask import Flask, jsonify
-from characters.bitzy.quantum_move import (
+from flask import Flask, jsonify, request
+from backend.characters.bitzy.quantum_move import (
     quantum_move_bitzy_q_thunder,
     quantum_move_bitzy_shock,
     quantum_move_bitzy_dualize,
     quantum_move_bitzy_bit_flip,
     BitzyQuantumState
 )
-from characters.bitzy.ability import ability_superhijack
-from characters.neutrinette.quantum_move import (
+from backend.characters.bitzy.ability import ability_superhijack
+from backend.characters.neutrinette.quantum_move import (
     quantum_move_neutrinette_q_photon_geyser,
     quantum_move_neutrinette_glitch_claw,
     quantum_move_neutrinette_entangle,
     quantum_move_neutrinette_switcheroo,
     NeutrinetteQuantumState
 )
-from characters.neutrinette.ability import ability_quantum_afterburn
-from characters.resona.quantum_move import (
+from backend.characters.neutrinette.ability import ability_quantum_afterburn
+from backend.characters.resona.quantum_move import (
     quantum_move_resona_q_metronome,
     quantum_move_resona_wave_crash,
     quantum_move_resona_metal_noise,
     quantum_move_resona_shift_gear,
     ResonaQuantumState
 )
-from characters.resona.ability import ability_quantum_waveform
-from routes import game_api
+from backend.characters.resona.ability import ability_quantum_waveform
+from backend.routes import game_api
+from backend.Game_Engine import start_game, process_move
 
 app = Flask(__name__)
 app.register_blueprint(game_api)
@@ -49,7 +50,7 @@ def start():
     print(f"[DEBUG] Starting game with character: {character}")
 
     # Call game engine start_game with correct character
-    result = Game_Engine.start_game(character)
+    result = start_game(character)
     return jsonify(result)
 
 
@@ -57,8 +58,7 @@ def start():
 def move():
     move_data = request.json
     move = move_data.get("move")
-
-    result = Game_Engine.make_move(move)  # inside here, it should look at game_state["character"]
+    result = process_move(move)  # inside here, it should look at game_state["character"]
     return jsonify(result)
 
 
@@ -82,20 +82,7 @@ def run_neutrinette_entangle():
     result = quantum_move_neutrinette_entangle(neutrinette_state)
     return jsonify(result)
 
-@app.route("/api/neutrinette/wave-crash", methods=["GET"])
-def run_neutrinette_wave_crash():
-    result = quantum_move_neutrinette_wave_crash(neutrinette_state)
-    return jsonify(result)
 
-@app.route("/api/neutrinette/observe", methods=["GET"])
-def run_neutrinette_observe():
-    result = quantum_move_neutrinette_observe(neutrinette_state)
-    return jsonify(result)
-
-@app.route("/api/neutrinette/decohere", methods=["GET"])
-def run_neutrinette_decohere():
-    result = quantum_move_neutrinette_decohere(neutrinette_state)
-    return jsonify(result)
 
 # Bitzy's quantum move endpoints
 @app.route("/api/bitzy/q-thunder", methods=["GET"])
