@@ -167,7 +167,8 @@ class SampleGame:
             elif move_name == "BIT-FLIP":
                 result = move_func(self.player_state, self.boss_state.qubit_state)
                 self.boss_state.qubit_state = result["enemy_qubit_state"]
-                
+                # Specify whose qubit is changed
+                result["message"] = result["message"].replace("enemy qubit", "Singulon's qubit")
         elif self.character_name == "Neutrinette":
             if move_name == "Q-PHOTON GEYSER":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.hp, self.player_state.is_entangled)
@@ -182,7 +183,8 @@ class SampleGame:
             elif move_name == "SWITCHEROO":
                 result = move_func(self.player_state, self.boss_state.qubit_state)
                 self.boss_state.qubit_state = result["enemy_qubit_state"]
-                
+                # Specify whose qubit is changed
+                result["message"] = result["message"].replace("enemy qubit", "Singulon's qubit")
         elif self.character_name == "Resona":
             if move_name == "Q-METRONOME":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.qubit_state)
@@ -192,16 +194,13 @@ class SampleGame:
                 result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "SHIFT GEAR":
                 result = move_func(self.player_state)
-        
         # Apply damage
         if result.get("success", True):
             damage = result.get("damage", 0)
             self.boss_state.hp -= damage
-            
             # Handle HP costs
             if result.get("hp_cost", 0) > 0:
                 self.player_hp -= result["hp_cost"]
-            
             print(f"You used {move_name}: {result['message']}")
             if damage > 0:
                 print(f"Dealt {damage} damage!")
@@ -209,43 +208,44 @@ class SampleGame:
                 print(f"Lost {result['hp_cost']} HP!")
         else:
             print(f"You used {move_name}: {result['message']}")
-        
-        # Show HP at end of turn
-        print(f"\nYour HP: {self.player_hp}")
-        print(f"Boss's HP: {self.boss_state.hp}")
-    
+        # Clamp HP to 0 for display
+        player_hp_display = max(0, self.player_hp)
+        boss_hp_display = max(0, self.boss_state.hp)
+        print(f"\nYour HP: {player_hp_display}")
+        print(f"Boss's HP: {boss_hp_display}")
+
     def execute_boss_move(self):
         """Execute Singulon boss move"""
-        # Singulon's moves
         boss_moves = [
             ("DUALIZE", quantum_move_singulon_dualize),
             ("HAZE", quantum_move_singulon_haze),
             ("BULLET MUONS", quantum_move_singulon_bullet_muons),
             ("Q-PRISMATIC LASER", quantum_move_singulon_q_prismatic_laser)
         ]
-        
         move_name, move_func = random.choice(boss_moves)
-        
-        # Execute the move
         if move_name == "Q-PRISMATIC LASER":
             result = move_func(self.boss_state, self.player_state.qubit_state)
         else:
             result = move_func(self.boss_state)
-        
+        # Specify whose qubit is changed in log
+        if move_name == "DUALIZE":
+            result["message"] = result["message"].replace("creates superposition!", "Singulon's qubit is now in superposition!")
+        if move_name == "HAZE":
+            result["message"] = result["message"].replace("resets qubit to |0⟩!", "Singulon's qubit is now |0⟩!")
         # Apply damage to player
         if result.get("success", True):
             damage = result.get("damage", 0)
             self.player_hp -= damage
-            
             print(f"Singulon used {move_name}: {result['message']}")
             if damage > 0:
                 print(f"Dealt {damage} damage!")
         else:
             print(f"Singulon used {move_name}: {result['message']}")
-        
-        # Show HP at end of boss turn
-        print(f"\nYour HP: {self.player_hp}")
-        print(f"Boss's HP: {self.boss_state.hp}")
+        # Clamp HP to 0 for display
+        player_hp_display = max(0, self.player_hp)
+        boss_hp_display = max(0, self.boss_state.hp)
+        print(f"\nYour HP: {player_hp_display}")
+        print(f"Boss's HP: {boss_hp_display}")
     
     def check_battle_end(self):
         """Check if battle has ended"""

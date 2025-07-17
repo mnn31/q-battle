@@ -2,10 +2,14 @@ import random
 from qiskit import QuantumCircuit
 from basic_gates import (
     hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
-    measure_qubit, run_quantum_circuit, calculate_damage
+    measure_qubit, run_quantum_circuit
 )
 
-
+def simple_damage(base_power, qmove=False):
+    if qmove:
+        return min(int(base_power * 1.0), 80)
+    else:
+        return min(int(base_power * 0.5), 40)
 
 def quantum_move_singulon_dualize(quantum_state):
     """DUALIZE: Puts the qubit in a state of SUPERPOSITION if it wasn't previously"""
@@ -13,20 +17,16 @@ def quantum_move_singulon_dualize(quantum_state):
         return {
             "success": False,
             "damage": 0,
-            "message": "DUALIZE failed! Qubit already in superposition.",
+            "message": "DUALIZE failed! Singulon's qubit already in superposition.",
             "qubit_state": quantum_state.qubit_state
         }
-    
-    # Create superposition using Hadamard gate
     qc = hadamard_gate(0)
     result = run_quantum_circuit(qc, shots=1)
-    
     quantum_state.qubit_state = "superposition"
-    
     return {
         "success": True,
         "damage": 0,
-        "message": "DUALIZE creates superposition!",
+        "message": "Singulon's qubit is now in superposition!",
         "qubit_state": quantum_state.qubit_state,
         "quantum_result": result
     }
@@ -34,11 +34,10 @@ def quantum_move_singulon_dualize(quantum_state):
 def quantum_move_singulon_haze(quantum_state):
     """HAZE: Reset the boss's qubit to |0⟩"""
     quantum_state.qubit_state = "|0⟩"
-    
     return {
         "success": True,
         "damage": 0,
-        "message": "HAZE resets qubit to |0⟩!",
+        "message": "Singulon's qubit is now |0⟩!",
         "qubit_state": quantum_state.qubit_state
     }
 
@@ -48,13 +47,10 @@ def quantum_move_singulon_bullet_muons(quantum_state):
         return {
             "success": False,
             "damage": 0,
-            "message": "BULLET MUONS failed! Qubit must be in |0⟩ state.",
+            "message": "BULLET MUONS failed! Singulon's qubit must be in |0⟩ state.",
             "qubit_state": quantum_state.qubit_state
         }
-    
-    # Calculate damage (70 base power)
-    damage = calculate_damage(quantum_state.attack_stat, 70, defense=quantum_state.defense)
-    
+    damage = simple_damage(70)
     return {
         "success": True,
         "damage": damage,
@@ -64,17 +60,14 @@ def quantum_move_singulon_bullet_muons(quantum_state):
 
 def quantum_move_singulon_q_prismatic_laser(quantum_state, player_qubit_state="|0⟩"):
     """Q-PRISMATIC LASER: If both qubits are in superposition, deals 80 damage, else 20 damage"""
-    # Check if both qubits are in superposition
     if quantum_state.qubit_state == "superposition" and player_qubit_state == "superposition":
         base_damage = 80
         message = "Q-PRISMATIC LASER deals massive damage! (Both qubits in superposition)"
+        damage = simple_damage(base_damage, qmove=True)
     else:
         base_damage = 20
         message = "Q-PRISMATIC LASER deals reduced damage. (Qubits not both in superposition)"
-    
-    # Calculate damage
-    damage = calculate_damage(quantum_state.attack_stat, base_damage, defense=quantum_state.defense)
-    
+        damage = simple_damage(base_damage)
     return {
         "success": True,
         "damage": damage,
