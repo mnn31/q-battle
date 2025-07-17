@@ -259,7 +259,7 @@ class SampleGame:
                     print(f"{ability_result['message']}")
             elif self.character_name == "Resona":
                 from characters.resona.ability import ability_quantum_waveform
-                ability_result = ability_quantum_waveform(self.player_state)
+                ability_result = ability_quantum_waveform(self.player_state.waveform_stacks)
                 # Resona's ability affects move behavior, not direct damage
             
             self.boss_state.hp -= damage
