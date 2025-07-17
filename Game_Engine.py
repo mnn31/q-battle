@@ -45,13 +45,30 @@ neutrinette_state = NeutrinetteQuantumState()
 resona_state = ResonaQuantumState()
 singulon_state = SingulonQuantumState()
 
-def start_game():
-    global game_state, bitzy_state, singulon_state
+def start_game(character="Bitzy"):
+    global game_state, bitzy_state, neutrinette_state, resona_state, singulon_state
+    
+    # Set up character-specific data
+    if character == "Bitzy":
+        player_state = bitzy_state
+        hp = 90
+        moves = ["Q-THUNDER", "SHOCK", "DUALIZE", "BIT-FLIP"]
+    elif character == "Neutrinette":
+        player_state = neutrinette_state
+        hp = 80
+        moves = ["Q-PHOTON GEYSER", "GLITCH CLAW", "ENTANGLE", "SWITCHEROO"]
+    elif character == "Resona":
+        player_state = resona_state
+        hp = 95
+        moves = ["Q-METRONOME", "WAVE CRASH", "METAL NOISE", "SHIFT GEAR"]
+    else:
+        return {"error": f"Unknown character: {character}"}
+    
     game_state = {
         "player": {
-            "hp": 90,  # Bitzy's HP
-            "moves": ["Q-THUNDER", "SHOCK", "DUALIZE", "BIT-FLIP"],
-            "character": "Bitzy"
+            "hp": hp,
+            "moves": moves,
+            "character": character
         },
         "enemy": {
             "hp": 400,  # Singulon's HP
@@ -60,55 +77,78 @@ def start_game():
         "turn": "player",
         "log": []
     }
-    # Reset Bitzy's quantum state
-    bitzy_state.qubit_state = "|0⟩"
-    # Reset Singulon's quantum state
+    
+    # Reset quantum states
+    player_state.qubit_state = "|0⟩"
     singulon_state.qubit_state = "|0⟩"
+    
     return {
-        "message": "Game started with Bitzy!",
+        "message": f"Game started with {character}!",
         "state": game_state
     }
 
 def process_move(move):
-    global game_state, bitzy_state
+    global game_state, bitzy_state, neutrinette_state, resona_state, singulon_state
 
     if game_state["turn"] != "player":
         return {"error": "It's not your turn."}
 
+    character = game_state["player"]["character"]
+    
     if move not in game_state["player"]["moves"]:
         return {"error": f"Invalid move: {move}"}
 
     log = game_state["log"]
 
-    # Process Bitzy's moves
-    if move == "Q-THUNDER":
-        result = quantum_move_bitzy_q_thunder(bitzy_state, singulon_state.defense)
-        if result["success"]:
-            damage = result["damage"]
-            game_state["enemy"]["hp"] -= damage
-            log.append(f"Bitzy used Q-THUNDER: {result['message']}")
-            log.append(f"Dealt {damage} damage!")
-        else:
-            log.append(f"Q-THUNDER failed: {result['message']}")
+    # Process moves based on character
+    if character == "Bitzy":
+        player_state = bitzy_state
+        if move == "Q-THUNDER":
+            result = quantum_move_bitzy_q_thunder(player_state, singulon_state.defense)
+        elif move == "SHOCK":
+            result = quantum_move_bitzy_shock(player_state, game_state["enemy"]["qubit_state"], singulon_state.defense)
+        elif move == "DUALIZE":
+            result = quantum_move_bitzy_dualize(player_state)
+        elif move == "BIT-FLIP":
+            result = quantum_move_bitzy_bit_flip(player_state, game_state["enemy"]["qubit_state"])
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
     
-    elif move == "SHOCK":
-        result = quantum_move_bitzy_shock(bitzy_state, game_state["enemy"]["qubit_state"], singulon_state.defense)
-        damage = result["damage"]
+    elif character == "Neutrinette":
+        player_state = neutrinette_state
+        if move == "Q-PHOTON GEYSER":
+            result = quantum_move_neutrinette_q_photon_geyser(player_state, game_state["player"]["hp"], game_state["enemy"]["hp"], player_state.is_entangled, singulon_state.defense)
+            if result.get("enemy_hp_cost", 0) > 0:
+                game_state["enemy"]["hp"] -= result["enemy_hp_cost"]
+        elif move == "GLITCH CLAW":
+            result = quantum_move_neutrinette_glitch_claw(player_state, game_state["player"]["hp"], singulon_state.defense)
+            if result.get("heal", 0) > 0:
+                game_state["player"]["hp"] = min(80, game_state["player"]["hp"] + result["heal"])
+        elif move == "ENTANGLE":
+            result = quantum_move_neutrinette_entangle(player_state, game_state["enemy"]["qubit_state"])
+        elif move == "SWITCHEROO":
+            result = quantum_move_neutrinette_switcheroo(player_state, game_state["enemy"]["qubit_state"])
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+    
+    elif character == "Resona":
+        player_state = resona_state
+        if move == "Q-METRONOME":
+            result = quantum_move_resona_q_metronome(player_state, game_state["player"]["hp"], game_state["enemy"]["qubit_state"], singulon_state.defense)
+        elif move == "WAVE CRASH":
+            result = quantum_move_resona_wave_crash(player_state, game_state["enemy"]["qubit_state"], singulon_state.defense)
+        elif move == "METAL NOISE":
+            result = quantum_move_resona_metal_noise(player_state, game_state["enemy"]["qubit_state"], singulon_state.defense)
+        elif move == "SHIFT GEAR":
+            result = quantum_move_resona_shift_gear(player_state)
+
+    # Apply damage if move was successful
+    if result.get("success", True):
+        damage = result.get("damage", 0)
         game_state["enemy"]["hp"] -= damage
-        log.append(f"Bitzy used SHOCK: {result['message']}")
-        log.append(f"Dealt {damage} damage!")
-    
-    elif move == "DUALIZE":
-        result = quantum_move_bitzy_dualize(bitzy_state)
-        if result["success"]:
-            log.append(f"Bitzy used DUALIZE: {result['message']}")
-        else:
-            log.append(f"DUALIZE failed: {result['message']}")
-    
-    elif move == "BIT-FLIP":
-        result = quantum_move_bitzy_bit_flip(bitzy_state, game_state["enemy"]["qubit_state"])
-        game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
-        log.append(f"Bitzy used BIT-FLIP: {result['message']}")
+        log.append(f"{character} used {move}: {result['message']}")
+        if damage > 0:
+            log.append(f"Dealt {damage} damage!")
+    else:
+        log.append(f"{move} failed: {result['message']}")
 
     # Check if enemy is dead
     if game_state["enemy"]["hp"] <= 0:
@@ -122,8 +162,17 @@ def process_move(move):
     return {"state": game_state}
 
 def enemy_attack():
-    global game_state, singulon_state
+    global game_state, singulon_state, bitzy_state, neutrinette_state, resona_state
     log = game_state["log"]
+
+    # Get current player state based on character
+    character = game_state["player"]["character"]
+    if character == "Bitzy":
+        player_state = bitzy_state
+    elif character == "Neutrinette":
+        player_state = neutrinette_state
+    elif character == "Resona":
+        player_state = resona_state
 
     # Singulon boss moves
     boss_moves = [
@@ -137,9 +186,9 @@ def enemy_attack():
     
     # Execute the move with player defense
     if move_name == "Q-PRISMATIC LASER":
-        result = move_func(singulon_state, bitzy_state.qubit_state, bitzy_state.defense)
+        result = move_func(singulon_state, player_state.qubit_state, player_state.defense)
     elif move_name == "BULLET MUONS":
-        result = move_func(singulon_state, bitzy_state.defense)
+        result = move_func(singulon_state, player_state.defense)
     else:
         result = move_func(singulon_state)
     

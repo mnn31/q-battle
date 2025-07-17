@@ -66,7 +66,11 @@ def run_quantum_circuit(qc, shots=1):
     result = sim.run(qc, shots=shots).result().get_counts()
     return result
 
+def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
+    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    return max(1, int(damage))  # Minimum 1 damage
+
 def calculate_damage(attack_stat, base_power, level=50, defense=50):
-    """Calculate damage using Pokemon-style formula"""
-    damage = ((2 * level + 10) / 250 + 2) * attack_stat * base_power / defense + 2
-    return int(damage) 
+    """Calculate damage using RPG formula (deprecated, use calculate_damage_rpg)"""
+    return calculate_damage_rpg(attack_stat, base_power, defense) 

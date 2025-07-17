@@ -244,15 +244,23 @@ class SampleGame:
         if result.get("success", True):
             damage = result.get("damage", 0)
             
-            # Apply ability bonus damage
+            # Apply ability bonus damage using proper functions
             if self.character_name == "Bitzy":
-                if self.boss_state.qubit_state == "|1⟩":
-                    damage += 10
-                    print("SUPERHIJACK: +10 bonus damage!")
+                from characters.bitzy.ability import ability_superhijack
+                ability_result = ability_superhijack(self.player_state, self.boss_state.qubit_state)
+                if ability_result["bonus_damage"] > 0:
+                    damage += ability_result["bonus_damage"]
+                    print(f"{ability_result['message']}")
             elif self.character_name == "Neutrinette":
-                if self.player_state.is_entangled:
-                    damage += 10
-                    print("QUANTUM AFTERBURN: +10 bonus damage!")
+                from characters.neutrinette.ability import ability_quantum_afterburn
+                ability_result = ability_quantum_afterburn(self.player_state, self.boss_state.qubit_state)
+                if ability_result["bonus_damage"] > 0:
+                    damage += ability_result["bonus_damage"]
+                    print(f"{ability_result['message']}")
+            elif self.character_name == "Resona":
+                from characters.resona.ability import ability_quantum_waveform
+                ability_result = ability_quantum_waveform(self.player_state)
+                # Resona's ability affects move behavior, not direct damage
             
             self.boss_state.hp -= damage
             
