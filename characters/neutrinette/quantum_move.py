@@ -8,22 +8,21 @@ from basic_gates import (
     measure_qubit, run_quantum_circuit, calculate_damage
 )
 
-def simple_damage(base_power, qmove=False):
-    if qmove:
-        return min(int(base_power * 0.8), 60)
-    else:
-        return min(int(base_power * 0.4), 30)
+def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
+    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    return max(1, int(damage))  # Minimum 1 damage
 
 class NeutrinetteQuantumState:
     """Manages Neutrinette's quantum state throughout battle"""
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
         self.attack_stat = 80
-        self.defense = 50  # placeholder
-        self.speed = 7  # placeholder
+        self.defense = 50
+        self.speed = 7
         self.is_entangled = False  # Track entanglement state
 
-def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy_hp=100, is_entangled=False):
+def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy_hp=100, is_entangled=False, defender_defense=50):
     """Q-PHOTON GEYSER: Requires |0⟩ or |1⟩ state, deals damage with HP cost"""
     if quantum_state.qubit_state == "superposition":
         return {
@@ -41,8 +40,8 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (75 base power) - reduced scaling
-    damage = simple_damage(75, qmove=True)
+    # Calculate damage (75 base power) with proper RPG formula
+    damage = calculate_damage_rpg(quantum_state.attack_stat, 75, defender_defense)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -77,15 +76,15 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
             "entanglement_effect": False
         }
 
-def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80):
+def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80, defender_defense=50):
     """GLITCH CLAW: Deals damage with chance to heal"""
     # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (40 base power) - reduced scaling
-    damage = simple_damage(40)
+    # Calculate damage (40 base power) with proper RPG formula
+    damage = calculate_damage_rpg(quantum_state.attack_stat, 40, defender_defense)
     
     # 30% chance to heal (based on quantum randomness)
     heal_chance = random.random()
