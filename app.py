@@ -23,7 +23,7 @@ from characters.resona.quantum_move import (
     ResonaQuantumState
 )
 from characters.resona.ability import ability_quantum_waveform
-from routes import game_api
+from Backend.routes import game_api
 
 app = Flask(__name__)
 app.register_blueprint(game_api)
