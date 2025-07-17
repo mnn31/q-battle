@@ -65,16 +65,28 @@ def test_character_moves(character_name):
             print(f"   Error: {e}")
         print()
 
+moves_to_test = [
+    "q-photon-geyser",
+    "glitch-claw",
+    "entangle",
+    "switcheroo",
+    "quantum-afterburn"
+]
 
 def test_game_integration(character_name="bitzy"):
     """Test the integrated game with any character's quantum moves"""
     base_url = "http://127.0.0.1:5000"
-    
     print(f"=== TESTING INTEGRATED GAME WITH {character_name.upper()} ===\n")
     
     # Start a new game
     print("1. Starting new game...")
-    response = requests.get(f"{base_url}/start")
+    response = requests.get(f"{base_url}/start", params={"character": character_name})
+
+    if response.status_code != 200:
+        print("❌ Failed to start game!")
+        print("Response:", response.json())
+        return  # Or use sys.exit(1) if you want to exit the script
+
     game_data = response.json()
     print(f"   Message: {game_data['message']}")
     print(f"   Player HP: {game_data['state']['player']['hp']}")
@@ -196,15 +208,24 @@ def test_all_characters():
 
 if __name__ == "__main__":
     try:
-        # Test all characters
-        test_all_characters()
-        
-        # Or test specific character
-        test_character_moves("bitzy")
-        test_game_integration("bitzy")
-        test_character_moves("neutrinette")
-        test_game_integration("neutrinette")
-        
+        # Prompt user for character name
+        character_name = input("Enter character to test (bitzy/neutrinette): ").strip().lower()
+
+        if character_name not in ["bitzy", "neutrinette"]:
+            print("Invalid character! Please enter 'bitzy' or 'neutrinette'.")
+            exit(1)
+
+        print(f"\nRunning tests for character: {character_name}\n")
+
+        # Run individual moves test
+        test_character_moves(character_name)
+
+        # Run integration test based on chosen character
+        if character_name == "bitzy":
+            test_game_integration(character_name)
+        elif character_name == "neutrinette":
+            test_neutrinette_integration()
+
     except requests.exceptions.ConnectionError:
         print("ERROR: Flask app is not running!")
         print("Please start the Flask app first:")
@@ -213,3 +234,4 @@ if __name__ == "__main__":
         print("3. Then run this test script")
     except Exception as e:
         print(f"ERROR: {e}")
+
