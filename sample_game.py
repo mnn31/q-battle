@@ -128,14 +128,6 @@ class SampleGame:
         print(f"\n----Turn {self.turn}----")
         print(f"Your HP: {self.player_hp}")
         print(f"Boss's HP: {self.boss_state.hp}")
-        print(f"\nYour move choices are:")
-        
-        for i, (move_name, move_desc) in enumerate(self.moves, 1):
-            print(f"{i}. {move_name} - {move_desc}")
-        
-        print(f"\nYour Qubit: {self.player_state.qubit_state}")
-        print(f"Boss's Qubit: {self.boss_state.qubit_state}")  # For testing
-        print("\nSelect one to perform (1-4): ")
     
     def get_player_move(self):
         """Get player's move choice"""
