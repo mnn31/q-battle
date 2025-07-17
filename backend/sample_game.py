@@ -56,7 +56,7 @@ class SampleGame:
         
         if choice == "bitzy":
             self.player_state = BitzyQuantumState()
-            self.player_hp = 90
+            self.player_hp = 100  # Increased by 10
             self.character_name = "Bitzy"
             self.ability_name = "QUANTUM HIJACK"
             self.ability_desc = "Deals +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩"
@@ -75,7 +75,7 @@ class SampleGame:
             
         elif choice == "neutrinette":
             self.player_state = NeutrinetteQuantumState()
-            self.player_hp = 80
+            self.player_hp = 90  # Increased by 10
             self.character_name = "Neutrinette"
             self.ability_name = "QUANTUM AFTERBURN"
             self.ability_desc = "Deals +10 damage if qubits are entangled"
@@ -94,7 +94,7 @@ class SampleGame:
             
         elif choice == "resona":
             self.player_state = ResonaQuantumState()
-            self.player_hp = 95
+            self.player_hp = 105  # Increased by 10
             self.character_name = "Resona"
             self.ability_name = "QUANTUM WAVEFORM"
             self.ability_desc = "Gains waveform stacks on collapse, increases Q-METRONOME damage"
@@ -120,14 +120,15 @@ class SampleGame:
     def display_battle_start(self):
         """Display battle introduction"""
         print(f"\nYou are fighting {self.boss_name}!")
-        print(f"\nYour ability is {self.ability_name}, which does {self.ability_desc}")
         print("\n" + "="*50)
     
     def display_turn(self):
         """Display current turn information"""
         print(f"\n----Turn {self.turn}----")
         print(f"Your HP: {self.player_hp}")
+        print(f"Your Stats - ATK: {self.player_state.attack_stat}, DEF: {self.player_state.defense}, SPD: {self.player_state.speed}")
         print(f"Boss's HP: {self.boss_state.hp}")
+        print(f"Boss's Stats - ATK: {self.boss_state.attack_stat}, DEF: {self.boss_state.defense}, SPD: {self.boss_state.speed}")
     
     def get_player_move(self):
         """Get player's move choice"""
@@ -212,7 +213,7 @@ class SampleGame:
         # Execute move based on character
         if self.character_name == "Bitzy":
             if move_name == "Q-THUNDER":
-                result = move_func(self.player_state, self.boss_state.defense)
+                result = move_func(self.player_state, self.boss_state.defense, self.boss_state.qubit_state)
             elif move_name == "SHOCK":
                 result = move_func(self.player_state, self.boss_state.qubit_state, self.boss_state.defense)
             elif move_name == "DUALIZE":
@@ -230,7 +231,7 @@ class SampleGame:
             elif move_name == "GLITCH CLAW":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.defense)
                 if result.get("heal", 0) > 0:
-                    self.player_hp = min(80, self.player_hp + result["heal"])
+                    self.player_hp = min(90, self.player_hp + result["heal"])  # Updated max HP
             elif move_name == "ENTANGLE":
                 result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "SWITCHEROO":
@@ -251,23 +252,8 @@ class SampleGame:
         if result.get("success", True):
             damage = result.get("damage", 0)
             
-            # Apply ability bonus damage using proper functions
-            if self.character_name == "Bitzy":
-                from characters.bitzy.ability import ability_superhijack
-                ability_result = ability_superhijack(self.player_state, self.boss_state.qubit_state)
-                if ability_result["bonus_damage"] > 0:
-                    damage += ability_result["bonus_damage"]
-                    print(f"{ability_result['message']}")
-            elif self.character_name == "Neutrinette":
-                from characters.neutrinette.ability import ability_quantum_afterburn
-                ability_result = ability_quantum_afterburn(self.player_state, self.boss_state.qubit_state)
-                if ability_result["bonus_damage"] > 0:
-                    damage += ability_result["bonus_damage"]
-                    print(f"{ability_result['message']}")
-            elif self.character_name == "Resona":
-                from characters.resona.ability import ability_quantum_waveform
-                ability_result = ability_quantum_waveform(self.player_state.waveform_stacks)
-                # Resona's ability affects move behavior, not direct damage
+            # Ability bonuses are now handled within the move functions themselves
+            pass
             
             self.boss_state.hp -= damage
             
@@ -283,12 +269,24 @@ class SampleGame:
         else:
             print(f"You used {move_name}: {result['message']}")
         
-        # Clamp HP to 0 for display
+                # Clamp HP to 0 for display
         player_hp_display = max(0, self.player_hp)
         boss_hp_display = max(0, self.boss_state.hp)
         print(f"\nYour HP: {player_hp_display}")
         print(f"Boss's HP: {boss_hp_display}")
-
+        
+        # Check Neutrinette's end-of-turn ability
+        if self.character_name == "Neutrinette" and self.player_state.is_entangled:
+            from characters.neutrinette.ability import ability_quantum_afterburn
+            ability_result = ability_quantum_afterburn(self.player_state, self.boss_state.qubit_state)
+            if ability_result["bonus_damage"] > 0:
+                self.boss_state.hp -= ability_result["bonus_damage"]
+                print(f"{ability_result['message']}")
+                print(f"Dealt {ability_result['bonus_damage']} bonus damage!")
+                # Update display after bonus damage
+                boss_hp_display = max(0, self.boss_state.hp)
+                print(f"Boss's HP: {boss_hp_display}")
+    
     def execute_boss_move(self):
         """Execute Singulon boss move"""
         boss_moves = [

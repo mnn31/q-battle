@@ -2,12 +2,12 @@ import random
 from qiskit import QuantumCircuit
 from basic_gates import (
     hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
-    measure_qubit, run_quantum_circuit
+    measure_qubit, run_quantum_circuit, apply_damage_roll
 )
 
 def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
-    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
-    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    """RPG-style damage formula: (Attack + Base Power) * 0.9 / (Defense * 0.05 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.9 / (defender_defense * 0.05 + 1)
     return max(1, int(damage))  # Minimum 1 damage
 
 def quantum_move_singulon_dualize(quantum_state):
@@ -49,7 +49,8 @@ def quantum_move_singulon_bullet_muons(quantum_state, defender_defense=50):
             "message": "BULLET MUONS failed! Singulon's qubit must be in |0⟩ state.",
             "qubit_state": quantum_state.qubit_state
         }
-    damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
+    damage = apply_damage_roll(base_damage)
     return {
         "success": True,
         "damage": damage,
@@ -62,11 +63,13 @@ def quantum_move_singulon_q_prismatic_laser(quantum_state, player_qubit_state="|
     if quantum_state.qubit_state == "superposition" and player_qubit_state == "superposition":
         base_damage = 150
         message = "Q-PRISMATIC LASER deals massive damage! (Both qubits in superposition)"
-        damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
+        calculated_damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
+        damage = apply_damage_roll(calculated_damage)
     else:
         base_damage = 60
         message = "Q-PRISMATIC LASER deals reduced damage. (Qubits not both in superposition)"
-        damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
+        calculated_damage = calculate_damage_rpg(quantum_state.attack_stat, base_damage, defender_defense)
+        damage = apply_damage_roll(calculated_damage)
     return {
         "success": True,
         "damage": damage,
