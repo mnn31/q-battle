@@ -8,21 +8,20 @@ from basic_gates import (
     measure_qubit, run_quantum_circuit, calculate_damage
 )
 
-def simple_damage(base_power, qmove=False):
-    if qmove:
-        return min(int(base_power * 0.8), 60)
-    else:
-        return min(int(base_power * 0.4), 30)
+def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
+    """RPG-style damage formula: (Attack + Base Power) * 0.8 / (Defense * 0.1 + 1)"""
+    damage = (attacker_attack + move_base_power) * 0.8 / (defender_defense * 0.1 + 1)
+    return max(1, int(damage))  # Minimum 1 damage
 
 class BitzyQuantumState:
     """Manages Bitzy's quantum state throughout battle"""
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
         self.attack_stat = 75
-        self.defense = 50  # placeholder
-        self.speed = 8  # placeholder
+        self.defense = 60
+        self.speed = 8
 
-def quantum_move_bitzy_q_thunder(quantum_state):
+def quantum_move_bitzy_q_thunder(quantum_state, defender_defense=50):
     """Q-THUNDER: Requires superposition, deals massive damage and collapses qubit"""
     if quantum_state.qubit_state != "superposition":
         return {
@@ -37,8 +36,8 @@ def quantum_move_bitzy_q_thunder(quantum_state):
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (90 base power) - reduced scaling
-    damage = simple_damage(90, qmove=True)
+    # Calculate damage (90 base power) with proper RPG formula
+    damage = calculate_damage_rpg(quantum_state.attack_stat, 90, defender_defense)
     
     # Collapse qubit randomly
     if "1" in result:
@@ -54,20 +53,20 @@ def quantum_move_bitzy_q_thunder(quantum_state):
         "quantum_result": result
     }
 
-def quantum_move_bitzy_shock(quantum_state, enemy_qubit_state="|0⟩"):
+def quantum_move_bitzy_shock(quantum_state, enemy_qubit_state="|0⟩", defender_defense=50):
     """SHOCK: Deals damage with bonus if qubits are in different states"""
     # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate base damage (30) - reduced scaling
-    base_damage = 30
-    total_damage = simple_damage(base_damage)
+    # Calculate base damage (30) with proper RPG formula
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 30, defender_defense)
+    total_damage = base_damage
     
     # Check if qubits are in different states
     if quantum_state.qubit_state != enemy_qubit_state:
-        bonus_damage = simple_damage(20)
+        bonus_damage = calculate_damage_rpg(quantum_state.attack_stat, 20, defender_defense)
         total_damage += bonus_damage
         message = f"SHOCK deals {total_damage} damage! (+{bonus_damage} different states bonus)"
     else:
