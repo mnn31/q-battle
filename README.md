@@ -1,6 +1,6 @@
 # 🔮 Q-Battle: Quantumons
 
-A simple quantum-powered battle game where you fight using quantum abilities! This project is built with Python and Qiskit to simulate quantum mechanics inside game mechanics. Players use "Quantumons" — creatures that attack with quantum moves like superposition and entanglement.
+A quantum-powered battle game where you fight using quantum abilities! This project is built with Python and Qiskit to simulate quantum mechanics inside game mechanics. Players use "Quantumons" — creatures that attack with quantum moves like superposition, entanglement, and interference.
 
 ---
 
@@ -9,21 +9,30 @@ A simple quantum-powered battle game where you fight using quantum abilities! Th
 - 🧠 **Qiskit** – IBM’s quantum computing framework
 - 🌐 **Flask** – Backend API server
 - 🐍 **Python** – Game logic and quantum simulation
-- (Later: React frontend for interactive UI)
+- 🎯 **CLI Interface** – Sample game for testing
 
 ---
 
 ## 🎮 Game Overview
 
-**Q-Battle** is a player-vs-computer (PvC) game. Each character has:
+**Q-Battle** is a player-vs-computer (PvC) game featuring three unique quantum characters:
 
-- Basic Attack (e.g., fixed damage)
-- **Quantum Move** (randomness via Qiskit)
-- Ultimate move (possibly using entanglement or multi-qubit logic)
+### **Bitzy** - The Superposition Master
+- **Theme**: Superposition manipulation and state control
+- **Signature Move**: Q-THUNDER (90 damage if in superposition)
+- **Ability**: QUANTUM HIJACK (+10 damage if enemy qubit is |1⟩)
 
-For now, we are developing:
-- A working backend API for quantum-powered moves
-- A simple test frontend or CLI for interaction
+### **Neutrinette** - The Entanglement Specialist
+- **Theme**: Entanglement and shared quantum effects
+- **Signature Move**: Q-PHOTON GEYSER (75 damage, costs HP, enemy loses HP if entangled)
+- **Ability**: QUANTUM AFTERBURN (+10 damage if entangled)
+
+### **Resona** - The Interference Scaler
+- **Theme**: Waveform stacking and interference patterns
+- **Signature Move**: Q-METRONOME (95 damage if |1⟩, 10 if |0⟩, scales with stacks)
+- **Ability**: QUANTUM WAVEFORM (stacks increase collapse probability and damage)
+
+A sample CLI game (`sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.
 
 ---
 
@@ -121,8 +130,3 @@ q-battle/
 - We’re building this as a fun, beginner-friendly intro to quantum computing through games!
 
 ---
-
-Let me know if you want me to also generate:
-- A matching `requirements.txt`
-- An issue list for GitHub (e.g. for tasks like "Make entangle move")
-- Or help auto-generate a `tests/` folder setup.
