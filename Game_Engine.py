@@ -107,7 +107,7 @@ def enemy_attack():
 
 def get_game_state():
     return game_state
-=======
+
 import random
 import sys
 import os
