@@ -63,15 +63,18 @@ class SampleGame:
             
             if self.boss_character == "Bitzy":
                 self.boss_state = BitzyQuantumState()
-                self.boss_state.hp = 110  # Character HP
+                self.boss_state.hp = 200  # Character HP
+                self.boss_state.defense = 10  # Force defense to 10
                 self.boss_name = "Bitzy"
             elif self.boss_character == "Neutrinette":
                 self.boss_state = NeutrinetteQuantumState()
-                self.boss_state.hp = 100  # Character HP
+                self.boss_state.hp = 200  # Character HP
+                self.boss_state.defense = 10  # Force defense to 10
                 self.boss_name = "Neutrinette"
             elif self.boss_character == "Resona":
                 self.boss_state = ResonaQuantumState()
-                self.boss_state.hp = 115  # Character HP
+                self.boss_state.hp = 200  # Character HP
+                self.boss_state.defense = 10  # Force defense to 10
                 self.boss_name = "Resona"
         
     def select_character(self):
@@ -381,13 +384,13 @@ class SampleGame:
                     result["message"] = result["message"].replace("enemy qubit", "your qubit")
             elif self.boss_character == "Neutrinette":
                 if move_name == "Q-PHOTON GEYSER":
-                    result = move_func(self.boss_state, self.boss_state.hp, self.player_hp, self.boss_state.is_entangled, self.player_state.defense)
+                    result = move_func(self.boss_state, self.boss_state.hp, self.player_hp, self.boss_state.is_entangled, self.boss_state.defense)
                     if result.get("enemy_hp_cost", 0) > 0:
                         self.player_hp -= result["enemy_hp_cost"]
                 elif move_name == "GLITCH CLAW":
-                    result = move_func(self.boss_state, self.boss_state.hp, self.player_state.defense)
+                    result = move_func(self.boss_state, self.boss_state.hp, self.boss_state.defense)
                     if result.get("heal", 0) > 0:
-                        self.boss_state.hp = min(self.boss_state.hp + result["heal"], 100)  # Heal boss
+                        self.boss_state.hp = min(self.boss_state.hp + result["heal"], 200)  # Heal boss (max 200)
                 elif move_name == "ENTANGLE":
                     result = move_func(self.boss_state, self.player_state.qubit_state)
                 elif move_name == "SWITCHEROO":
@@ -396,11 +399,11 @@ class SampleGame:
                     result["message"] = result["message"].replace("enemy qubit", "your qubit")
             elif self.boss_character == "Resona":
                 if move_name == "Q-METRONOME":
-                    result = move_func(self.boss_state, self.boss_state.hp, self.player_state.qubit_state, self.player_state.defense)
+                    result = move_func(self.boss_state, self.boss_state.hp, self.player_state.qubit_state, self.boss_state.defense)
                 elif move_name == "WAVE CRASH":
-                    result = move_func(self.boss_state, self.player_state.qubit_state, self.player_state.defense)
+                    result = move_func(self.boss_state, self.player_state.qubit_state, self.boss_state.defense)
                 elif move_name == "METAL NOISE":
-                    result = move_func(self.boss_state, self.player_state.qubit_state, self.player_state.defense)
+                    result = move_func(self.boss_state, self.player_state.qubit_state, self.boss_state.defense)
                 elif move_name == "SHIFT GEAR":
                     result = move_func(self.boss_state)
         
