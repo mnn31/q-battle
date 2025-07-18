@@ -91,7 +91,9 @@ def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80, defender_
     # 30% chance to heal (based on quantum randomness)
     heal_chance = random.random()
     if heal_chance < 0.30:  # 30% chance
-        heal_amount = int(80 * 0.20)  # 20% of max HP
+        # Use character's max HP (90 for Neutrinette) instead of hardcoded 80
+        max_hp = 90  # Neutrinette's max HP
+        heal_amount = int(max_hp * 0.20)  # 20% of max HP
         message = f"GLITCH CLAW deals {damage} damage and heals {heal_amount} HP!"
         return {
             "success": True,

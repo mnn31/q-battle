@@ -262,7 +262,8 @@ class SampleGame:
             elif move_name == "GLITCH CLAW":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.defense)
                 if result.get("heal", 0) > 0:
-                    self.player_hp = min(90, self.player_hp + result["heal"])  # Updated max HP
+                    # Use Neutrinette's actual max HP (90)
+                    self.player_hp = min(90, self.player_hp + result["heal"])
             elif move_name == "ENTANGLE":
                 result = move_func(self.player_state, self.boss_state.qubit_state)
             elif move_name == "SWITCHEROO":
@@ -390,7 +391,8 @@ class SampleGame:
                 elif move_name == "GLITCH CLAW":
                     result = move_func(self.boss_state, self.boss_state.hp, self.boss_state.defense)
                     if result.get("heal", 0) > 0:
-                        self.boss_state.hp = min(self.boss_state.hp + result["heal"], 200)  # Heal boss (max 200)
+                        # Use character's max HP for boss healing (200 for all character bosses)
+                        self.boss_state.hp = min(200, self.boss_state.hp + result["heal"])
                 elif move_name == "ENTANGLE":
                     result = move_func(self.boss_state, self.player_state.qubit_state)
                 elif move_name == "SWITCHEROO":
