@@ -40,8 +40,8 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (75 base power) with proper RPG formula and damage roll
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 75, defender_defense)
+    # Calculate damage (150 base power for Q-Move) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 150, defender_defense)
     damage = apply_damage_roll(base_damage)
     
     # Collapse qubit randomly

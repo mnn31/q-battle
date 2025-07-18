@@ -36,8 +36,8 @@ def quantum_move_bitzy_q_thunder(quantum_state, defender_defense=50, enemy_qubit
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (90 base power) with proper RPG formula
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 90, defender_defense)
+    # Calculate damage (150 base power for Q-Move) with proper RPG formula
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 150, defender_defense)
     damage = base_damage
     
     # Apply ability bonus (SUPERHIJACK) if enemy qubit is |1⟩
@@ -76,12 +76,13 @@ def quantum_move_bitzy_shock(quantum_state, enemy_qubit_state="|0⟩", defender_
     if quantum_state.qubit_state != enemy_qubit_state:
         bonus_damage = 20  # Flat 20 damage bonus
         total_damage += bonus_damage
+        # Apply damage roll to final damage
+        total_damage = apply_damage_roll(total_damage)
         message = f"SHOCK deals {total_damage} damage! (+{bonus_damage} different states bonus)"
     else:
+        # Apply damage roll to final damage
+        total_damage = apply_damage_roll(total_damage)
         message = f"SHOCK deals {total_damage} damage!"
-    
-    # Apply damage roll to final damage
-    total_damage = apply_damage_roll(total_damage)
     
     return {
         "success": True,
