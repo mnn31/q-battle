@@ -20,22 +20,14 @@ class HigscrozmaQuantumState:
         self.attack_stat = 70
         self.defense = 25  # Extremely low, must use BARRIER to increase
         self.speed = 12  # High speed for SHADOW FORCE priority
-        self.barriers_in_front = 3  # Start with 3 barriers in front
+        self.barriers_in_front = 3  # Start with 3 barriers in front (behind first barrier)
         self.barriers_behind = 0    # Start with 0 barriers behind
         self.next_turn_strike = False  # For SHADOW FORCE invincibility
         self.next_turn_strike_damage = 0  # Damage for next turn strike
 
 def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85, defender_defense=50):
-    """Q-VOID RIFT: Requires superposition, deals damage + 10% of Defense, heals per barrier behind, shatters back barriers"""
-    if quantum_state.qubit_state != "superposition":
-        return {
-            "success": False,
-            "damage": 0,
-            "message": "Q-VOID RIFT failed! Qubit not in superposition.",
-            "qubit_state": quantum_state.qubit_state
-        }
-    
-    # Create circuit to measure superposition state
+    """Q-VOID RIFT: Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers."""
+    # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
@@ -82,7 +74,7 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85,
     }
 
 def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
-    """PRISMATIC LASER: Deals damage, shatters one random barrier, puts qubit in superposition"""
+    """PRISMATIC LASER: Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)"""
     # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
@@ -127,7 +119,7 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     }
 
 def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
-    """SHADOW FORCE: Requires superposition, collapses qubit, different effects based on result, moves up one barrier"""
+    """SHADOW FORCE: If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)"""
     if quantum_state.qubit_state != "superposition":
         return {
             "success": False,
@@ -158,7 +150,7 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         message = f"SHADOW FORCE collapses to |1⟩! User becomes invincible this turn, will strike for {110} damage next turn!"
     else:
         quantum_state.qubit_state = "|0⟩"
-        # Deal damage immediately
+        # Deal damage immediately (70 base power)
         base_damage = calculate_damage_rpg(quantum_state.attack_stat, 70, defender_defense)
         damage = apply_damage_roll(base_damage)
         message = f"SHADOW FORCE deals {damage} damage! (collapsed to |0⟩)"
@@ -179,7 +171,7 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
     }
 
 def quantum_move_higscrozma_barrier(quantum_state):
-    """BARRIER: Increases defense if max barriers, creates new barrier if not, puts qubit in superposition"""
+    """BARRIER: Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION."""
     # Check if maximum number of barriers are active (3 total)
     total_barriers = quantum_state.barriers_in_front + quantum_state.barriers_behind
     

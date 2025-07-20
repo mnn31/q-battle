@@ -66,9 +66,9 @@ class SampleGame:
             self.boss_name = "Singulon"
             self.boss_character = "Singulon"
         else:
-                    # 50% chance to face a random character
-        characters = ["Bitzy", "Neutrinette", "Resona", "Higscrozma"]
-        self.boss_character = random.choice(characters)
+            # 50% chance to face a random character
+            characters = ["Bitzy", "Neutrinette", "Resona", "Higscrozma"]
+            self.boss_character = random.choice(characters)
             
             if self.boss_character == "Bitzy":
                 self.boss_state = BitzyQuantumState()
@@ -233,13 +233,13 @@ class SampleGame:
             print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 1.")
         elif self.character_name == "Higscrozma":
             print("1. Q-VOID RIFT")
-            print("   Higscrozma's Q-Move. Requires superposition, deals damage + 10% of Defense, heals per barrier behind, shatters back barriers.")
+            print("   Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers.")
             print("2. PRISMATIC LASER")
-            print("   Deals 90 damage, shatters one random barrier, puts qubit in superposition.")
+            print("   Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)")
             print("3. SHADOW FORCE")
-            print("   Requires superposition, collapses qubit. If |0⟩ deals 70 damage, if |1⟩ becomes invincible and strikes next turn, moves up one barrier.")
+            print("   If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)")
             print("4. BARRIER")
-            print("   Increases defense if max barriers, creates new barrier if not, puts qubit in superposition.")
+            print("   Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION.")
             print("\nAbility: QUANTUM BULWARK")
             print("Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each.")
             print(f"Current Barriers - Front: {self.player_state.barriers_in_front}, Back: {self.player_state.barriers_behind}")
