@@ -334,11 +334,38 @@ body {
     border-top: 2px solid #333;
     padding: 15px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 15px;
     width: 100%;
     position: relative;
     z-index: 3;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.battle-log {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 10px;
+    max-height: 100px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.log-entry {
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    margin: 2px 0;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .qubit-states {

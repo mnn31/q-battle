@@ -3,113 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q-Battle - Quantum Battle Game</title>
-    <link rel="stylesheet" href="static/css/style.css">
+    <title>Q-Battle: Quantumons</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="battle-container">
-        <!-- Character Selection -->
-        <div class="character-selection" id="character-selection">
-            <h2>Choose Your Quantum Character</h2>
-            <div class="character-grid">
-                <div class="character-option" data-character="bitzy">
-                    <img src="static/sprites/blitzle.gif" alt="Bitzy" class="character-sprite">
-                    <div class="character-name">Bitzy</div>
-                    <div class="character-desc">Superposition Master</div>
-                </div>
-                <div class="character-option" data-character="neutrinette">
-                    <img src="static/sprites/neutrinette.gif" alt="Neutrinette" class="character-sprite">
-                    <div class="character-name">Neutrinette</div>
-                    <div class="character-desc">Entanglement Specialist</div>
-                </div>
-                <div class="character-option" data-character="resona">
-                    <img src="static/sprites/resona.gif" alt="Resona" class="character-sprite">
-                    <div class="character-name">Resona</div>
-                    <div class="character-desc">Interference Scaler</div>
-                </div>
-                <div class="character-option" data-character="higscrozma">
-                    <img src="static/sprites/higscrozma.gif" alt="Higscrozma" class="character-sprite">
-                    <div class="character-name">Higscrozma</div>
-                    <div class="character-desc">Quantum Tunneler</div>
-                </div>
+    <!-- Character Selection Screen -->
+    <div id="character-selection" class="character-selection">
+        <h2>Choose Your Quantumon</h2>
+        <div class="character-grid">
+            <div class="character-option" data-character="Bitzy">
+                <img src="/static/sprites/blitzle.gif" alt="Bitzy" class="character-sprite">
+                <div class="character-name">Bitzy</div>
+                <div class="character-desc">Superposition Master</div>
             </div>
-        </div>
-
-        <!-- Battle Screen -->
-        <div class="battle-screen" id="battle-screen" style="display: none;">
-            <!-- Battle Arena -->
-            <div class="battle-arena">
-                <!-- Player Side (Left) - Bitzy -->
-                <div class="player-side">
-                    <div class="player-sprite">
-                        <img src="static/sprites/blitzle.gif" alt="Bitzy" class="sprite player-facing" id="player-sprite">
-                    </div>
-                    <div class="player-info">
-                        <div class="health-bar">
-                            <div class="health-fill" style="width: 90%;"></div>
-                        </div>
-                        <div class="player-name" id="player-name">Bitzy</div>
-                        <div class="player-hp">HP: 90/100</div>
-                    </div>
-                </div>
-
-                <!-- Enemy Side (Right) - Higscrozma -->
-                <div class="enemy-side">
-                    <div class="enemy-sprite">
-                        <img src="static/sprites/higscrozma.gif" alt="Higscrozma" class="sprite enemy-facing">
-                    </div>
-                    <div class="enemy-info">
-                        <div class="health-bar">
-                            <div class="health-fill" style="width: 75%;"></div>
-                        </div>
-                        <div class="enemy-name">Higscrozma</div>
-                        <div class="enemy-hp">HP: 150/200</div>
-                    </div>
-                </div>
+            <div class="character-option" data-character="Neutrinette">
+                <img src="/static/sprites/neutrinette.gif" alt="Neutrinette" class="character-sprite">
+                <div class="character-name">Neutrinette</div>
+                <div class="character-desc">Entanglement Specialist</div>
             </div>
-        </div>
-
-        <!-- Move Selection -->
-        <div class="move-selection">
-            <div class="move-grid">
-                <button class="move-button" data-move="q-thunder">
-                    <div class="move-name">Q-THUNDER</div>
-                    <div class="move-desc">Massive damage if in superposition</div>
-                </button>
-                <button class="move-button" data-move="shock">
-                    <div class="move-name">SHOCK</div>
-                    <div class="move-desc">Damage + bonus if different states</div>
-                </button>
-                <button class="move-button" data-move="dualize">
-                    <div class="move-name">DUALIZE</div>
-                    <div class="move-desc">Creates superposition</div>
-                </button>
-                <button class="move-button" data-move="bit-flip">
-                    <div class="move-name">BIT-FLIP</div>
-                    <div class="move-desc">Flips enemy qubit state</div>
-                </button>
+            <div class="character-option" data-character="Resona">
+                <img src="/static/sprites/resona.gif" alt="Resona" class="character-sprite">
+                <div class="character-name">Resona</div>
+                <div class="character-desc">Interference Scaler</div>
             </div>
-        </div>
-
-        <!-- Status Display -->
-        <div class="status-display">
-            <div class="qubit-states">
-                <div class="qubit-info">
-                    <span class="label">Your Qubit:</span>
-                    <div class="qubit-cube player-qubit">|0⟩</div>
-                </div>
-                <div class="qubit-info">
-                    <span class="label">Enemy Qubit:</span>
-                    <div class="qubit-cube enemy-qubit">|1⟩</div>
-                </div>
-            </div>
-            <div class="turn-info">
-                <span class="label">Turn:</span>
-                <span class="turn-number">3</span>
+            <div class="character-option" data-character="Higscrozma">
+                <img src="/static/sprites/higscrozma.gif" alt="Higscrozma" class="character-sprite">
+                <div class="character-name">Higscrozma</div>
+                <div class="character-desc">Quantum Tunneler</div>
             </div>
         </div>
     </div>
 
-    <script src="static/js/game.js"></script>
+    <!-- Battle Screen (Hidden initially) -->
+    <div id="battle-screen" class="battle-screen" style="display: none;">
+        <div class="battle-container">
+            <!-- Battle Arena -->
+            <div class="battle-arena">
+                <!-- Enemy Side (Top Right) -->
+                <div class="enemy-side">
+                    <div class="enemy-info">
+                        <div class="enemy-name">Singulon</div>
+                        <div class="health-bar">
+                            <div class="health-fill" id="enemy-health-fill"></div>
+                        </div>
+                        <div class="enemy-hp" id="enemy-hp">400/400</div>
+                    </div>
+                    <div class="enemy-sprite">
+                        <img src="/static/sprites/singulon.gif" alt="Singulon" class="sprite enemy-facing">
+                    </div>
+                </div>
+
+                <!-- Player Side (Bottom Left) -->
+                <div class="player-side">
+                    <div class="player-info">
+                        <div class="player-name" id="player-name">Player</div>
+                        <div class="health-bar">
+                            <div class="health-fill" id="player-health-fill"></div>
+                        </div>
+                        <div class="player-hp" id="player-hp">100/100</div>
+                    </div>
+                    <div class="player-sprite">
+                        <img id="player-sprite" src="" alt="Player" class="sprite player-facing">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Display -->
+            <div class="status-display">
+                <div class="status-row">
+                    <div class="turn-info">
+                        <div class="turn-number" id="turn-number">Turn 1</div>
+                    </div>
+                    <div class="qubit-states">
+                        <div class="qubit-info">
+                            <div class="label">Player Qubit:</div>
+                            <div class="qubit-cube player-qubit" id="player-qubit">|0⟩</div>
+                        </div>
+                        <div class="qubit-info">
+                            <div class="label">Enemy Qubit:</div>
+                            <div class="qubit-cube enemy-qubit" id="enemy-qubit">|0⟩</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="battle-log" id="battle-log">
+                    <div class="log-entry">Battle started! Choose your move.</div>
+                </div>
+            </div>
+
+            <!-- Move Selection -->
+            <div class="move-selection">
+                <div class="move-grid">
+                    <button class="move-button" data-move="move1" id="move1">
+                        <div class="move-name" id="move1-name">Move 1</div>
+                        <div class="move-desc" id="move1-desc">Description</div>
+                    </button>
+                    <button class="move-button" data-move="move2" id="move2">
+                        <div class="move-name" id="move2-name">Move 2</div>
+                        <div class="move-desc" id="move2-desc">Description</div>
+                    </button>
+                    <button class="move-button" data-move="move3" id="move3">
+                        <div class="move-name" id="move3-name">Move 3</div>
+                        <div class="move-desc" id="move3-desc">Description</div>
+                    </button>
+                    <button class="move-button" data-move="move4" id="move4">
+                        <div class="move-name" id="move4-name">Move 4</div>
+                        <div class="move-desc" id="move4-desc">Description</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/game.js"></script>
 </body>
 </html> 
