@@ -171,7 +171,7 @@ def process_move(move):
     # Apply damage if move was successful
     if result.get("success", True):
         damage = result.get("damage", 0)
-        game_state["enemy"]["hp"] -= damage
+        game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
         
         # Update player's qubit state
         if "qubit_state" in result:
@@ -245,7 +245,7 @@ def enemy_attack():
     # Apply damage to player
     if result.get("success", True):
         damage = result.get("damage", 0)
-        game_state["player"]["hp"] -= damage
+        game_state["player"]["hp"] = max(0, game_state["player"]["hp"] - damage)  # Prevent negative HP
         
         log.append(f"Singulon used {move_name}: {result['message']}")
         if damage > 0:

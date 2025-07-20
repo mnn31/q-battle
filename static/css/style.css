@@ -487,7 +487,7 @@ body {
 
 .health-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ff4444 0%, #ffaa44 50%, #44ff44 100%);
+    background: linear-gradient(90deg, #44ff44 0%, #22cc22 100%); /* Default green */
     transition: width 0.3s ease;
 }
 

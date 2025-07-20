@@ -198,14 +198,20 @@ function updateBattleDisplay() {
     
     // Update health bars
     const playerMaxHp = characterData[currentCharacter].maxHp;
-    const playerHpPercent = (gameState.player.hp / playerMaxHp) * 100;
-    const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+    const playerHp = Math.max(0, gameState.player.hp); // Prevent negative HP
+    const enemyHp = Math.max(0, gameState.enemy.hp); // Prevent negative HP
+    const playerHpPercent = (playerHp / playerMaxHp) * 100;
+    const enemyHpPercent = (enemyHp / 400) * 100;
     
-    playerHp.textContent = `${gameState.player.hp}/${playerMaxHp}`;
+    playerHp.textContent = `${playerHp}/${playerMaxHp}`;
     playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
     
-    enemyHp.textContent = `${gameState.enemy.hp}/400`;
+    enemyHp.textContent = `${enemyHp}/400`;
     enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+    
+    // Update HP bar colors based on percentage
+    updateHealthBarColor(playerHealthFill, playerHpPercent);
+    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
     
     // Update qubit states
     const playerState = gameState.player.qubit_state || "|0⟩";
@@ -260,6 +266,17 @@ function enableMoveButtons() {
         button.disabled = false;
         button.style.opacity = '1';
     });
+}
+
+// Update health bar color based on HP percentage
+function updateHealthBarColor(healthFill, hpPercent) {
+    if (hpPercent > 70) {
+        healthFill.style.background = 'linear-gradient(90deg, #44ff44 0%, #22cc22 100%)'; // Green
+    } else if (hpPercent > 20) {
+        healthFill.style.background = 'linear-gradient(90deg, #ffaa44 0%, #ff8800 100%)'; // Yellow/Orange
+    } else {
+        healthFill.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc2222 100%)'; // Red
+    }
 }
 
 // End battle
