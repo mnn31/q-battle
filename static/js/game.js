@@ -5,7 +5,7 @@ let gameState = {
     playerQubit: "|0⟩",
     enemyQubit: "|1⟩",
     turn: 1,
-    selectedCharacter: "Bitzy"
+    selectedCharacter: "Resona"
 };
 
 // Character sprite mapping

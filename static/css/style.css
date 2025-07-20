@@ -12,6 +12,33 @@ body {
     overflow: hidden;
 }
 
+/* Battle background with grass and circles */
+.battle-screen {
+    position: relative;
+    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+}
+
+.battle-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 30%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 80% 20%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 40% 70%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 90% 80%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 60% 40%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 10% 60%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 70% 10%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 30% 90%, #8B4513 3px, transparent 3px);
+    background-size: 200px 200px, 150px 150px, 180px 180px, 120px 120px, 160px 160px, 140px 140px, 170px 170px, 130px 130px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
 /* Battle Container */
 .battle-container {
     width: 100vw;
@@ -99,6 +126,7 @@ body {
     align-items: center;
     padding: 20px;
     position: relative;
+    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
 }
 
 /* Sprite Animations */
