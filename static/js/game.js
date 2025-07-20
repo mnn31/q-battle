@@ -8,30 +8,80 @@ let gameState = {
     selectedCharacter: "Bitzy"
 };
 
+// Character sprite mapping
+const characterSprites = {
+    "bitzy": "static/sprites/blitzle.gif",
+    "neutrinette": "static/sprites/neutrinette.gif", 
+    "resona": "static/sprites/resona.gif",
+    "higscrozma": "static/sprites/higscrozma.gif"
+};
+
 // Initialize game
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Q-Battle Frontend Loaded!');
     
-    // Add click handlers to move buttons
-    const moveButtons = document.querySelectorAll('.move-button');
-    moveButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const moveNumber = this.getAttribute('data-move');
-            handleMoveClick(moveNumber);
+    // Add character selection handlers
+    const characterOptions = document.querySelectorAll('.character-option');
+    characterOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const character = this.getAttribute('data-character');
+            selectCharacter(character);
         });
     });
     
-    // Add hover effects
-    moveButtons.forEach(button => {
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px) scale(1.02)';
+    // Add click handlers to move buttons (only after character selection)
+    function addMoveHandlers() {
+        const moveButtons = document.querySelectorAll('.move-button');
+        moveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const moveNumber = this.getAttribute('data-move');
+                handleMoveClick(moveNumber);
+            });
         });
         
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0px) scale(1)';
+        // Add hover effects
+        moveButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px) scale(1.02)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0px) scale(1)';
+            });
         });
-    });
+    }
+    
+    // Store the function globally so it can be called after character selection
+    window.addMoveHandlers = addMoveHandlers;
 });
+
+// Handle character selection
+function selectCharacter(character) {
+    console.log(`Selected character: ${character}`);
+    
+    // Update game state
+    gameState.selectedCharacter = character.charAt(0).toUpperCase() + character.slice(1);
+    
+    // Update player sprite
+    const playerSprite = document.getElementById('player-sprite');
+    const playerName = document.getElementById('player-name');
+    
+    if (characterSprites[character]) {
+        playerSprite.src = characterSprites[character];
+        playerName.textContent = gameState.selectedCharacter;
+    }
+    
+    // Hide character selection and show battle screen
+    document.getElementById('character-selection').style.display = 'none';
+    document.getElementById('battle-screen').style.display = 'flex';
+    
+    // Add move handlers after character selection
+    if (window.addMoveHandlers) {
+        window.addMoveHandlers();
+    }
+    
+    console.log(`Battle started with ${gameState.selectedCharacter}!`);
+}
 
 // Handle move button clicks
 function handleMoveClick(moveNumber) {
