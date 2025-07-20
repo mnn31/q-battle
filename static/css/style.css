@@ -246,11 +246,11 @@ body {
 
 /* Sprite Direction Classes */
 .player-facing {
-    transform: scaleX(1); /* Facing right (towards enemy) */
+    transform: scaleX(-1); /* Facing left (towards enemy) - flipped 180 degrees */
 }
 
 .enemy-facing {
-    transform: scaleX(-1); /* Facing left (towards player) */
+    transform: scaleX(1); /* Facing right (towards player) */
 }
 
 @keyframes bounce {
@@ -301,10 +301,11 @@ body {
     padding: 15px;
     cursor: pointer;
     transition: all 0.2s ease;
-    text-align: left;
+    text-align: center;
     color: white;
     font-family: 'Courier New', monospace;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 .move-button:hover {
@@ -320,12 +321,41 @@ body {
 .move-name {
     font-weight: bold;
     font-size: 16px;
-    margin-bottom: 5px;
 }
 
 .move-desc {
+    display: none;
+}
+
+/* Tooltip for move descriptions */
+.move-button:hover::after {
+    content: attr(data-description);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
     font-size: 12px;
-    opacity: 0.9;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+    max-width: 300px;
+    text-align: center;
+}
+
+.move-button:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    margin-bottom: -5px;
+    z-index: 1000;
 }
 
 /* Status Display - positioned at bottom */

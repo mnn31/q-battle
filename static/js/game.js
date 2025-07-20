@@ -8,40 +8,40 @@ const characterData = {
     "Bitzy": {
         sprite: "/static/sprites/blitzle.gif",
         moves: [
-            { name: "Q-THUNDER", desc: "Massive damage if in superposition" },
-            { name: "SHOCK", desc: "Damage + bonus if different states" },
-            { name: "DUALIZE", desc: "Creates superposition" },
-            { name: "BIT-FLIP", desc: "Flips enemy qubit state" }
+            { name: "Q-THUNDER", desc: "90 damage if in superposition, 10 if not" },
+            { name: "SHOCK", desc: "40 damage + 10 if enemy qubit is |1⟩" },
+            { name: "DUALIZE", desc: "Creates superposition (|0⟩ → |+⟩)" },
+            { name: "BIT-FLIP", desc: "Flips enemy qubit state (|0⟩ ↔ |1⟩)" }
         ],
         maxHp: 90
     },
     "Neutrinette": {
         sprite: "/static/sprites/neutrinette.gif",
         moves: [
-            { name: "Q-PHOTON GEYSER", desc: "High damage, costs HP, enemy loses HP if entangled" },
-            { name: "GLITCH CLAW", desc: "Damage + healing" },
-            { name: "ENTANGLE", desc: "Entangles with enemy" },
-            { name: "SWITCHEROO", desc: "Swaps qubit states" }
+            { name: "Q-PHOTON GEYSER", desc: "75 damage, costs 10 HP, enemy loses 5 HP if entangled" },
+            { name: "GLITCH CLAW", desc: "50 damage + heals 10 HP" },
+            { name: "ENTANGLE", desc: "Entangles with enemy qubit" },
+            { name: "SWITCHEROO", desc: "Swaps qubit states with enemy" }
         ],
         maxHp: 80
     },
     "Resona": {
         sprite: "/static/sprites/resona.gif",
         moves: [
-            { name: "Q-METRONOME", desc: "High damage if |1⟩, low if |0⟩, scales with stacks" },
-            { name: "WAVE CRASH", desc: "Damage based on waveform stacks" },
-            { name: "METAL NOISE", desc: "Damage + defense boost" },
-            { name: "SHIFT GEAR", desc: "Increases waveform stacks" }
+            { name: "Q-METRONOME", desc: "95 damage if |1⟩, 10 if |0⟩, scales with waveform stacks" },
+            { name: "WAVE CRASH", desc: "60 damage + 10 per waveform stack" },
+            { name: "METAL NOISE", desc: "45 damage + increases defense by 10%" },
+            { name: "SHIFT GEAR", desc: "Increases waveform stacks by 1" }
         ],
         maxHp: 95
     },
     "Higscrozma": {
         sprite: "/static/sprites/higscrozma.gif",
         moves: [
-            { name: "Q-VOID RIFT", desc: "Damage + 10% Defense, heals per barrier" },
-            { name: "QUANTUM BULWARK", desc: "Creates barriers" },
-            { name: "TUNNEL STRIKE", desc: "High damage through barriers" },
-            { name: "BARRIER SHIFT", desc: "Manipulates barriers" }
+            { name: "Q-VOID RIFT", desc: "80 damage + 10% Defense, heals 5 HP per barrier behind" },
+            { name: "QUANTUM BULWARK", desc: "Creates a quantum barrier" },
+            { name: "TUNNEL STRIKE", desc: "70 damage through barriers" },
+            { name: "BARRIER SHIFT", desc: "Manipulates quantum barriers" }
         ],
         maxHp: 100
     }
@@ -100,6 +100,9 @@ function setupMoveButtons(moves) {
             moveName.textContent = moves[i].name;
             moveDesc.textContent = moves[i].desc;
             moveButton.style.display = 'block';
+            
+            // Set up tooltip with full description
+            moveButton.setAttribute('data-description', moves[i].desc);
             
             // Add click handler
             moveButton.onclick = () => executeMove(moves[i].name);
