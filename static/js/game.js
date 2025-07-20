@@ -85,6 +85,9 @@ function selectCharacter(character) {
     // Set up move buttons
     setupMoveButtons(charData.moves);
     
+    // Set up sprite hover for ability descriptions
+    setupSpriteHover(character);
+    
     // Start the game
     startBattle(character);
 }
@@ -123,6 +126,16 @@ async function startBattle(character) {
             updateBattleDisplay();
             showBattleScreen();
             addLogEntry(`Battle started with ${character}!`);
+            
+            // Check for special effects based on move
+            if (result.state.log && result.state.log.length > 0) {
+                const lastLog = result.state.log[result.state.log.length - 1];
+                if (lastLog.includes('BARRIER')) {
+                    showSpecialEffect('barrier');
+                } else if (lastLog.includes('WAVE CRASH') || lastLog.includes('Q-METRONOME')) {
+                    showSpecialEffect('waveform');
+                }
+            }
         } else {
             console.error('Failed to start game:', result);
         }
@@ -155,6 +168,16 @@ async function executeMove(moveName) {
         if (result.state) {
             gameState = result.state;
             updateBattleDisplay();
+            
+            // Check for special effects based on move
+            if (result.state.log && result.state.log.length > 0) {
+                const lastLog = result.state.log[result.state.log.length - 1];
+                if (lastLog.includes('BARRIER')) {
+                    showSpecialEffect('barrier');
+                } else if (lastLog.includes('WAVE CRASH') || lastLog.includes('Q-METRONOME')) {
+                    showSpecialEffect('waveform');
+                }
+            }
             
             // Check for game end
             if (gameState.enemy.hp <= 0) {
@@ -276,6 +299,72 @@ function updateHealthBarColor(healthFill, hpPercent) {
         healthFill.style.background = 'linear-gradient(90deg, #ffaa44 0%, #ff8800 100%)'; // Yellow/Orange
     } else {
         healthFill.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc2222 100%)'; // Red
+    }
+}
+
+// Set up sprite hover for ability descriptions
+function setupSpriteHover(character) {
+    const abilityDescriptions = {
+        "Bitzy": "SUPERHIJACK: +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩",
+        "Neutrinette": "QUANTUM AFTERBURN: +10 damage if entangled with enemy",
+        "Resona": "QUANTUM WAVEFORM: Stacks increase collapse probability and damage",
+        "Higscrozma": "QUANTUM BULWARK: Barriers reduce damage taken/dealt, back barriers boost damage"
+    };
+    
+    const sprite = document.querySelector('.player-sprite');
+    if (sprite) {
+        sprite.setAttribute('data-description', abilityDescriptions[character] || '');
+    }
+}
+
+// Show special effects
+function showSpecialEffect(effectType) {
+    const battleScreen = document.getElementById('battle-screen');
+    
+    if (effectType === 'barrier') {
+        // Pink screen effect for Higscrozma barrier
+        const pinkOverlay = document.createElement('div');
+        pinkOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            opacity: 0.3;
+            z-index: 1000;
+            pointer-events: none;
+            animation: barrierEffect 1s ease-out;
+        `;
+        battleScreen.appendChild(pinkOverlay);
+        
+        setTimeout(() => {
+            if (pinkOverlay.parentNode) {
+                pinkOverlay.parentNode.removeChild(pinkOverlay);
+            }
+        }, 1000);
+    } else if (effectType === 'waveform') {
+        // Waveform sprite effect for Resona
+        const waveformSprite = document.createElement('div');
+        waveformSprite.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: url('/static/sprites/waveform.png') no-repeat center;
+            background-size: contain;
+            z-index: 1000;
+            animation: waveformEffect 2s ease-out;
+        `;
+        battleScreen.appendChild(waveformSprite);
+        
+        setTimeout(() => {
+            if (waveformSprite.parentNode) {
+                waveformSprite.parentNode.removeChild(waveformSprite);
+            }
+        }, 2000);
     }
 }
 
