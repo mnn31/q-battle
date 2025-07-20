@@ -56,6 +56,7 @@ body {
     justify-content: center;
     height: 100vh;
     padding: 20px;
+    width: 100%;
 }
 
 .character-selection h2 {
@@ -72,6 +73,7 @@ body {
     gap: 30px;
     max-width: 800px;
     width: 100%;
+    margin: 0 auto;
 }
 
 .character-option {
@@ -122,17 +124,118 @@ body {
 .battle-screen {
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
     position: relative;
     background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+    min-height: 100vh;
 }
 
-/* Sprite Animations */
+/* Forest/grass background with dirt holes */
+.battle-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        /* Grass texture */
+        radial-gradient(circle at 20% 30%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 80% 20%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 40% 70%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 90% 80%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 60% 40%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 10% 60%, #8B4513 3px, transparent 3px),
+        radial-gradient(circle at 70% 10%, #8B4513 2px, transparent 2px),
+        radial-gradient(circle at 30% 90%, #8B4513 3px, transparent 3px),
+        /* Dirt holes for characters */
+        radial-gradient(ellipse 120px 60px at 20% 85%, #654321 0%, #8B4513 50%, transparent 70%),
+        radial-gradient(ellipse 120px 60px at 80% 15%, #654321 0%, #8B4513 50%, transparent 70%);
+    background-size: 200px 200px, 150px 150px, 180px 180px, 120px 120px, 160px 160px, 140px 140px, 170px 170px, 130px 130px, 300px 300px, 300px 300px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Battle arena container */
+.battle-arena {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    padding: 20px;
+}
+
+/* Character positions with dirt holes */
+.player-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    z-index: 3;
+}
+
+.player-side::before {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 80px;
+    background: radial-gradient(ellipse 75px 40px, #654321 0%, #8B4513 50%, transparent 70%);
+    z-index: -1;
+}
+
+.enemy-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    z-index: 3;
+}
+
+.enemy-side::before {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 80px;
+    background: radial-gradient(ellipse 75px 40px, #654321 0%, #8B4513 50%, transparent 70%);
+    z-index: -1;
+}
+
+/* Sprite positioning - Much bigger sprites */
+.player-sprite {
+    order: 2;
+    position: relative;
+    z-index: 3;
+}
+
+.enemy-sprite {
+    order: 1;
+    position: relative;
+    z-index: 3;
+}
+
+/* Much bigger sprites */
 .sprite {
-    width: 128px;
-    height: 128px;
+    width: 256px;
+    height: 256px;
     image-rendering: pixelated;
     animation: bounce 2s ease-in-out infinite;
 }
@@ -151,92 +254,38 @@ body {
         transform: translateY(0px);
     }
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-15px);
     }
 }
 
-/* Enemy Side (Right) */
-.enemy-side {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.enemy-sprite {
-    order: 1;
-}
-
-.enemy-info {
-    order: 2;
+/* Info panels */
+.player-info, .enemy-info {
     text-align: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #333;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 15px;
+    border: 3px solid #333;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 3;
+    min-width: 200px;
 }
 
-/* Player Side (Left) */
-.player-side {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.player-sprite {
-    order: 2;
-}
-
-.player-info {
-    order: 1;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #333;
-}
-
-/* Health Bars */
-.health-bar {
-    width: 150px;
-    height: 20px;
-    background: #ddd;
-    border: 2px solid #333;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 5px 0;
-}
-
-.health-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ff4444 0%, #ffaa44 50%, #44ff44 100%);
-    transition: width 0.3s ease;
-}
-
-/* Character Names and HP */
-.enemy-name, .player-name {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-}
-
-.enemy-hp, .player-hp {
-    font-size: 14px;
-    color: #666;
-}
-
-/* Move Selection */
+/* Move Selection - positioned at bottom */
 .move-selection {
     background: rgba(255, 255, 255, 0.95);
     border-top: 3px solid #333;
     padding: 20px;
+    width: 100%;
+    position: relative;
+    z-index: 3;
+    margin-top: auto;
 }
 
 .move-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
     max-width: 600px;
     margin: 0 auto;
 }
@@ -251,12 +300,13 @@ body {
     text-align: left;
     color: white;
     font-family: 'Courier New', monospace;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .move-button:hover {
     background: linear-gradient(135deg, #5ba0f2 0%, #458bcd 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
 .move-button:active {
@@ -274,7 +324,7 @@ body {
     opacity: 0.9;
 }
 
-/* Status Display */
+/* Status Display - positioned at bottom */
 .status-display {
     background: rgba(255, 255, 255, 0.9);
     border-top: 2px solid #333;
@@ -282,6 +332,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 3;
 }
 
 .qubit-states {
@@ -351,6 +404,35 @@ body {
     font-weight: bold;
     color: #333;
     font-size: 18px;
+}
+
+/* Health Bars */
+.health-bar {
+    width: 200px;
+    height: 25px;
+    background: #ddd;
+    border: 3px solid #333;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444 0%, #ffaa44 50%, #44ff44 100%);
+    transition: width 0.3s ease;
+}
+
+/* Character Names and HP */
+.enemy-name, .player-name {
+    font-weight: bold;
+    font-size: 20px;
+    color: #333;
+}
+
+.enemy-hp, .player-hp {
+    font-size: 16px;
+    color: #666;
 }
 
 /* Responsive Design */

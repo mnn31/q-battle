@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Q-Battle - Quantum Battle Game</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
     <div class="battle-container">
@@ -37,31 +37,34 @@
 
         <!-- Battle Screen -->
         <div class="battle-screen" id="battle-screen" style="display: none;">
-            <!-- Enemy Side (Right) -->
-            <div class="enemy-side">
-                <div class="enemy-sprite">
-                    <img src="static/sprites/higscrozma.gif" alt="Higscrozma" class="sprite enemy-facing">
-                </div>
-                <div class="enemy-info">
-                    <div class="health-bar">
-                        <div class="health-fill" style="width: 75%;"></div>
+            <!-- Battle Arena -->
+            <div class="battle-arena">
+                <!-- Player Side (Left) - Bitzy -->
+                <div class="player-side">
+                    <div class="player-sprite">
+                        <img src="static/sprites/blitzle.gif" alt="Bitzy" class="sprite player-facing" id="player-sprite">
                     </div>
-                    <div class="enemy-name">Higscrozma</div>
-                    <div class="enemy-hp">HP: 150/200</div>
+                    <div class="player-info">
+                        <div class="health-bar">
+                            <div class="health-fill" style="width: 90%;"></div>
+                        </div>
+                        <div class="player-name" id="player-name">Bitzy</div>
+                        <div class="player-hp">HP: 90/100</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Player Side (Left) -->
-            <div class="player-side">
-                <div class="player-sprite">
-                    <img src="static/sprites/resona.gif" alt="Resona" class="sprite player-facing" id="player-sprite">
-                </div>
-                <div class="player-info">
-                    <div class="health-bar">
-                        <div class="health-fill" style="width: 90%;"></div>
+                <!-- Enemy Side (Right) - Higscrozma -->
+                <div class="enemy-side">
+                    <div class="enemy-sprite">
+                        <img src="static/sprites/higscrozma.gif" alt="Higscrozma" class="sprite enemy-facing">
                     </div>
-                    <div class="player-name" id="player-name">Resona</div>
-                    <div class="player-hp">HP: 90/100</div>
+                    <div class="enemy-info">
+                        <div class="health-bar">
+                            <div class="health-fill" style="width: 75%;"></div>
+                        </div>
+                        <div class="enemy-name">Higscrozma</div>
+                        <div class="enemy-hp">HP: 150/200</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -69,19 +72,19 @@
         <!-- Move Selection -->
         <div class="move-selection">
             <div class="move-grid">
-                <button class="move-button" data-move="1">
+                <button class="move-button" data-move="q-thunder">
                     <div class="move-name">Q-THUNDER</div>
                     <div class="move-desc">Massive damage if in superposition</div>
                 </button>
-                <button class="move-button" data-move="2">
+                <button class="move-button" data-move="shock">
                     <div class="move-name">SHOCK</div>
                     <div class="move-desc">Damage + bonus if different states</div>
                 </button>
-                <button class="move-button" data-move="3">
+                <button class="move-button" data-move="dualize">
                     <div class="move-name">DUALIZE</div>
                     <div class="move-desc">Creates superposition</div>
                 </button>
-                <button class="move-button" data-move="4">
+                <button class="move-button" data-move="bit-flip">
                     <div class="move-name">BIT-FLIP</div>
                     <div class="move-desc">Flips enemy qubit state</div>
                 </button>
@@ -107,6 +110,6 @@
         </div>
     </div>
 
-    <script src="js/game.js"></script>
+    <script src="static/js/game.js"></script>
 </body>
 </html> 
