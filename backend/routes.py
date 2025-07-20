@@ -16,3 +16,7 @@ def move():
 @game_api.route('/state', methods=['GET'])
 def state():
     return jsonify(get_game_state())
+
+@game_api.route('/game-state', methods=['GET'])
+def game_state():
+    return jsonify({"state": get_game_state()})

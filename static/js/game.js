@@ -201,10 +201,31 @@ async function executeMove(moveName) {
             if (gameState.turn === 'enemy') {
                 addLogEntry("Singulon is thinking...");
                 setTimeout(() => {
-                    updateBattleDisplay();
-                    enableMoveButtons();
-                    turnCount++;
-                    turnNumber.textContent = `Turn ${turnCount}`;
+                    // Force refresh game state from server
+                    fetch('/game-state')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.state) {
+                                gameState = data.state;
+                                updateBattleDisplay();
+                                
+                                // Check for game end after enemy turn
+                                if (gameState.player.hp <= 0) {
+                                    addLogEntry("💀 You fainted! Game over.");
+                                    endBattle(false);
+                                    return;
+                                }
+                            }
+                            enableMoveButtons();
+                            turnCount++;
+                            turnNumber.textContent = `Turn ${turnCount}`;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching game state:', error);
+                            enableMoveButtons();
+                            turnCount++;
+                            turnNumber.textContent = `Turn ${turnCount}`;
+                        });
                 }, 1500);
             } else {
                 enableMoveButtons();
@@ -241,11 +262,15 @@ function updateBattleDisplay() {
         currentCharacter
     });
     
+    // Update player HP display
     playerHp.textContent = `${playerHp}/${playerMaxHp}`;
     playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    console.log(`Player HP: ${playerHp}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
     
+    // Update enemy HP display
     enemyHp.textContent = `${enemyHp}/400`;
     enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+    console.log(`Enemy HP: ${enemyHp}/400 (${enemyHpPercent.toFixed(1)}%)`);
     
     // Update HP bar colors based on percentage
     updateHealthBarColor(playerHealthFill, playerHpPercent);

@@ -15,7 +15,7 @@ body {
 /* Battle background with pixel art style */
 .battle-screen {
     position: relative;
-    background: #d3d3d3; /* Light grey background like pixel art */
+    background: linear-gradient(135deg, #2c5f5f 0%, #4a8b8b 50%, #6bb6b6 100%); /* Dark teal to light teal gradient */
 }
 
 .battle-screen::before {
@@ -28,11 +28,11 @@ body {
     background: 
         /* Top health bars area */
         linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 15%),
-        /* Battle platforms */
-        radial-gradient(ellipse 200px 100px at 25% 50%, rgba(139, 69, 19, 0.3) 0%, transparent 70%),
-        radial-gradient(ellipse 200px 100px at 75% 50%, rgba(139, 69, 19, 0.3) 0%, transparent 70%),
+        /* Battle platforms - larger and more prominent */
+        radial-gradient(ellipse 300px 150px at 25% 60%, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 80%),
+        radial-gradient(ellipse 300px 150px at 75% 60%, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 80%),
         /* Bottom text area */
-        linear-gradient(to top, rgba(0, 0, 0, 0.1) 0%, transparent 20%);
+        linear-gradient(to top, rgba(0, 0, 0, 0.2) 0%, transparent 25%);
     pointer-events: none;
 }
 
@@ -42,7 +42,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #d3d3d3; /* Light grey background like pixel art */
+    background: linear-gradient(135deg, #2c5f5f 0%, #4a8b8b 50%, #6bb6b6 100%); /* Dark teal to light teal gradient */
 }
 
 /* Character Selection */
