@@ -16,6 +16,10 @@ body {
 .battle-screen {
     position: relative;
     background: linear-gradient(135deg, #2c5f5f 0%, #4a8b8b 50%, #6bb6b6 100%); /* Dark teal to light teal gradient */
+    background-image: url('/static/images/battle-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .battle-screen::before {
@@ -28,9 +32,6 @@ body {
     background: 
         /* Top health bars area */
         linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 15%),
-        /* Battle platforms - larger and more prominent */
-        radial-gradient(ellipse 300px 150px at 25% 60%, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 80%),
-        radial-gradient(ellipse 300px 150px at 75% 60%, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 80%),
         /* Bottom text area */
         linear-gradient(to top, rgba(0, 0, 0, 0.2) 0%, transparent 25%);
     pointer-events: none;
@@ -171,15 +172,15 @@ body {
     padding: 20px;
 }
 
-/* Character positions with dirt holes */
+/* Character positions on battle platforms */
 .player-side {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 15px;
     position: absolute;
-    bottom: 50px;
-    left: 50px;
+    bottom: 35%;
+    left: 25%;
     z-index: 3;
 }
 
@@ -189,9 +190,9 @@ body {
     bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
-    height: 80px;
-    background: radial-gradient(ellipse 75px 40px, #654321 0%, #8B4513 50%, transparent 70%);
+    width: 200px;
+    height: 100px;
+    background: radial-gradient(ellipse 100px 50px, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 70%);
     z-index: -1;
 }
 
@@ -201,8 +202,8 @@ body {
     align-items: center;
     gap: 15px;
     position: absolute;
-    top: 50px;
-    right: 50px;
+    bottom: 35%;
+    right: 25%;
     z-index: 3;
 }
 
@@ -212,9 +213,9 @@ body {
     bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
-    height: 80px;
-    background: radial-gradient(ellipse 75px 40px, #654321 0%, #8B4513 50%, transparent 70%);
+    width: 200px;
+    height: 100px;
+    background: radial-gradient(ellipse 100px 50px, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 70%);
     z-index: -1;
 }
 

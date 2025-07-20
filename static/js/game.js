@@ -172,6 +172,7 @@ async function executeMove(moveName) {
         
         if (result.state) {
             gameState = result.state;
+            console.log('Move executed, new game state:', gameState);
             updateBattleDisplay();
             
             // Check for special effects based on move
@@ -259,7 +260,8 @@ function updateBattleDisplay() {
         playerHpPercent,
         enemyHp,
         enemyHpPercent,
-        currentCharacter
+        currentCharacter,
+        gameState: gameState
     });
     
     // Update player HP display
