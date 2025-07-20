@@ -8,40 +8,40 @@ const characterData = {
     "Bitzy": {
         sprite: "/static/sprites/blitzle.gif",
         moves: [
-            { name: "Q-THUNDER", desc: "90 damage if in superposition, 10 if not" },
-            { name: "SHOCK", desc: "40 damage + 10 if enemy qubit is |1⟩" },
-            { name: "DUALIZE", desc: "Creates superposition (|0⟩ → |+⟩)" },
-            { name: "BIT-FLIP", desc: "Flips enemy qubit state (|0⟩ ↔ |1⟩)" }
+            { name: "Q-THUNDER", desc: "Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails. (DMG: 90)" },
+            { name: "SHOCK", desc: "Deals damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states. (DMG: 30 + 20)" },
+            { name: "DUALIZE", desc: "Puts the qubit in a state of SUPERPOSITION if it wasn't previously." },
+            { name: "BIT-FLIP", desc: "Flips the state of the enemy's qubit." }
         ],
         maxHp: 90
     },
     "Neutrinette": {
         sprite: "/static/sprites/neutrinette.gif",
         moves: [
-            { name: "Q-PHOTON GEYSER", desc: "75 damage, costs 10 HP, enemy loses 5 HP if entangled" },
-            { name: "GLITCH CLAW", desc: "50 damage + heals 10 HP" },
-            { name: "ENTANGLE", desc: "Entangles with enemy qubit" },
-            { name: "SWITCHEROO", desc: "Swaps qubit states with enemy" }
+            { name: "Q-PHOTON GEYSER", desc: "Neutrinette's Q-Move. Loses 25% current HP if the qubit is in a state of either 0 or 1, but deals massive damage and collapses the qubit randomly. (DMG: 75)" },
+            { name: "GLITCH CLAW", desc: "Deals damage and has a chance of healing the user for 20% max HP. (DMG: 40)" },
+            { name: "ENTANGLE", desc: "Puts the qubit and the enemy's qubit in a state of ENTANGLEMENT with each other if it wasn't previously." },
+            { name: "SWITCHEROO", desc: "Swaps the states of the qubit and the enemy's qubit." }
         ],
         maxHp: 80
     },
     "Resona": {
         sprite: "/static/sprites/resona.gif",
         moves: [
-            { name: "Q-METRONOME", desc: "95 damage if |1⟩, 10 if |0⟩, scales with waveform stacks" },
-            { name: "WAVE CRASH", desc: "60 damage + 10 per waveform stack" },
-            { name: "METAL NOISE", desc: "45 damage + increases defense by 10%" },
-            { name: "SHIFT GEAR", desc: "Increases waveform stacks by 1" }
+            { name: "Q-METRONOME", desc: "Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)." },
+            { name: "WAVE CRASH", desc: "Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 20 + 40)" },
+            { name: "METAL NOISE", desc: "Prevents the enemy from using moves that change their qubit state for the next turn. If the enemy's qubit is in a state of 1, they may not use a Q-Move. If it is in a state of 0, deal damage. (DMG: 20)" },
+            { name: "SHIFT GEAR", desc: "Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%." }
         ],
         maxHp: 95
     },
     "Higscrozma": {
         sprite: "/static/sprites/higscrozma.gif",
         moves: [
-            { name: "Q-VOID RIFT", desc: "80 damage + 10% Defense, heals 5 HP per barrier behind" },
-            { name: "QUANTUM BULWARK", desc: "Creates a quantum barrier" },
-            { name: "TUNNEL STRIKE", desc: "70 damage through barriers" },
-            { name: "BARRIER SHIFT", desc: "Manipulates quantum barriers" }
+            { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers." },
+            { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)" },
+            { name: "SHADOW FORCE", desc: "If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)" },
+            { name: "BARRIER", desc: "Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION." }
         ],
         maxHp: 100
     }

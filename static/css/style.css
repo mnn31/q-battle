@@ -246,11 +246,11 @@ body {
 
 /* Sprite Direction Classes */
 .player-facing {
-    transform: scaleX(-1); /* Facing left (towards enemy) - flipped 180 degrees */
+    transform: scaleX(1); /* Facing right (towards enemy) */
 }
 
 .enemy-facing {
-    transform: scaleX(1); /* Facing right (towards player) */
+    transform: scaleX(-1); /* Facing left (towards player) */
 }
 
 @keyframes bounce {
