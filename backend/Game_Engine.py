@@ -84,7 +84,8 @@ def start_game(character="Bitzy"):
         "player": {
             "hp": hp,
             "moves": moves,
-            "character": character
+            "character": character,
+            "qubit_state": "|0⟩"  # Player qubit state
         },
         "enemy": {
             "hp": 400,  # Singulon's HP
@@ -171,6 +172,16 @@ def process_move(move):
     if result.get("success", True):
         damage = result.get("damage", 0)
         game_state["enemy"]["hp"] -= damage
+        
+        # Update player's qubit state
+        if "qubit_state" in result:
+            player_state.qubit_state = result["qubit_state"]
+            game_state["player"]["qubit_state"] = result["qubit_state"]
+        
+        # Update enemy's qubit state if changed
+        if "enemy_qubit_state" in result:
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+        
         log.append(f"{character} used {move}: {result['message']}")
         if damage > 0:
             log.append(f"Dealt {damage} damage!")
@@ -225,6 +236,11 @@ def enemy_attack():
     if "qubit_state" in result:
         singulon_state.qubit_state = result["qubit_state"]
         game_state["enemy"]["qubit_state"] = result["qubit_state"]
+    
+    # Update player's qubit state if changed
+    if "player_qubit_state" in result:
+        player_state.qubit_state = result["player_qubit_state"]
+        game_state["player"]["qubit_state"] = result["player_qubit_state"]
     
     # Apply damage to player
     if result.get("success", True):

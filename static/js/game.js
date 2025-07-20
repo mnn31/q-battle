@@ -208,8 +208,12 @@ function updateBattleDisplay() {
     enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
     
     // Update qubit states
-    playerQubit.textContent = gameState.player.qubit_state || "|0⟩";
-    enemyQubit.textContent = gameState.enemy.qubit_state || "|0⟩";
+    const playerState = gameState.player.qubit_state || "|0⟩";
+    const enemyState = gameState.enemy.qubit_state || "|0⟩";
+    
+    // Convert superposition to "S" for display
+    playerQubit.textContent = playerState === "superposition" ? "S" : playerState;
+    enemyQubit.textContent = enemyState === "superposition" ? "S" : enemyState;
     
     // Update battle log
     if (gameState.log && gameState.log.length > 0) {
