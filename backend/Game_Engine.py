@@ -29,6 +29,14 @@ from backend.characters.resona.quantum_move import (
     ResonaQuantumState
 )
 from backend.characters.resona.ability import ability_quantum_waveform
+from backend.characters.higscrozma.quantum_move import (
+    quantum_move_higscrozma_q_void_rift,
+    quantum_move_higscrozma_prismatic_laser,
+    quantum_move_higscrozma_shadow_force,
+    quantum_move_higscrozma_barrier,
+    HigscrozmaQuantumState
+)
+from backend.characters.higscrozma.ability import ability_quantum_bulwark
 from backend.characters.boss.SingulonStats import SingulonQuantumState
 from backend.characters.boss.Moves import (
     quantum_move_singulon_dualize,
@@ -42,10 +50,11 @@ game_state = {}
 bitzy_state = BitzyQuantumState()
 neutrinette_state = NeutrinetteQuantumState()
 resona_state = ResonaQuantumState()
+higscrozma_state = HigscrozmaQuantumState()
 singulon_state = SingulonQuantumState()
 
 def start_game(character="Bitzy"):
-    global game_state, bitzy_state, neutrinette_state, resona_state, singulon_state
+    global game_state, bitzy_state, neutrinette_state, resona_state, higscrozma_state, singulon_state
     print(f"[ENGINE] start_game called with: {character}")
     # Set up character-specific data
     if character == "Bitzy":
@@ -63,6 +72,11 @@ def start_game(character="Bitzy"):
         player_state = resona_state
         hp = 95
         moves = ["Q-METRONOME", "WAVE CRASH", "METAL NOISE", "SHIFT GEAR"]
+    elif character == "Higscrozma":
+        print(f"[DEBUG] Game engine start_game called with character: {character}")
+        player_state = higscrozma_state
+        hp = 100
+        moves = ["Q-VOID RIFT", "PRISMATIC LASER", "SHADOW FORCE", "BARRIER"]
     else:
         return {"error": f"Unknown character: {character}"}
     
@@ -141,6 +155,17 @@ def process_move(move):
             result = quantum_move_resona_metal_noise(player_state, game_state["enemy"]["qubit_state"], singulon_state.defense)
         elif move == "SHIFT GEAR":
             result = quantum_move_resona_shift_gear(player_state)
+    
+    elif character == "Higscrozma":
+        player_state = higscrozma_state
+        if move == "Q-VOID RIFT":
+            result = quantum_move_higscrozma_q_void_rift(player_state, game_state["player"]["hp"], 100, singulon_state.defense)
+        elif move == "PRISMATIC LASER":
+            result = quantum_move_higscrozma_prismatic_laser(player_state, singulon_state.defense)
+        elif move == "SHADOW FORCE":
+            result = quantum_move_higscrozma_shadow_force(player_state, singulon_state.defense)
+        elif move == "BARRIER":
+            result = quantum_move_higscrozma_barrier(player_state)
 
     # Apply damage if move was successful
     if result.get("success", True):
@@ -164,7 +189,7 @@ def process_move(move):
     return {"state": game_state}
 
 def enemy_attack():
-    global game_state, singulon_state, bitzy_state, neutrinette_state, resona_state
+    global game_state, singulon_state, bitzy_state, neutrinette_state, resona_state, higscrozma_state
     log = game_state["log"]
 
     # Get current player state based on character
@@ -175,6 +200,8 @@ def enemy_attack():
         player_state = neutrinette_state
     elif character == "Resona":
         player_state = resona_state
+    elif character == "Higscrozma":
+        player_state = higscrozma_state
 
     # Singulon boss moves
     boss_moves = [
