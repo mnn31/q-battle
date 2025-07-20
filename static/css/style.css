@@ -12,10 +12,10 @@ body {
     overflow: hidden;
 }
 
-/* Battle background with grass and circles */
+/* Battle background with pixel art style */
 .battle-screen {
     position: relative;
-    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+    background: #d3d3d3; /* Light grey background like pixel art */
 }
 
 .battle-screen::before {
@@ -25,17 +25,14 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-        radial-gradient(circle at 20% 30%, #8B4513 2px, transparent 2px),
-        radial-gradient(circle at 80% 20%, #8B4513 3px, transparent 3px),
-        radial-gradient(circle at 40% 70%, #8B4513 2px, transparent 2px),
-        radial-gradient(circle at 90% 80%, #8B4513 3px, transparent 3px),
-        radial-gradient(circle at 60% 40%, #8B4513 2px, transparent 2px),
-        radial-gradient(circle at 10% 60%, #8B4513 3px, transparent 3px),
-        radial-gradient(circle at 70% 10%, #8B4513 2px, transparent 2px),
-        radial-gradient(circle at 30% 90%, #8B4513 3px, transparent 3px);
-    background-size: 200px 200px, 150px 150px, 180px 180px, 120px 120px, 160px 160px, 140px 140px, 170px 170px, 130px 130px;
-    opacity: 0.3;
+    background: 
+        /* Top health bars area */
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 15%),
+        /* Battle platforms */
+        radial-gradient(ellipse 200px 100px at 25% 50%, rgba(139, 69, 19, 0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 200px 100px at 75% 50%, rgba(139, 69, 19, 0.3) 0%, transparent 70%),
+        /* Bottom text area */
+        linear-gradient(to top, rgba(0, 0, 0, 0.1) 0%, transparent 20%);
     pointer-events: none;
 }
 
@@ -45,7 +42,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+    background: #d3d3d3; /* Light grey background like pixel art */
 }
 
 /* Character Selection */

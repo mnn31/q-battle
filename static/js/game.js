@@ -61,6 +61,8 @@ const enemyQubit = document.getElementById('enemy-qubit');
 const turnNumber = document.getElementById('turn-number');
 const battleLog = document.getElementById('battle-log');
 
+// Game state variables - initialized here
+
 // Initialize character selection
 document.addEventListener('DOMContentLoaded', function() {
     const characterOptions = document.querySelectorAll('.character-option');
@@ -123,6 +125,9 @@ async function startBattle(character) {
         
         if (result.state) {
             gameState = result.state;
+            currentCharacter = character;
+            turnCount = 1;
+            turnNumber.textContent = `Turn ${turnCount}`;
             updateBattleDisplay();
             showBattleScreen();
             addLogEntry(`Battle started with ${character}!`);
@@ -225,6 +230,16 @@ function updateBattleDisplay() {
     const enemyHp = Math.max(0, gameState.enemy.hp); // Prevent negative HP
     const playerHpPercent = (playerHp / playerMaxHp) * 100;
     const enemyHpPercent = (enemyHp / 400) * 100;
+    
+    // Debug logging
+    console.log('HP Update:', {
+        playerHp,
+        playerMaxHp,
+        playerHpPercent,
+        enemyHp,
+        enemyHpPercent,
+        currentCharacter
+    });
     
     playerHp.textContent = `${playerHp}/${playerMaxHp}`;
     playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
