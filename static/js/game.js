@@ -173,7 +173,12 @@ async function executeMove(moveName) {
         if (result.state) {
             gameState = result.state;
             console.log('Move executed, new game state:', gameState);
-            updateBattleDisplay();
+            
+            // Force immediate HP update
+            setTimeout(() => {
+                updateBattleDisplay();
+                refreshHPFromServer(); // Double-check with server
+            }, 100);
             
             // Check for special effects based on move
             if (result.state.log && result.state.log.length > 0) {
@@ -244,7 +249,10 @@ async function executeMove(moveName) {
 
 // Update battle display
 function updateBattleDisplay() {
-    if (!gameState) return;
+    if (!gameState) {
+        console.log('No game state available for update');
+        return;
+    }
     
     // Update health bars
     const playerMaxHp = characterData[currentCharacter].maxHp;
@@ -264,15 +272,23 @@ function updateBattleDisplay() {
         gameState: gameState
     });
     
-    // Update player HP display
-    playerHp.textContent = `${playerHp}/${playerMaxHp}`;
-    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-    console.log(`Player HP: ${playerHp}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
+    // Force update player HP display
+    if (playerHp && playerMaxHp) {
+        playerHp.textContent = `${playerHp}/${playerMaxHp}`;
+        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+        console.log(`Player HP Updated: ${playerHp}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
+    } else {
+        console.error('Player HP elements not found:', { playerHp, playerMaxHp });
+    }
     
-    // Update enemy HP display
-    enemyHp.textContent = `${enemyHp}/400`;
-    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-    console.log(`Enemy HP: ${enemyHp}/400 (${enemyHpPercent.toFixed(1)}%)`);
+    // Force update enemy HP display
+    if (enemyHp) {
+        enemyHp.textContent = `${enemyHp}/400`;
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        console.log(`Enemy HP Updated: ${enemyHp}/400 (${enemyHpPercent.toFixed(1)}%)`);
+    } else {
+        console.error('Enemy HP elements not found:', { enemyHp });
+    }
     
     // Update HP bar colors based on percentage
     updateHealthBarColor(playerHealthFill, playerHpPercent);
@@ -341,6 +357,21 @@ function updateHealthBarColor(healthFill, hpPercent) {
         healthFill.style.background = 'linear-gradient(90deg, #ffaa44 0%, #ff8800 100%)'; // Yellow/Orange
     } else {
         healthFill.style.background = 'linear-gradient(90deg, #ff4444 0%, #cc2222 100%)'; // Red
+    }
+}
+
+// Force refresh HP from server
+async function refreshHPFromServer() {
+    try {
+        const response = await fetch('/game-state');
+        const data = await response.json();
+        if (data.state) {
+            gameState = data.state;
+            updateBattleDisplay();
+            console.log('HP refreshed from server:', gameState);
+        }
+    } catch (error) {
+        console.error('Error refreshing HP from server:', error);
     }
 }
 
