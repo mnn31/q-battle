@@ -180,6 +180,11 @@ async function executeMove(moveName) {
                 refreshHPFromServer(); // Double-check with server
             }, 100);
             
+            // Force another update after a delay to ensure it sticks
+            setTimeout(() => {
+                updateBattleDisplay();
+            }, 500);
+            
             // Check for special effects based on move
             if (result.state.log && result.state.log.length > 0) {
                 const lastLog = result.state.log[result.state.log.length - 1];
@@ -256,17 +261,17 @@ function updateBattleDisplay() {
     
     // Update health bars
     const playerMaxHp = characterData[currentCharacter].maxHp;
-    const playerHp = Math.max(0, gameState.player.hp); // Prevent negative HP
-    const enemyHp = Math.max(0, gameState.enemy.hp); // Prevent negative HP
-    const playerHpPercent = (playerHp / playerMaxHp) * 100;
-    const enemyHpPercent = (enemyHp / 400) * 100;
+    const playerHpValue = Math.max(0, gameState.player.hp); // Prevent negative HP
+    const enemyHpValue = Math.max(0, gameState.enemy.hp); // Prevent negative HP
+    const playerHpPercent = (playerHpValue / playerMaxHp) * 100;
+    const enemyHpPercent = (enemyHpValue / 400) * 100;
     
     // Debug logging
     console.log('HP Update:', {
-        playerHp,
+        playerHpValue,
         playerMaxHp,
         playerHpPercent,
-        enemyHp,
+        enemyHpValue,
         enemyHpPercent,
         currentCharacter,
         gameState: gameState
@@ -274,18 +279,18 @@ function updateBattleDisplay() {
     
     // Force update player HP display
     if (playerHp && playerMaxHp) {
-        playerHp.textContent = `${playerHp}/${playerMaxHp}`;
+        playerHp.textContent = `${playerHpValue}/${playerMaxHp}`;
         playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        console.log(`Player HP Updated: ${playerHp}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
+        console.log(`Player HP Updated: ${playerHpValue}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
     } else {
         console.error('Player HP elements not found:', { playerHp, playerMaxHp });
     }
     
     // Force update enemy HP display
     if (enemyHp) {
-        enemyHp.textContent = `${enemyHp}/400`;
+        enemyHp.textContent = `${enemyHpValue}/400`;
         enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-        console.log(`Enemy HP Updated: ${enemyHp}/400 (${enemyHpPercent.toFixed(1)}%)`);
+        console.log(`Enemy HP Updated: ${enemyHpValue}/400 (${enemyHpPercent.toFixed(1)}%)`);
     } else {
         console.error('Enemy HP elements not found:', { enemyHp });
     }
@@ -374,6 +379,17 @@ async function refreshHPFromServer() {
         console.error('Error refreshing HP from server:', error);
     }
 }
+
+// Manual HP update function for debugging
+function forceHPUpdate() {
+    console.log('Forcing HP update...');
+    updateBattleDisplay();
+    refreshHPFromServer();
+}
+
+// Make it available globally for debugging
+window.forceHPUpdate = forceHPUpdate;
+window.updateBattleDisplay = updateBattleDisplay;
 
 // Set up sprite hover for ability descriptions
 function setupSpriteHover(character) {

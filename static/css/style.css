@@ -179,7 +179,7 @@ body {
     align-items: center;
     gap: 15px;
     position: absolute;
-    bottom: 35%;
+    bottom: 25%;
     left: 25%;
     z-index: 3;
 }
@@ -202,7 +202,7 @@ body {
     align-items: center;
     gap: 15px;
     position: absolute;
-    bottom: 35%;
+    bottom: 25%;
     right: 25%;
     z-index: 3;
 }
