@@ -334,16 +334,20 @@ body {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     color: white;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    white-space: nowrap;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
     z-index: 1000;
-    margin-bottom: 5px;
-    max-width: 300px;
-    text-align: center;
+    margin-bottom: 10px;
+    max-width: 400px;
+    width: max-content;
+    text-align: left;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .move-button:hover::before {
@@ -352,9 +356,9 @@ body {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.9);
-    margin-bottom: -5px;
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.95);
+    margin-bottom: -6px;
     z-index: 1000;
 }
 

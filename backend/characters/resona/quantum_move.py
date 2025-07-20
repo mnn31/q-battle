@@ -5,7 +5,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'quantum_gat
 
 from basic_gates import (
     hadamard_gate, x_gate, cnot_gate, swap_gate, create_superposition, 
-    measure_qubit, run_quantum_circuit, calculate_damage, apply_damage_roll
+    measure_qubit, run_quantum_circuit, calculate_damage, apply_damage_roll,
+    biased_quantum_state
 )
 
 def calculate_damage_rpg(attacker_attack, move_base_power, defender_defense):
@@ -34,7 +35,6 @@ def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_st
     # Create circuit to measure current qubit state with collapse probability bonus
     if quantum_state.next_turn_collapse_bonus > 0:
         # Use biased quantum state for higher |1⟩ probability
-        from basic_gates import biased_quantum_state
         qc = biased_quantum_state(0, 0.5 + quantum_state.next_turn_collapse_bonus)
         result = run_quantum_circuit(qc, shots=1)
         quantum_state.next_turn_collapse_bonus = 0  # Reset after use
@@ -91,7 +91,6 @@ def quantum_move_resona_wave_crash(quantum_state, enemy_qubit_state="|0⟩", def
     # Create circuit for quantum randomness with collapse probability bonus
     if quantum_state.next_turn_collapse_bonus > 0:
         # Use biased quantum state for higher |1⟩ probability
-        from basic_gates import biased_quantum_state
         qc = biased_quantum_state(0, 0.5 + quantum_state.next_turn_collapse_bonus)
         result = run_quantum_circuit(qc, shots=1)
         quantum_state.next_turn_collapse_bonus = 0  # Reset after use
