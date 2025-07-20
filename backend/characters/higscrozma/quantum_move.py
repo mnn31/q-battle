@@ -24,6 +24,7 @@ class HigscrozmaQuantumState:
         self.barriers_behind = 0    # Start with 0 barriers behind
         self.next_turn_strike = False  # For SHADOW FORCE invincibility
         self.next_turn_strike_damage = 0  # Damage for next turn strike
+        self.cannot_move_next_turn = False  # For SHADOW FORCE |1⟩ effect
 
 def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85, defender_defense=50):
     """Q-VOID RIFT: Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers."""
@@ -60,6 +61,10 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85,
         message += f" Heals {heal_amount} HP! Shatters {barriers_shattered} barriers!"
     else:
         message += f" Shatters {barriers_shattered} barriers!"
+    
+    # Print barrier effects
+    barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
+    message += barrier_effect
     
     return {
         "success": True,
@@ -107,6 +112,10 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     else:
         message = f"PRISMATIC LASER deals {damage} damage! Qubit in superposition!"
     
+    # Print barrier effects
+    barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
+    message += barrier_effect
+    
     return {
         "success": True,
         "damage": damage,
@@ -147,6 +156,7 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         # User becomes invincible for current turn, strikes for massive damage next turn
         quantum_state.next_turn_strike = True
         quantum_state.next_turn_strike_damage = 110  # Massive damage next turn
+        quantum_state.cannot_move_next_turn = True  # Set flag to prevent move usage next turn
         message = f"SHADOW FORCE collapses to |1⟩! User becomes invincible this turn, will strike for {110} damage next turn!"
     else:
         quantum_state.qubit_state = "|0⟩"
@@ -158,11 +168,16 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
     if barrier_moved:
         message += " Moved up one barrier!"
     
+    # Print barrier effects
+    barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
+    message += barrier_effect
+    
     return {
         "success": True,
         "damage": damage if "0" in result else 0,
         "next_turn_strike": quantum_state.next_turn_strike,
         "next_turn_strike_damage": quantum_state.next_turn_strike_damage,
+        "cannot_move_next_turn": quantum_state.cannot_move_next_turn,
         "message": message,
         "qubit_state": quantum_state.qubit_state,
         "barriers_in_front": quantum_state.barriers_in_front,
@@ -190,6 +205,10 @@ def quantum_move_higscrozma_barrier(quantum_state):
     
     # Put qubit in superposition
     quantum_state.qubit_state = "superposition"
+    
+    # Print barrier effects
+    barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
+    message += barrier_effect
     
     return {
         "success": True,

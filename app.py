@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, send_from_directory
 from backend.characters.bitzy.quantum_move import (
     quantum_move_bitzy_q_thunder,
     quantum_move_bitzy_shock,
@@ -26,7 +26,7 @@ from backend.characters.resona.ability import ability_quantum_waveform
 from backend.routes import game_api
 from backend.Game_Engine import start_game, process_move
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.register_blueprint(game_api)
 
 # Global quantum states for demo purposes
@@ -125,6 +125,15 @@ def get_bitzy_state():
 def run_bitzy_legacy():
     result = quantum_move_bitzy_q_thunder(bitzy_state)
     return jsonify(result)
+
+# Frontend routes
+@app.route("/")
+def index():
+    return send_from_directory('static', 'index.html')
+
+@app.route("/game")
+def game():
+    return send_from_directory('static', 'index.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

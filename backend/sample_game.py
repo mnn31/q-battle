@@ -57,6 +57,7 @@ class SampleGame:
         self.boss_character = None  # Track which character the boss is using
         self.turn = 1
         self.battle_log = []
+        self.cannot_move_next_turn = False  # For HIGSCROZMA SHADOW FORCE effect
         
         # Randomly determine if facing Singulon or a character
         if random.random() < 0.5:
@@ -341,6 +342,9 @@ class SampleGame:
                 result = move_func(self.player_state, self.boss_state.defense)
             elif move_name == "SHADOW FORCE":
                 result = move_func(self.player_state, self.boss_state.defense)
+                # Check if player cannot move next turn
+                if result.get("cannot_move_next_turn", False):
+                    self.cannot_move_next_turn = True
             elif move_name == "BARRIER":
                 result = move_func(self.player_state)
         # Apply damage
@@ -521,6 +525,18 @@ class SampleGame:
         """Main battle loop"""
         while True:
             self.display_turn()
+            
+            # Check if player cannot move this turn (HIGSCROZMA SHADOW FORCE effect)
+            if self.cannot_move_next_turn:
+                print(f"\nYou cannot move this turn due to SHADOW FORCE effect!")
+                self.cannot_move_next_turn = False  # Reset for next turn
+                # Skip player move and go to boss turn
+                self.execute_boss_move()
+                if self.check_battle_end():
+                    break
+                self.turn += 1
+                continue
+            
             move_choice = self.get_player_move()
             
             # Determine turn order based on speed
