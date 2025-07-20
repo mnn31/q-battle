@@ -32,6 +32,15 @@ from characters.resona.quantum_move import (
 )
 from characters.resona.ability import ability_quantum_waveform
 
+from characters.higscrozma.quantum_move import (
+    quantum_move_higscrozma_q_void_rift,
+    quantum_move_higscrozma_prismatic_laser,
+    quantum_move_higscrozma_shadow_force,
+    quantum_move_higscrozma_barrier,
+    HigscrozmaQuantumState
+)
+from characters.higscrozma.ability import ability_quantum_bulwark
+
 from characters.boss.SingulonStats import SingulonQuantumState
 from characters.boss.Moves import (
     quantum_move_singulon_dualize,
@@ -57,9 +66,9 @@ class SampleGame:
             self.boss_name = "Singulon"
             self.boss_character = "Singulon"
         else:
-            # 50% chance to face a random character
-            characters = ["Bitzy", "Neutrinette", "Resona"]
-            self.boss_character = random.choice(characters)
+                    # 50% chance to face a random character
+        characters = ["Bitzy", "Neutrinette", "Resona", "Higscrozma"]
+        self.boss_character = random.choice(characters)
             
             if self.boss_character == "Bitzy":
                 self.boss_state = BitzyQuantumState()
@@ -76,10 +85,15 @@ class SampleGame:
                 self.boss_state.hp = 200  # Character HP
                 self.boss_state.defense = 10  # Force defense to 10
                 self.boss_name = "Resona"
+            elif self.boss_character == "Higscrozma":
+                self.boss_state = HigscrozmaQuantumState()
+                self.boss_state.hp = 200  # Character HP
+                self.boss_state.defense = 10  # Force defense to 10
+                self.boss_name = "Higscrozma"
         
     def select_character(self):
         """Let user select their character"""
-        print("Pick your character (Bitzy, Neutrinette, Resona): ")
+        print("Pick your character (Bitzy, Neutrinette, Resona, Higscrozma): ")
         choice = input().strip().lower()
         
         if choice == "bitzy":
@@ -139,8 +153,27 @@ class SampleGame:
                 quantum_move_resona_shift_gear
             ]
             
+        elif choice == "higscrozma":
+            self.player_state = HigscrozmaQuantumState()
+            self.player_hp = 95  # Increased by 10
+            self.character_name = "Higscrozma"
+            self.ability_name = "QUANTUM BULWARK"
+            self.ability_desc = "Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each"
+            self.moves = [
+                ("Q-VOID RIFT", "Deals damage + 10% of Defense, heals per barrier behind, shatters back barriers"),
+                ("PRISMATIC LASER", "Deals 90 damage, shatters one random barrier, puts qubit in superposition"),
+                ("SHADOW FORCE", "If |0⟩ deals 70 damage, if |1⟩ becomes invincible and strikes next turn, moves up one barrier"),
+                ("BARRIER", "Increases defense if max barriers, creates new barrier if not, puts qubit in superposition")
+            ]
+            self.move_functions = [
+                quantum_move_higscrozma_q_void_rift,
+                quantum_move_higscrozma_prismatic_laser,
+                quantum_move_higscrozma_shadow_force,
+                quantum_move_higscrozma_barrier
+            ]
+            
         else:
-            print("Invalid character! Please choose Bitzy, Neutrinette, or Resona.")
+            print("Invalid character! Please choose Bitzy, Neutrinette, Resona, or Higscrozma.")
             return False
             
         return True
@@ -198,6 +231,18 @@ class SampleGame:
             print("   Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%.")
             print("\nAbility: QUANTUM WAVEFORM")
             print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 1.")
+        elif self.character_name == "Higscrozma":
+            print("1. Q-VOID RIFT")
+            print("   Higscrozma's Q-Move. Requires superposition, deals damage + 10% of Defense, heals per barrier behind, shatters back barriers.")
+            print("2. PRISMATIC LASER")
+            print("   Deals 90 damage, shatters one random barrier, puts qubit in superposition.")
+            print("3. SHADOW FORCE")
+            print("   Requires superposition, collapses qubit. If |0⟩ deals 70 damage, if |1⟩ becomes invincible and strikes next turn, moves up one barrier.")
+            print("4. BARRIER")
+            print("   Increases defense if max barriers, creates new barrier if not, puts qubit in superposition.")
+            print("\nAbility: QUANTUM BULWARK")
+            print("Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each.")
+            print(f"Current Barriers - Front: {self.player_state.barriers_in_front}, Back: {self.player_state.barriers_behind}")
         
         print(f"\nYour Qubit: {self.player_state.qubit_state}")
         print(f"{self.boss_name}'s Qubit: {self.boss_state.qubit_state}")
@@ -235,6 +280,13 @@ class SampleGame:
                 ("WAVE CRASH", quantum_move_resona_wave_crash),
                 ("METAL NOISE", quantum_move_resona_metal_noise),
                 ("SHIFT GEAR", quantum_move_resona_shift_gear)
+            ]
+        elif self.character_name == "Higscrozma":
+            moves = [
+                ("Q-VOID RIFT", quantum_move_higscrozma_q_void_rift),
+                ("PRISMATIC LASER", quantum_move_higscrozma_prismatic_laser),
+                ("SHADOW FORCE", quantum_move_higscrozma_shadow_force),
+                ("BARRIER", quantum_move_higscrozma_barrier)
             ]
         
         move_name, move_func = moves[move_choice - 1]  # Convert 1-4 to 0-3 index
@@ -279,6 +331,17 @@ class SampleGame:
             elif move_name == "METAL NOISE":
                 result = move_func(self.player_state, self.boss_state.qubit_state, self.boss_state.defense)
             elif move_name == "SHIFT GEAR":
+                result = move_func(self.player_state)
+        elif self.character_name == "Higscrozma":
+            if move_name == "Q-VOID RIFT":
+                result = move_func(self.player_state, self.player_hp, 95, self.boss_state.defense)  # 95 is max HP
+                if result.get("heal", 0) > 0:
+                    self.player_hp = min(95, self.player_hp + result["heal"])
+            elif move_name == "PRISMATIC LASER":
+                result = move_func(self.player_state, self.boss_state.defense)
+            elif move_name == "SHADOW FORCE":
+                result = move_func(self.player_state, self.boss_state.defense)
+            elif move_name == "BARRIER":
                 result = move_func(self.player_state)
         # Apply damage
         if result.get("success", True):
@@ -368,6 +431,13 @@ class SampleGame:
                     ("METAL NOISE", quantum_move_resona_metal_noise),
                     ("SHIFT GEAR", quantum_move_resona_shift_gear)
                 ]
+            elif self.boss_character == "Higscrozma":
+                boss_moves = [
+                    ("Q-VOID RIFT", quantum_move_higscrozma_q_void_rift),
+                    ("PRISMATIC LASER", quantum_move_higscrozma_prismatic_laser),
+                    ("SHADOW FORCE", quantum_move_higscrozma_shadow_force),
+                    ("BARRIER", quantum_move_higscrozma_barrier)
+                ]
             
             move_name, move_func = random.choice(boss_moves)
             
@@ -407,6 +477,17 @@ class SampleGame:
                 elif move_name == "METAL NOISE":
                     result = move_func(self.boss_state, self.player_state.qubit_state, self.boss_state.defense)
                 elif move_name == "SHIFT GEAR":
+                    result = move_func(self.boss_state)
+            elif self.boss_character == "Higscrozma":
+                if move_name == "Q-VOID RIFT":
+                    result = move_func(self.boss_state, self.boss_state.hp, 200, self.player_state.defense)  # 200 is max HP for boss
+                    if result.get("heal", 0) > 0:
+                        self.boss_state.hp = min(200, self.boss_state.hp + result["heal"])
+                elif move_name == "PRISMATIC LASER":
+                    result = move_func(self.boss_state, self.player_state.defense)
+                elif move_name == "SHADOW FORCE":
+                    result = move_func(self.boss_state, self.player_state.defense)
+                elif move_name == "BARRIER":
                     result = move_func(self.boss_state)
         
         # Apply damage to player

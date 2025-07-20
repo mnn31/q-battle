@@ -1,12 +1,12 @@
 # 🔮 Q-Battle: Quantumons
 
-A quantum-powered battle game where you fight using quantum abilities! This project is built with Python and Qiskit to simulate quantum mechanics inside game mechanics. Players use "Quantumons" — creatures that attack with quantum moves like superposition, entanglement, and interference.
+A quantum-powered battle game where you fight using quantum abilities! This project is built with Python and Qiskit to simulate quantum mechanics inside game mechanics. Players use "Quantumons" — creatures that attack with quantum moves like superposition, entanglement, interference, and quantum tunneling.
 
 ---
 
 ## ⚙️ Technologies Used
 
-- 🧠 **Qiskit** – IBM’s quantum computing framework
+- 🧠 **Qiskit** – IBM's quantum computing framework
 - 🌐 **Flask** – Backend API server
 - 🐍 **Python** – Game logic and quantum simulation
 - 🎯 **CLI Interface** – Sample game for testing
@@ -15,14 +15,14 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 
 ## 🎮 Game Overview
 
-**Q-Battle** is a player-vs-computer (PvC) game featuring three unique quantum characters:
+**Q-Battle** is a player-vs-computer (PvC) game featuring four unique quantum characters, each representing different quantum phenomena:
 
 ### **Bitzy** - The Superposition Master
 - **Theme**: Superposition manipulation and state control
 - **Signature Move**: Q-THUNDER (90 damage if in superposition)
 - **Ability**: QUANTUM HIJACK (+10 damage if enemy qubit is |1⟩)
 
-### **Neutrinette** - The Entanglement Specialist
+### **Neutrinette** - The Entanglement Specialist  
 - **Theme**: Entanglement and shared quantum effects
 - **Signature Move**: Q-PHOTON GEYSER (75 damage, costs HP, enemy loses HP if entangled)
 - **Ability**: QUANTUM AFTERBURN (+10 damage if entangled)
@@ -31,6 +31,11 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 - **Theme**: Waveform stacking and interference patterns
 - **Signature Move**: Q-METRONOME (95 damage if |1⟩, 10 if |0⟩, scales with stacks)
 - **Ability**: QUANTUM WAVEFORM (stacks increase collapse probability and damage)
+
+### **HIGSCROZMA** - The Quantum Tunneler
+- **Theme**: Quantum tunneling through energy barriers
+- **Signature Move**: Q-VOID RIFT (damage + 10% Defense, heals per barrier behind)
+- **Ability**: QUANTUM BULWARK (barriers reduce damage taken/dealt, back barriers boost damage)
 
 A sample CLI game (`sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.
 
@@ -63,7 +68,7 @@ Then go to:
 ```
 http://127.0.0.1:5000/api/hadamard
 ```
-You’ll see quantum randomness output like `{ "1": 1 }` or `{ "0": 1 }`.
+You'll see quantum randomness output like `{ "1": 1 }` or `{ "0": 1 }`.
 
 ---
 
@@ -73,7 +78,7 @@ Each move has a separate file, e.g.:
 
 - `move_hadamard.py` → simulates a quantum superposition (50% attack hit chance)
 
-Later, we’ll add:
+Later, we'll add:
 - `move_cnot.py`
 - `move_entangle.py`
 
@@ -105,20 +110,29 @@ Instead of fake randomness (like `random.random()`), we simulate true quantum be
 - **Hadamard** → 50/50 chance moves
 - **Entanglement** → linked outcomes
 - **Measurement** → unknown result until circuit is run
+- **Quantum Tunneling** → particles passing through energy barriers
 
 Qiskit lets us embed real quantum logic in our gameplay!
 
 ---
 
-## 📁 Repo Structure (Work in Progress)
+## 📁 Repo Structure
 ```
 q-battle/
 ├── app.py                  # Flask API
-├── move_hadamard.py        # Quantum move logic
+├── backend/
+│   ├── characters/         # Quantum character moves and abilities
+│   │   ├── bitzy/         # Superposition master
+│   │   ├── neutrinette/   # Entanglement specialist
+│   │   ├── resona/        # Interference scaler
+│   │   ├── higscrozma/    # Quantum tunneler
+│   │   └── boss/          # Boss character (Singulon)
+│   ├── quantum_gates/     # Quantum gate implementations
+│   ├── sample_game.py     # CLI battle game
+│   └── routes.py          # Flask API routes
 ├── environment.yml         # Conda environment
-├── README.md               # Project info
-├── static/                 # (optional frontend assets)
-└── tests/                  # Test scripts (coming soon)
+├── README.md              # Project info
+└── tests/                 # Test scripts
 ```
 
 ---
@@ -127,6 +141,6 @@ q-battle/
 - All quantum move files should return a dictionary of result counts
 - Flask endpoints wrap the quantum functions for HTTP access
 - Frontend will call these endpoints using fetch or axios
-- We’re building this as a fun, beginner-friendly intro to quantum computing through games!
+- We're building this as a fun, beginner-friendly intro to quantum computing through games!
 
 ---
