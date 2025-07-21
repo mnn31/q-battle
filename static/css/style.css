@@ -104,7 +104,6 @@ body {
     object-fit: contain;
     image-rendering: pixelated;
     margin-bottom: 10px;
-    animation: bounce 2s ease-in-out infinite;
 }
 
 .character-name {
@@ -260,7 +259,6 @@ body {
     max-height: 256px;
     object-fit: contain;
     image-rendering: pixelated;
-    animation: bounce 2s ease-in-out infinite;
 }
 
 /* Sprite Direction Classes */
@@ -272,6 +270,7 @@ body {
     transform: scaleX(-1); /* Facing left (towards player) */
 }
 
+/*
 @keyframes bounce {
     0%, 100% {
         transform: translateY(0px);
@@ -280,6 +279,7 @@ body {
         transform: translateY(-15px);
     }
 }
+*/
 
 /* Info panels */
 .player-info, .enemy-info {

@@ -312,6 +312,18 @@ function updateBattleDisplay() {
         const lastEntry = gameState.log[gameState.log.length - 1];
         addLogEntry(lastEntry);
     }
+
+    // Flip player sprite to face right (towards Singulon)
+    if (playerSprite) {
+        playerSprite.classList.remove('player-facing');
+        playerSprite.classList.add('enemy-facing');
+    }
+    // Flip enemy sprite to face left (towards player)
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    if (enemySprite) {
+        enemySprite.classList.remove('enemy-facing');
+        enemySprite.classList.add('player-facing');
+    }
 }
 
 // Show battle screen
@@ -437,14 +449,14 @@ function showSpecialEffect(effectType) {
         const waveformSprite = document.createElement('div');
         waveformSprite.style.cssText = `
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
             width: 50px;
             height: 50px;
             background: url('/static/sprites/waveform.png') no-repeat center;
             background-size: contain;
-            z-index: 1000;
+        z-index: 1000;
             animation: waveformEffect 2s ease-out;
         `;
         battleScreen.appendChild(waveformSprite);
@@ -481,4 +493,4 @@ function endBattle(victory) {
         const moveSelection = document.querySelector('.move-selection');
         moveSelection.appendChild(restartButton);
     }, 2000);
-} 
+}
