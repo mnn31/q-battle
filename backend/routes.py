@@ -6,7 +6,24 @@ game_api = Blueprint('game_api', __name__)
 
 @game_api.route('/start', methods=['GET'])
 def start():
-    return jsonify(start_game())
+    # Get 'character' param; default to "bitzy" lowercase
+    character_param = request.args.get("character", "bitzy").lower()
+    print(f"[DEBUG] Routes.py - Received character parameter: '{character_param}'")
+
+    # Normalize to proper internal names matching start_game expected strings
+    if character_param == "bitzy":
+        character = "Bitzy"
+    elif character_param == "neutrinette":
+        character = "Neutrinette"
+    elif character_param == "resona":
+        character = "Resona"
+    elif character_param == "higscrozma":
+        character = "Higscrozma"
+    else:
+        character = "Bitzy"  # default fallback
+
+    print(f"[DEBUG] Routes.py - Starting game with character: {character}")
+    return jsonify(start_game(character))
 
 @game_api.route('/move', methods=['POST'])
 def move():

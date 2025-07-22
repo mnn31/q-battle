@@ -43,7 +43,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #2c5f5f 0%, #4a8b8b 50%, #6bb6b6 100%); /* Dark teal to light teal gradient */
+    background: rgba(44, 95, 95, 0.8); /* Semi-transparent dark teal */
 }
 
 /* Character Selection */
@@ -128,7 +128,7 @@ body {
     align-items: center;
     padding: 20px;
     position: relative;
-    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+    background: rgba(70, 130, 180, 0.7); /* Semi-transparent steel blue */
     min-height: 100vh;
 }
 
@@ -497,6 +497,23 @@ body {
 /* Enemy qubit - red */
 .enemy-qubit {
     background: linear-gradient(135deg, #e24a4a, #bd3535) !important;
+}
+
+/* Entangled qubits - purple aura */
+.player-qubit.entangled,
+.enemy-qubit.entangled {
+    background: linear-gradient(135deg, #8a2be2, #9370db) !important;
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+    animation: entanglementGlow 2s ease-in-out infinite;
+}
+
+@keyframes entanglementGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(138, 43, 226, 0.8);
+    }
 }
 
 /* Remove old qubit-states styling since we moved qubits into HP boxes */

@@ -182,6 +182,19 @@ function updateBattleDisplay() {
     window.visualPlayerHpUpdated = null;
     window.visualEnemyHpUpdated = null;
 
+    // Update entanglement visual state
+    const playerQubit = document.getElementById('player-qubit');
+    const enemyQubit = document.getElementById('enemy-qubit');
+    if (playerQubit && enemyQubit && gameState) {
+        if (gameState.is_entangled) {
+            playerQubit.classList.add('entangled');
+            enemyQubit.classList.add('entangled');
+        } else {
+            playerQubit.classList.remove('entangled');
+            enemyQubit.classList.remove('entangled');
+        }
+    }
+
     // Flip player sprite to face right (towards Singulon)
     if (playerSprite) {
         playerSprite.classList.remove('player-facing');
@@ -446,8 +459,8 @@ async function executeMove(moveName) {
 
 // Update qubit states based on the message being displayed
 function updateQubitStatesFromMessage(message) {
-    // Check for player DUALIZE
-    if (message.includes("put its qubit into superposition")) {
+    // Check for player DUALIZE (only when player uses it, not enemy)
+    if (message.includes("put its qubit into superposition") && !message.includes("Singulon")) {
         const playerQubit = document.getElementById('player-qubit');
         if (playerQubit) {
             playerQubit.textContent = "S";
@@ -456,24 +469,48 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for Q-THUNDER qubit collapse (when qubit collapses from superposition)
     if (message.includes("Q-THUNDER strikes for")) {
-        // Q-THUNDER collapses the qubit - call backend immediately to get correct state
+        // Q-THUNDER collapses the qubit - update from current game state
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
+            const collapsedState = gameState.player.qubit_state;
+            // Remove trailing period and convert superposition to S
+            const cleanState = collapsedState.replace(/\.$/, '');
+            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+        }
+    }
+    
+    // Check for "Your qubit is" messages and update visual qubit state
+    if (message.includes("Your qubit is")) {
         const playerQubit = document.getElementById('player-qubit');
         if (playerQubit) {
-            // Call backend to get the current qubit state immediately
-            fetch('/game-state')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.state && data.state.player && data.state.player.qubit_state) {
-                        const collapsedState = data.state.player.qubit_state;
-                        playerQubit.textContent = collapsedState === "superposition" ? "S" : collapsedState;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching qubit state:', error);
-                    // Fallback to random collapse if backend call fails
-                    const collapsedState = Math.random() < 0.5 ? "|0⟩" : "|1⟩";
-                    playerQubit.textContent = collapsedState;
-                });
+            // Extract the qubit state from the message
+            const qubitMatch = message.match(/Your qubit is (.+)/);
+            if (qubitMatch) {
+                const qubitState = qubitMatch[1];
+                // Remove trailing period and convert superposition to S
+                const cleanState = qubitState.replace(/\.$/, '');
+                playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+            }
+        }
+    }
+    
+    // Check for entanglement messages and update visual state
+    if (message.includes("creates quantum entanglement")) {
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            playerQubit.classList.add('entangled');
+            enemyQubit.classList.add('entangled');
+        }
+    }
+    
+    // Check for entanglement breaking messages
+    if (message.includes("Entanglement broken")) {
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            playerQubit.classList.remove('entangled');
+            enemyQubit.classList.remove('entangled');
         }
     }
     
@@ -505,54 +542,77 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Check for damage messages and update HP bars visually in real-time (with FULL damage to match backend)
+    // Check for healing messages and update HP bars visually in real-time
+    if (message.includes("heals") && message.includes("HP!")) {
+        // Update HP bars to match the current backend state (healing already applied)
+        const playerHpPercent = (gameState.player.hp / 90) * 100;
+        
+        // Player was healed - update visual display immediately
+        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+        updateHealthBarColor(playerHealthFill, playerHpPercent);
+        
+        const playerHp = document.getElementById('player-hp');
+        if (playerHp) {
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+        }
+        
+        // Set flag to prevent double update
+        window.visualPlayerHpUpdated = true;
+    }
+    
+    // Check for Quantum Afterburn recoil damage messages
+    if (message.includes("QUANTUM AFTERBURN reflects") && message.includes("damage back to the enemy!")) {
+        // Update enemy HP bar to reflect recoil damage
+        const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+        
+        // Enemy took recoil damage - update visual display immediately
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+        
+        const enemyHp = document.getElementById('enemy-hp');
+        if (enemyHp) {
+            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+        }
+        
+        // Set flag to prevent double update
+        window.visualEnemyHpUpdated = true;
+    }
+    
+    // Check for damage messages and update HP bars visually in real-time
     if (message.includes("Dealt") && message.includes("damage!")) {
-        // Extract damage amount from message
-        const damageMatch = message.match(/Dealt (\d+) damage!/);
-        if (damageMatch) {
-            const damage = parseInt(damageMatch[1]);
+        // Update HP bars to match the current backend state (damage already applied)
+        const playerHpPercent = (gameState.player.hp / 90) * 100;
+        const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+        
+        // Determine if it's player or enemy damage based on the previous message
+        const logIndex = gameState.log.indexOf(message);
+        const previousMessage = logIndex > 0 ? gameState.log[logIndex - 1] : "";
+        const isEnemyDamage = previousMessage.includes("Singulon used");
+        
+        if (isEnemyDamage) {
+            // Enemy dealt damage to player - update visual display immediately
+            playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+            updateHealthBarColor(playerHealthFill, playerHpPercent);
             
-            // Determine if it's player or enemy damage based on the previous message
-            // If the previous message was "Singulon used X!", then this damage is from enemy to player
-            const logIndex = gameState.log.indexOf(message);
-            const previousMessage = logIndex > 0 ? gameState.log[logIndex - 1] : "";
-            const isEnemyDamage = previousMessage.includes("Singulon used");
-            
-            if (isEnemyDamage) {
-                // Enemy dealt damage to player - update visual display with FULL damage
-                const currentPlayerHp = gameState.player.hp;
-                const newPlayerHp = Math.max(0, currentPlayerHp - damage);
-                
-                // Update player HP bar and text immediately (visual only, don't modify gameState)
-                const playerHpPercent = (newPlayerHp / 90) * 100;
-                playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-                updateHealthBarColor(playerHealthFill, playerHpPercent);
-                
-                const playerHp = document.getElementById('player-hp');
-                if (playerHp) {
-                    playerHp.textContent = `${newPlayerHp}/90`;
-                }
-                
-                // Mark that we've updated player HP visually to prevent override
-                window.visualPlayerHpUpdated = true;
-            } else {
-                // Player dealt damage to enemy - update visual display with FULL damage
-                const currentEnemyHp = gameState.enemy.hp;
-                const newEnemyHp = Math.max(0, currentEnemyHp - damage);
-                
-                // Update enemy HP bar and text immediately (visual only, don't modify gameState)
-                const enemyHpPercent = (newEnemyHp / 400) * 100;
-                enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-                updateHealthBarColor(enemyHealthFill, enemyHpPercent);
-                
-                const enemyHp = document.getElementById('enemy-hp');
-                if (enemyHp) {
-                    enemyHp.textContent = `${newEnemyHp}/400`;
-                }
-                
-                // Mark that we've updated enemy HP visually to prevent override
-                window.visualEnemyHpUpdated = true;
+            const playerHp = document.getElementById('player-hp');
+            if (playerHp) {
+                playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
             }
+            
+            // Mark that we've updated player HP visually to prevent override
+            window.visualPlayerHpUpdated = true;
+        } else {
+            // Player dealt damage to enemy - update visual display immediately
+            enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+            updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+            
+            const enemyHp = document.getElementById('enemy-hp');
+            if (enemyHp) {
+                enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+            }
+            
+            // Mark that we've updated enemy HP visually to prevent override
+            window.visualEnemyHpUpdated = true;
         }
     }
 }

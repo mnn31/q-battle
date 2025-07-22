@@ -65,7 +65,7 @@ def start_game(character="Bitzy"):
     elif character == "Neutrinette":
         print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = neutrinette_state
-        hp = 80
+        hp = 90  # Fixed to match character info
         moves = ["Q-PHOTON GEYSER", "GLITCH CLAW", "ENTANGLE", "SWITCHEROO"]
     elif character == "Resona":
         print(f"[DEBUG] Game engine start_game called with character: {character}")
@@ -92,12 +92,17 @@ def start_game(character="Bitzy"):
             "qubit_state": "|0⟩"  # Enemy qubit state for BIT-FLIP
         },
         "turn": "player",
-        "log": []
+        "log": [],
+        "is_entangled": False  # Track entanglement state
     }
     
     # Reset quantum states
     player_state.qubit_state = "|0⟩"
     singulon_state.qubit_state = "|0⟩"
+    
+    # Reset entanglement state
+    if hasattr(player_state, 'is_entangled'):
+        player_state.is_entangled = False
     
     return {
         "message": f"Game started with {character}!",
@@ -144,12 +149,14 @@ def process_move(move):
         elif move == "GLITCH CLAW":
             result = quantum_move_neutrinette_glitch_claw(player_state, game_state["player"]["hp"], singulon_state.defense)
             if result.get("heal", 0) > 0:
-                game_state["player"]["hp"] = min(80, game_state["player"]["hp"] + result["heal"])
+                game_state["player"]["hp"] = min(90, game_state["player"]["hp"] + result["heal"])
         elif move == "ENTANGLE":
             result = quantum_move_neutrinette_entangle(player_state, game_state["enemy"]["qubit_state"])
         elif move == "SWITCHEROO":
             result = quantum_move_neutrinette_switcheroo(player_state, game_state["enemy"]["qubit_state"])
             game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+            if "is_entangled" in result:
+                game_state["is_entangled"] = result["is_entangled"]
     
     elif character == "Resona":
         player_state = resona_state
@@ -186,6 +193,18 @@ def process_move(move):
     elif move == "BIT-FLIP":
         new_state = result.get("enemy_qubit_state", game_state["enemy"]["qubit_state"])
         log.append(f"{character} flipped Singulon's qubit to {new_state}!")
+        # Update enemy qubit state immediately for real-time display
+        if "enemy_qubit_state" in result:
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+            singulon_state.qubit_state = result["enemy_qubit_state"]
+    elif move == "ENTANGLE":
+        log.append(f"{character} creates quantum entanglement!")
+        # Update entanglement state
+        if "is_entangled" in result:
+            player_state.is_entangled = result["is_entangled"]
+            game_state["is_entangled"] = result["is_entangled"]
+    elif move == "SWITCHEROO":
+        log.append(f"{character} swaps qubit states!")
         # Update enemy qubit state immediately for real-time display
         if "enemy_qubit_state" in result:
             game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
@@ -321,6 +340,14 @@ def enemy_attack():
         # 4. Dealt <damage> damage! (only if damage > 0)
         if damage > 0:
             log.append(f"Dealt {damage} damage!")
+            
+            # QUANTUM AFTERBURN: Check if Neutrinette is entangled and apply recoil damage
+            if character == "Neutrinette" and player_state.is_entangled:
+                from .characters.neutrinette.ability import ability_quantum_afterburn
+                afterburn_result = ability_quantum_afterburn(player_state, damage)
+                if afterburn_result["recoil_damage"] > 0:
+                    game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
+                    log.append(afterburn_result["message"])
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")

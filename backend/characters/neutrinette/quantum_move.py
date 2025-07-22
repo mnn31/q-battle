@@ -142,7 +142,7 @@ def quantum_move_neutrinette_entangle(quantum_state, enemy_qubit_state="|0⟩"):
     }
 
 def quantum_move_neutrinette_switcheroo(quantum_state, enemy_qubit_state="|0⟩"):
-    """SWITCHEROO: Swaps qubit states"""
+    """SWITCHEROO: Swaps qubit states and breaks entanglement"""
     # Create SWAP circuit
     qc = swap_gate(0, 1)
     result = run_quantum_circuit(qc, shots=1)
@@ -151,12 +151,21 @@ def quantum_move_neutrinette_switcheroo(quantum_state, enemy_qubit_state="|0⟩"
     new_enemy_state = quantum_state.qubit_state
     quantum_state.qubit_state = enemy_qubit_state
     
+    # Break entanglement
+    was_entangled = quantum_state.is_entangled
+    quantum_state.is_entangled = False
+    
+    message = "SWITCHEROO swaps qubit states!"
+    if was_entangled:
+        message += " (Entanglement broken!)"
+    
     return {
         "success": True,
         "damage": 0,
-        "message": f"SWITCHEROO swaps qubit states!",
+        "message": message,
         "qubit_state": quantum_state.qubit_state,
         "enemy_qubit_state": new_enemy_state,
+        "is_entangled": False,
         "quantum_result": result
     }
 

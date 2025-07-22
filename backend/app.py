@@ -35,24 +35,7 @@ bitzy_state = BitzyQuantumState()
 neutrinette_state = NeutrinetteQuantumState()
 
 
-@app.route("/start")
-def start():
-    # Get 'character' param; default to "bitzy" lowercase
-    character_param = request.args.get("character", "bitzy").lower()
-
-    # Normalize to proper internal names matching start_game expected strings
-    if character_param == "bitzy":
-        character = "Bitzy"
-    elif character_param == "neutrinette":
-        character = "Neutrinette"
-    else:
-        character = "Bitzy"  # default fallback
-
-    print(f"[DEBUG] Starting game with character: {character}")
-
-    # Call game engine start_game with correct character
-    result = start_game(character)
-    return jsonify(result)
+# Removed duplicate /start route - now handled by routes.py
 
 
 @app.route("/move", methods=["POST"])
