@@ -133,6 +133,7 @@ def process_move(move):
         elif move == "BIT-FLIP":
             result = quantum_move_bitzy_bit_flip(player_state, game_state["enemy"]["qubit_state"])
             game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+            singulon_state.qubit_state = result["enemy_qubit_state"]  # Also update the quantum state object
     
     elif character == "Neutrinette":
         player_state = neutrinette_state
@@ -174,6 +175,42 @@ def process_move(move):
 
     # 1. Bitzy used <move>!
     log.append(f"{character} used {move}!")
+    
+    # Add specific move descriptions
+    if move == "DUALIZE":
+        log.append(f"{character} put its qubit into superposition!")
+    elif move == "BIT-FLIP":
+        new_state = result.get("enemy_qubit_state", game_state["enemy"]["qubit_state"])
+        log.append(f"{character} flipped Singulon's qubit to {new_state}!")
+    
+    # Check if move failed
+    if not result.get("success", True):
+        log.append("But it failed!")
+        # Update qubit states even for failed moves
+        if "qubit_state" in result:
+            player_state.qubit_state = result["qubit_state"]
+            game_state["player"]["qubit_state"] = result["qubit_state"]
+        if "enemy_qubit_state" in result:
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+        
+        # Check if enemy is dead (even if move failed)
+        if game_state["enemy"]["hp"] <= 0:
+            log.append("Singulon fainted! You win!")
+            log.append(f"Your qubit is {game_state['player']['qubit_state']}.")
+            log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
+            return {"state": game_state}
+        
+        # Enemy's turn even if player move failed
+        game_state["turn"] = "enemy"
+        enemy_move_info = enemy_attack()
+        
+        # 5. Your qubit is <state>.
+        log.append(f"Your qubit is {game_state['player']['qubit_state']}.")
+        # 6. Singulon's qubit is <state>.
+        log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
+        
+        return {"state": game_state, "enemy_move": enemy_move_info}
+    
     # 2. Dealt <damage> damage! (only if damage > 0)
     damage = result.get("damage", 0)
     if damage > 0:
@@ -258,12 +295,21 @@ def enemy_attack():
         
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
+        
+        # Add specific move descriptions for enemy
+        if move_name == "DUALIZE":
+            log.append("Singulon put its qubit into superposition!")
+        elif move_name == "HAZE":
+            log.append("Singulon reset its qubit to |0⟩!")
+        
         # 4. Dealt <damage> damage! (only if damage > 0)
         if damage > 0:
             log.append(f"Dealt {damage} damage!")
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
+        # But it failed!
+        log.append("But it failed!")
         # No damage message for failed moves
 
     if game_state["player"]["hp"] <= 0:

@@ -402,10 +402,15 @@ async function executeMove(moveName) {
             const newLog = gameState.log || [];
             const newEntries = newLog.slice(oldLogLength);
             
-            // Display each new log entry one at a time
-            for (const entry of newEntries) {
+            // Display each new log entry one at a time with real-time updates
+            for (let i = 0; i < newEntries.length; i++) {
+                const entry = newEntries[i];
                 showBattleMessage(entry, 3000);
-                updateBattleDisplay(); // Update UI after each message
+                
+                // Update battle display immediately after each message
+                updateBattleDisplay();
+                
+                // Wait for message to be seen
                 await new Promise(resolve => setTimeout(resolve, 3000));
             }
             
