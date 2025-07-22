@@ -155,24 +155,32 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
-    // Update HP bars and text from backend state
+    // Update HP bars and text from backend state, but preserve real-time visual updates
     const playerHpPercent = (gameState.player.hp / 90) * 100;
     const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
     
-    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-    
-    const playerHp = document.getElementById('player-hp');
-    const enemyHp = document.getElementById('enemy-hp');
-    if (playerHp) {
-        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
-    }
-    if (enemyHp) {
-        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    // Only update HP bars if we haven't already updated them in real-time
+    if (!window.visualPlayerHp) {
+        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+        const playerHp = document.getElementById('player-hp');
+        if (playerHp) {
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+        }
+        updateHealthBarColor(playerHealthFill, playerHpPercent);
     }
     
-    updateHealthBarColor(playerHealthFill, playerHpPercent);
-    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    if (!window.visualEnemyHp) {
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        const enemyHp = document.getElementById('enemy-hp');
+        if (enemyHp) {
+            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+        }
+        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    }
+    
+    // Clear visual HP flags after sync
+    window.visualPlayerHp = null;
+    window.visualEnemyHp = null;
 
     // Flip player sprite to face right (towards Singulon)
     if (playerSprite) {
@@ -488,7 +496,7 @@ function updateQubitStatesFromMessage(message) {
             const isEnemyDamage = previousMessage.includes("Singulon used");
             
             if (isEnemyDamage) {
-                // Enemy dealt damage to player - update visual display only
+                // Enemy dealt damage to player - update visual display only (don't modify gameState)
                 const currentPlayerHp = gameState.player.hp;
                 const newPlayerHp = Math.max(0, currentPlayerHp - damage);
                 
@@ -501,8 +509,11 @@ function updateQubitStatesFromMessage(message) {
                 if (playerHp) {
                     playerHp.textContent = `${newPlayerHp}/90`;
                 }
+                
+                // Store the visual HP for later sync (don't modify gameState)
+                window.visualPlayerHp = newPlayerHp;
             } else {
-                // Player dealt damage to enemy - update visual display only
+                // Player dealt damage to enemy - update visual display only (don't modify gameState)
                 const currentEnemyHp = gameState.enemy.hp;
                 const newEnemyHp = Math.max(0, currentEnemyHp - damage);
                 
@@ -515,6 +526,9 @@ function updateQubitStatesFromMessage(message) {
                 if (enemyHp) {
                     enemyHp.textContent = `${newEnemyHp}/400`;
                 }
+                
+                // Store the visual HP for later sync (don't modify gameState)
+                window.visualEnemyHp = newEnemyHp;
             }
         }
     }
