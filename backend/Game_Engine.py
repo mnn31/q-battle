@@ -179,15 +179,23 @@ def process_move(move):
     # Add specific move descriptions
     if move == "DUALIZE":
         log.append(f"{character} put its qubit into superposition!")
+        # Update qubit state immediately for real-time display
+        if "qubit_state" in result:
+            player_state.qubit_state = result["qubit_state"]
+            game_state["player"]["qubit_state"] = result["qubit_state"]
     elif move == "BIT-FLIP":
         new_state = result.get("enemy_qubit_state", game_state["enemy"]["qubit_state"])
         log.append(f"{character} flipped Singulon's qubit to {new_state}!")
+        # Update enemy qubit state immediately for real-time display
+        if "enemy_qubit_state" in result:
+            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
+            singulon_state.qubit_state = result["enemy_qubit_state"]
     
     # Check if move failed
     if not result.get("success", True):
         log.append("But it failed!")
         # Update qubit states even for failed moves
-        if "qubit_state" in result:
+        if "qubit_state" in result and move != "BIT-FLIP":
             player_state.qubit_state = result["qubit_state"]
             game_state["player"]["qubit_state"] = result["qubit_state"]
         if "enemy_qubit_state" in result:
@@ -217,13 +225,13 @@ def process_move(move):
         log.append(f"Dealt {damage} damage!")
     game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
 
-    # Update player's qubit state
-    if "qubit_state" in result:
+    # Update player's qubit state (if not already updated)
+    if "qubit_state" in result and move != "DUALIZE" and move != "BIT-FLIP":
         player_state.qubit_state = result["qubit_state"]
         game_state["player"]["qubit_state"] = result["qubit_state"]
 
-    # Update enemy's qubit state if changed
-    if "enemy_qubit_state" in result:
+    # Update enemy's qubit state if changed (if not already updated)
+    if "enemy_qubit_state" in result and move != "BIT-FLIP":
         game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
 
     # Check if enemy is dead
@@ -299,8 +307,16 @@ def enemy_attack():
         # Add specific move descriptions for enemy
         if move_name == "DUALIZE":
             log.append("Singulon put its qubit into superposition!")
+            # Update qubit state immediately for real-time display
+            if "qubit_state" in result:
+                singulon_state.qubit_state = result["qubit_state"]
+                game_state["enemy"]["qubit_state"] = result["qubit_state"]
         elif move_name == "HAZE":
             log.append("Singulon reset its qubit to |0⟩!")
+            # Update qubit state immediately for real-time display
+            if "qubit_state" in result:
+                singulon_state.qubit_state = result["qubit_state"]
+                game_state["enemy"]["qubit_state"] = result["qubit_state"]
         
         # 4. Dealt <damage> damage! (only if damage > 0)
         if damage > 0:

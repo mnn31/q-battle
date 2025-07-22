@@ -134,7 +134,7 @@ def quantum_move_bitzy_bit_flip(quantum_state, enemy_qubit_state="|0⟩"):
         "success": True,
         "damage": 0,
         "message": f"BIT-FLIP changes enemy qubit from {enemy_qubit_state} to {new_enemy_state}!",
-        "qubit_state": quantum_state.qubit_state,
+        "qubit_state": quantum_state.qubit_state,  # Keep player's qubit unchanged
         "enemy_qubit_state": new_enemy_state,
         "quantum_result": result
     }

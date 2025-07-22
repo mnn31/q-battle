@@ -155,27 +155,7 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
-    // Update HP bars and text
-    const playerHpPercent = (gameState.player.hp / 90) * 100; // Assuming max HP is 90 for Bitzy
-    const enemyHpPercent = (gameState.enemy.hp / 400) * 100; // Singulon's max HP is 400
-    
-    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-    
-    // Update HP text numbers
-    const playerHp = document.getElementById('player-hp');
-    const enemyHp = document.getElementById('enemy-hp');
-    if (playerHp) {
-        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
-    }
-    if (enemyHp) {
-        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
-    }
-    
-    updateHealthBarColor(playerHealthFill, playerHpPercent);
-    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
-    
-    // Update qubit states
+    // Update qubit states only (HP updates are handled in real-time damage logic)
     const playerState = gameState.player.qubit_state || "|0⟩";
     const enemyState = gameState.enemy.qubit_state || "|0⟩";
     
@@ -407,8 +387,8 @@ async function executeMove(moveName) {
                 const entry = newEntries[i];
                 showBattleMessage(entry, 3000);
                 
-                // Update battle display immediately after each message
-                updateBattleDisplay();
+                // Update qubit states based on the message being displayed
+                updateQubitStatesFromMessage(entry);
                 
                 // Wait for message to be seen
                 await new Promise(resolve => setTimeout(resolve, 3000));
@@ -440,4 +420,124 @@ async function executeMove(moveName) {
     } finally {
         isProcessingMove = false;
     }
+}
+
+// Update qubit states based on the message being displayed
+function updateQubitStatesFromMessage(message) {
+    // Check for player DUALIZE
+    if (message.includes("put its qubit into superposition")) {
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit) {
+            playerQubit.textContent = "S";
+        }
+    }
+    
+    // Check for BIT-FLIP
+    if (message.includes("flipped Singulon's qubit to")) {
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            if (message.includes("to |1⟩")) {
+                enemyQubit.textContent = "|1⟩";
+            } else if (message.includes("to |0⟩")) {
+                enemyQubit.textContent = "|0⟩";
+            }
+        }
+    }
+    
+    // Check for enemy DUALIZE
+    if (message.includes("Singulon put its qubit into superposition")) {
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            enemyQubit.textContent = "S";
+        }
+    }
+    
+    // Check for enemy HAZE
+    if (message.includes("Singulon reset its qubit to |0⟩")) {
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            enemyQubit.textContent = "|0⟩";
+        }
+    }
+    
+    // Check for damage messages and update HP bars in real-time
+    if (message.includes("Dealt") && message.includes("damage!")) {
+        // Extract damage amount from message
+        const damageMatch = message.match(/Dealt (\d+) damage!/);
+        if (damageMatch) {
+            const damage = parseInt(damageMatch[1]);
+            
+            // Determine if it's player or enemy damage based on context
+            if (message.includes("Singulon used")) {
+                // Enemy dealt damage to player - update visual display only
+                const currentPlayerHp = gameState.player.hp;
+                const newPlayerHp = Math.max(0, currentPlayerHp - damage);
+                
+                // Update player HP bar and text immediately (visual only)
+                const playerHpPercent = (newPlayerHp / 90) * 100;
+                playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+                updateHealthBarColor(playerHealthFill, playerHpPercent);
+                
+                const playerHp = document.getElementById('player-hp');
+                if (playerHp) {
+                    playerHp.textContent = `${newPlayerHp}/90`;
+                }
+            } else {
+                // Player dealt damage to enemy - update visual display only
+                const currentEnemyHp = gameState.enemy.hp;
+                const newEnemyHp = Math.max(0, currentEnemyHp - damage);
+                
+                // Update enemy HP bar and text immediately (visual only)
+                const enemyHpPercent = (newEnemyHp / 400) * 100;
+                enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+                updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+                
+                const enemyHp = document.getElementById('enemy-hp');
+                if (enemyHp) {
+                    enemyHp.textContent = `${newEnemyHp}/400`;
+                }
+            }
+        }
+    }
+    
+    // Check for final qubit state messages and update to current state
+    if (message.includes("Your qubit is")) {
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit) {
+            // Keep the current qubit state as displayed (don't override)
+            // The qubit state should already be correct from previous real-time updates
+        }
+    }
+    
+    if (message.includes("Singulon's qubit is")) {
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            // Keep the current qubit state as displayed (don't override)
+            // The qubit state should already be correct from previous real-time updates
+        }
+    }
+}
+
+// New function to update only HP bars and text (without qubit states)
+function updateHPDisplay() {
+    if (!gameState) return;
+    
+    // Only update HP bars and text, NOT qubit states
+    const playerHpPercent = (gameState.player.hp / 90) * 100;
+    const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+    
+    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+    
+    const playerHp = document.getElementById('player-hp');
+    const enemyHp = document.getElementById('enemy-hp');
+    if (playerHp) { 
+        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`; 
+    }
+    if (enemyHp) { 
+        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`; 
+    }
+    
+    updateHealthBarColor(playerHealthFill, playerHpPercent);
+    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
 }
