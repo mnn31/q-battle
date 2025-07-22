@@ -448,12 +448,24 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for Q-THUNDER qubit collapse (when qubit collapses from superposition)
     if (message.includes("Q-THUNDER strikes for")) {
-        // Q-THUNDER collapses the qubit - update based on backend state
+        // Q-THUNDER collapses the qubit - call backend immediately to get correct state
         const playerQubit = document.getElementById('player-qubit');
-        if (playerQubit && gameState.player.qubit_state) {
-            // Use the backend's collapsed state
-            const collapsedState = gameState.player.qubit_state;
-            playerQubit.textContent = collapsedState === "superposition" ? "S" : collapsedState;
+        if (playerQubit) {
+            // Call backend to get the current qubit state immediately
+            fetch('/game-state')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.state && data.state.player && data.state.player.qubit_state) {
+                        const collapsedState = data.state.player.qubit_state;
+                        playerQubit.textContent = collapsedState === "superposition" ? "S" : collapsedState;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching qubit state:', error);
+                    // Fallback to random collapse if backend call fails
+                    const collapsedState = Math.random() < 0.5 ? "|0⟩" : "|1⟩";
+                    playerQubit.textContent = collapsedState;
+                });
         }
     }
     
@@ -485,8 +497,51 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Note: HP updates are handled by the backend only to prevent double damage
-    // The visual HP bars will update when the backend sends the final state
+    // Check for damage messages and update HP bars visually in real-time (with HALVED damage to prevent double damage)
+    if (message.includes("Dealt") && message.includes("damage!")) {
+        // Extract damage amount from message
+        const damageMatch = message.match(/Dealt (\d+) damage!/);
+        if (damageMatch) {
+            const damage = parseInt(damageMatch[1]);
+            const halvedDamage = Math.floor(damage / 2); // HALVE the damage to prevent double damage
+            
+            // Determine if it's player or enemy damage based on the previous message
+            // If the previous message was "Singulon used X!", then this damage is from enemy to player
+            const logIndex = gameState.log.indexOf(message);
+            const previousMessage = logIndex > 0 ? gameState.log[logIndex - 1] : "";
+            const isEnemyDamage = previousMessage.includes("Singulon used");
+            
+            if (isEnemyDamage) {
+                // Enemy dealt damage to player - update visual display with HALVED damage
+                const currentPlayerHp = gameState.player.hp;
+                const newPlayerHp = Math.max(0, currentPlayerHp - halvedDamage);
+                
+                // Update player HP bar and text immediately (visual only, don't modify gameState)
+                const playerHpPercent = (newPlayerHp / 90) * 100;
+                playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+                updateHealthBarColor(playerHealthFill, playerHpPercent);
+                
+                const playerHp = document.getElementById('player-hp');
+                if (playerHp) {
+                    playerHp.textContent = `${newPlayerHp}/90`;
+                }
+            } else {
+                // Player dealt damage to enemy - update visual display with HALVED damage
+                const currentEnemyHp = gameState.enemy.hp;
+                const newEnemyHp = Math.max(0, currentEnemyHp - halvedDamage);
+                
+                // Update enemy HP bar and text immediately (visual only, don't modify gameState)
+                const enemyHpPercent = (newEnemyHp / 400) * 100;
+                enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+                updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+                
+                const enemyHp = document.getElementById('enemy-hp');
+                if (enemyHp) {
+                    enemyHp.textContent = `${newEnemyHp}/400`;
+                }
+            }
+        }
+    }
 }
 
 // New function to update only HP bars and text (without qubit states)
