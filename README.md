@@ -25,7 +25,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 ### **Neutrinette** - The Entanglement Specialist  
 - **Theme**: Entanglement and shared quantum effects
 - **Signature Move**: Q-PHOTON GEYSER (75 damage, costs HP, enemy loses HP if entangled)
-- **Ability**: QUANTUM AFTERBURN (+10 damage if entangled)
+- **Ability**: QUANTUM AFTERBURN (25% of damage taken while entangled is reflected back to enemy)
 
 ### **Resona** - The Interference Scaler
 - **Theme**: Waveform stacking and interference patterns

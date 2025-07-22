@@ -121,7 +121,7 @@ class SampleGame:
             self.player_hp = 90  # Increased by 10
             self.character_name = "Neutrinette"
             self.ability_name = "QUANTUM AFTERBURN"
-            self.ability_desc = "Deals +10 damage if qubits are entangled"
+            self.ability_desc = "When Neutrinette takes damage while entangled, 25% of that damage is reflected back to the enemy as recoil damage"
             self.moves = [
                 ("Q-PHOTON GEYSER", "Deals 75 damage, costs 25% HP, enemy loses HP if entangled"),
                 ("GLITCH CLAW", "Deals 40 damage, 30% chance to heal 20% max HP"),
@@ -220,7 +220,7 @@ class SampleGame:
             print("4. SWITCHEROO")
             print("   Swaps the states of the qubit and the enemy's qubit.")
             print("\nAbility: QUANTUM AFTERBURN")
-            print("After using a move, Neutrinette will deal an additional 10 damage if the qubit and the enemy's qubit are ENTANGLED.")
+            print("When Neutrinette takes damage while entangled, 25% of that damage is reflected back to the enemy as recoil damage.")
         elif self.character_name == "Resona":
             print("1. Q-METRONOME")
             print("   Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)")

@@ -26,7 +26,8 @@ const characterData = {
             { name: "ENTANGLE", desc: "Puts the qubit and the enemy's qubit in a state of ENTANGLEMENT with each other if it wasn't previously." },
             { name: "SWITCHEROO", desc: "Swaps the states of the qubit and the enemy's qubit." }
         ],
-        maxHp: 80
+        maxHp: 90,
+        ability: "QUANTUM AFTERBURN: When Neutrinette takes damage while entangled, 25% of that damage is reflected back to the enemy as recoil damage."
     },
     "Resona": {
         sprite: "/static/sprites/resona.gif",
@@ -273,7 +274,7 @@ window.updateBattleDisplay = updateBattleDisplay;
 function setupSpriteHover(character) {
     const abilityDescriptions = {
         "Bitzy": "SUPERHIJACK: +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩",
-        "Neutrinette": "QUANTUM AFTERBURN: +10 damage if entangled with enemy",
+        "Neutrinette": "QUANTUM AFTERBURN: 25% of damage taken while entangled is reflected back to enemy",
         "Resona": "QUANTUM WAVEFORM: Stacks increase collapse probability and damage",
         "Higscrozma": "QUANTUM BULWARK: Barriers reduce damage taken/dealt, back barriers boost damage"
     };
