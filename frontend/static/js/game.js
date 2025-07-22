@@ -155,24 +155,32 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
-    // Update HP bars and text from backend state
+    // Update HP bars and text from backend state, but preserve real-time visual updates
     const playerHpPercent = (gameState.player.hp / 90) * 100;
     const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
     
-    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-    
-    const playerHp = document.getElementById('player-hp');
-    const enemyHp = document.getElementById('enemy-hp');
-    if (playerHp) {
-        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
-    }
-    if (enemyHp) {
-        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    // Only update HP bars if we haven't already updated them in real-time
+    if (!window.visualPlayerHpUpdated) {
+        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+        const playerHp = document.getElementById('player-hp');
+        if (playerHp) {
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+        }
+        updateHealthBarColor(playerHealthFill, playerHpPercent);
     }
     
-    updateHealthBarColor(playerHealthFill, playerHpPercent);
-    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    if (!window.visualEnemyHpUpdated) {
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        const enemyHp = document.getElementById('enemy-hp');
+        if (enemyHp) {
+            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+        }
+        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    }
+    
+    // Clear visual HP flags after sync
+    window.visualPlayerHpUpdated = null;
+    window.visualEnemyHpUpdated = null;
 
     // Flip player sprite to face right (towards Singulon)
     if (playerSprite) {
@@ -485,8 +493,56 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Note: HP updates are handled by the backend only to prevent double damage
-    // The visual HP bars will update when the backend sends the final state
+    // Check for damage messages and update HP bars visually in real-time (without modifying gameState)
+    if (message.includes("Dealt") && message.includes("damage!")) {
+        // Extract damage amount from message
+        const damageMatch = message.match(/Dealt (\d+) damage!/);
+        if (damageMatch) {
+            const damage = parseInt(damageMatch[1]);
+            
+            // Determine if it's player or enemy damage based on the previous message
+            // If the previous message was "Singulon used X!", then this damage is from enemy to player
+            const logIndex = gameState.log.indexOf(message);
+            const previousMessage = logIndex > 0 ? gameState.log[logIndex - 1] : "";
+            const isEnemyDamage = previousMessage.includes("Singulon used");
+            
+            if (isEnemyDamage) {
+                // Enemy dealt damage to player - update visual display only (don't modify gameState)
+                const currentPlayerHp = gameState.player.hp;
+                const newPlayerHp = Math.max(0, currentPlayerHp - damage);
+                
+                // Update player HP bar and text immediately (visual only, don't modify gameState)
+                const playerHpPercent = (newPlayerHp / 90) * 100;
+                playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+                updateHealthBarColor(playerHealthFill, playerHpPercent);
+                
+                const playerHp = document.getElementById('player-hp');
+                if (playerHp) {
+                    playerHp.textContent = `${newPlayerHp}/90`;
+                }
+                
+                // Mark that we've updated player HP visually
+                window.visualPlayerHpUpdated = true;
+            } else {
+                // Player dealt damage to enemy - update visual display only (don't modify gameState)
+                const currentEnemyHp = gameState.enemy.hp;
+                const newEnemyHp = Math.max(0, currentEnemyHp - damage);
+                
+                // Update enemy HP bar and text immediately (visual only, don't modify gameState)
+                const enemyHpPercent = (newEnemyHp / 400) * 100;
+                enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+                updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+                
+                const enemyHp = document.getElementById('enemy-hp');
+                if (enemyHp) {
+                    enemyHp.textContent = `${newEnemyHp}/400`;
+                }
+                
+                // Mark that we've updated enemy HP visually
+                window.visualEnemyHpUpdated = true;
+            }
+        }
+    }
 }
 
 // New function to update only HP bars and text (without qubit states)
