@@ -174,9 +174,10 @@ def process_move(move):
 
     # 1. Bitzy used <move>!
     log.append(f"{character} used {move}!")
-    # 2. Dealt <damage> damage!
+    # 2. Dealt <damage> damage! (only if damage > 0)
     damage = result.get("damage", 0)
-    log.append(f"Dealt {damage} damage!")
+    if damage > 0:
+        log.append(f"Dealt {damage} damage!")
     game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
 
     # Update player's qubit state
@@ -257,13 +258,13 @@ def enemy_attack():
         
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
-        # 4. Dealt <damage> damage!
-        log.append(f"Dealt {damage} damage!")
+        # 4. Dealt <damage> damage! (only if damage > 0)
+        if damage > 0:
+            log.append(f"Dealt {damage} damage!")
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
-        # 4. Dealt 0 damage!
-        log.append(f"Dealt 0 damage!")
+        # No damage message for failed moves
 
     if game_state["player"]["hp"] <= 0:
         log.append("You fainted! Game over.")

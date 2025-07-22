@@ -155,12 +155,22 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
-    // Update HP bars
+    // Update HP bars and text
     const playerHpPercent = (gameState.player.hp / 90) * 100; // Assuming max HP is 90 for Bitzy
     const enemyHpPercent = (gameState.enemy.hp / 400) * 100; // Singulon's max HP is 400
     
     playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
     enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+    
+    // Update HP text numbers
+    const playerHp = document.getElementById('player-hp');
+    const enemyHp = document.getElementById('enemy-hp');
+    if (playerHp) {
+        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+    }
+    if (enemyHp) {
+        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    }
     
     updateHealthBarColor(playerHealthFill, playerHpPercent);
     updateHealthBarColor(enemyHealthFill, enemyHpPercent);

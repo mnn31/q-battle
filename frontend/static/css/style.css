@@ -462,49 +462,44 @@ body {
     width: 100%;
 }
 
-.qubit-states {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-    margin: 10px 0;
-    padding: 0 20px;
-}
-
-.qubit-info {
+/* Qubit display within HP boxes */
+.qubit-display {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
 }
 
-.label {
+.qubit-display .label {
+    color: #666;
     font-weight: bold;
-    color: #333;
 }
 
-.qubit-cube {
-    width: 30px;
-    height: 30px;
-    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-    border: 2px solid #333;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
+.qubit-display .qubit-cube {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
     color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
     font-weight: bold;
-    animation: qubitGlow 2s ease-in-out infinite;
-    box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    min-width: 30px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Player qubit - blue */
 .player-qubit {
-    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    background: linear-gradient(135deg, #4a90e2, #357abd) !important;
 }
 
+/* Enemy qubit - red */
 .enemy-qubit {
-    background: linear-gradient(135deg, #e24a4a 0%, #bd3535 100%);
+    background: linear-gradient(135deg, #e24a4a, #bd3535) !important;
 }
+
+/* Remove old qubit-states styling since we moved qubits into HP boxes */
 
 @keyframes qubitGlow {
     0%, 100% {
