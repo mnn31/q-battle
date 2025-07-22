@@ -263,7 +263,7 @@ body {
 .player-sprite img {
     transform: scale(1) scaleX(-1); /* normal size, keep facing direction */
     position: absolute;
-    bottom: -10px;
+    bottom: 10px;
     left: -150px;
     transform: scale(1) scaleX(-1) translateY(50%);
 }
@@ -310,17 +310,19 @@ body {
     min-width: 200px;
 }
 
+/* Player HP/info box - position below player sprite */
 .player-info {
     position: absolute;
-    left: 100;
-    bottom: -600px; /* Adjust this value */
+    left: 0;
+    bottom: -60px; /* Adjust this value to move the player HP box up/down */
     z-index: 3;
 }
 
+/* Enemy HP/info box - position below enemy sprite */
 .enemy-info {
     position: absolute;
-    right: 0;
-    bottom: -60px; /* Adjust this value */
+    right: -150px;
+    bottom: -60px; /* Adjust this value to move the enemy HP box up/down */
     z-index: 3;
 }
 
@@ -427,21 +429,30 @@ body {
 }
 
 .battle-log {
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 10px;
-    padding: 10px;
-    max-height: 100px;
-    overflow-y: auto;
-    text-align: left;
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 8px;
+    padding: 12px 16px;
+    height: 50px;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    border: 2px solid #333;
+    min-height: 50px;
 }
 
 .log-entry {
     color: #fff;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    margin: 2px 0;
-    padding: 2px 5px;
-    border-radius: 3px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .status-row {
@@ -580,6 +591,23 @@ body {
 .enemy-hp, .player-hp {
     font-size: 16px;
     color: #666;
+}
+
+/* Move HP boxes below the sprites */
+.player-hp-box {
+    position: absolute;
+    left: 10px;
+    bottom: 10px; /* much further below player sprite */
+    top: 100px;
+    border: 2px solid red !important;
+    z-index: 3;
+}
+
+.enemy-hp-box {
+    position: absolute;
+    right: 60px;
+    top: 420px; /* much further below enemy sprite */
+    z-index: 3;
 }
 
 /* Responsive Design */

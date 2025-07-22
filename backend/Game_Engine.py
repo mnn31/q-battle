@@ -111,8 +111,12 @@ def process_move(move):
         return {"error": "It's not your turn."}
 
     character = game_state["player"]["character"]
+    valid_moves = game_state["player"]["moves"]
+    print(f"[DEBUG] process_move: Received move: '{move}' for character: {character}")
+    print(f"[DEBUG] process_move: Valid moves: {valid_moves}")
     
-    if move not in game_state["player"]["moves"]:
+    if move not in valid_moves:
+        print(f"[DEBUG] process_move: Move '{move}' is not in valid moves!")
         return {"error": f"Invalid move: {move}"}
 
     log = game_state["log"]
@@ -168,36 +172,40 @@ def process_move(move):
         elif move == "BARRIER":
             result = quantum_move_higscrozma_barrier(player_state)
 
-    # Apply damage if move was successful
-    if result.get("success", True):
-        damage = result.get("damage", 0)
-        game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
-        
-        # Update player's qubit state
-        if "qubit_state" in result:
-            player_state.qubit_state = result["qubit_state"]
-            game_state["player"]["qubit_state"] = result["qubit_state"]
-        
-        # Update enemy's qubit state if changed
-        if "enemy_qubit_state" in result:
-            game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
-        
-        log.append(f"{character} used {move}: {result['message']}")
-        if damage > 0:
-            log.append(f"Dealt {damage} damage!")
-    else:
-        log.append(f"{move} failed: {result['message']}")
+    # 1. Bitzy used <move>!
+    log.append(f"{character} used {move}!")
+    # 2. Dealt <damage> damage!
+    damage = result.get("damage", 0)
+    log.append(f"Dealt {damage} damage!")
+    game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
+
+    # Update player's qubit state
+    if "qubit_state" in result:
+        player_state.qubit_state = result["qubit_state"]
+        game_state["player"]["qubit_state"] = result["qubit_state"]
+
+    # Update enemy's qubit state if changed
+    if "enemy_qubit_state" in result:
+        game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
 
     # Check if enemy is dead
     if game_state["enemy"]["hp"] <= 0:
         log.append("Singulon fainted! You win!")
+        # Add qubit state summary
+        log.append(f"Your qubit is {game_state['player']['qubit_state']}.")
+        log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
         return {"state": game_state}
 
     # Enemy's turn
     game_state["turn"] = "enemy"
-    enemy_attack()
+    enemy_move_info = enemy_attack()
 
-    return {"state": game_state}
+    # 5. Your qubit is <state>.
+    log.append(f"Your qubit is {game_state['player']['qubit_state']}.")
+    # 6. Singulon's qubit is <state>.
+    log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
+
+    return {"state": game_state, "enemy_move": enemy_move_info}
 
 def enemy_attack():
     global game_state, singulon_state, bitzy_state, neutrinette_state, resona_state, higscrozma_state
@@ -214,7 +222,7 @@ def enemy_attack():
     elif character == "Higscrozma":
         player_state = higscrozma_state
 
-    # Singulon boss moves
+    # Singulon boss moves ONLY - no random character selection
     boss_moves = [
         ("DUALIZE", quantum_move_singulon_dualize),
         ("HAZE", quantum_move_singulon_haze),
@@ -247,16 +255,27 @@ def enemy_attack():
         damage = result.get("damage", 0)
         game_state["player"]["hp"] = max(0, game_state["player"]["hp"] - damage)  # Prevent negative HP
         
-        log.append(f"Singulon used {move_name}: {result['message']}")
-        if damage > 0:
-            log.append(f"Dealt {damage} damage!")
+        # 3. Singulon used <move>!
+        log.append(f"Singulon used {move_name}!")
+        # 4. Dealt <damage> damage!
+        log.append(f"Dealt {damage} damage!")
     else:
-        log.append(f"Singulon used {move_name}: {result['message']}")
+        # 3. Singulon used <move>!
+        log.append(f"Singulon used {move_name}!")
+        # 4. Dealt 0 damage!
+        log.append(f"Dealt 0 damage!")
 
     if game_state["player"]["hp"] <= 0:
         log.append("You fainted! Game over.")
     else:
         game_state["turn"] = "player"
+
+    # Return enemy move information
+    return {
+        "move_name": move_name,
+        "damage": result.get("damage", 0),
+        "success": result.get("success", True)
+    }
 
 def get_game_state():
     return game_state

@@ -2,11 +2,13 @@
 let currentCharacter = null;
 let gameState = null;
 let turnCount = 1;
+let isProcessingMove = false; // Prevent multiple move processing
 
-// Character data
+// Character data with speed stats
 const characterData = {
     "Bitzy": {
         sprite: "/static/sprites/blitzle.gif",
+        speed: 85, // Speed stat for turn order
         moves: [
             { name: "Q-THUNDER", desc: "Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails. (DMG: 90)" },
             { name: "SHOCK", desc: "Deals damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states. (DMG: 30 + 20)" },
@@ -17,6 +19,7 @@ const characterData = {
     },
     "Neutrinette": {
         sprite: "/static/sprites/neutrinette.gif",
+        speed: 90, // Speed stat for turn order
         moves: [
             { name: "Q-PHOTON GEYSER", desc: "Neutrinette's Q-Move. Loses 25% current HP if the qubit is in a state of either 0 or 1, but deals massive damage and collapses the qubit randomly. (DMG: 75)" },
             { name: "GLITCH CLAW", desc: "Deals damage and has a chance of healing the user for 20% max HP. (DMG: 40)" },
@@ -27,6 +30,7 @@ const characterData = {
     },
     "Resona": {
         sprite: "/static/sprites/resona.gif",
+        speed: 70, // Speed stat for turn order
         moves: [
             { name: "Q-METRONOME", desc: "Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)." },
             { name: "WAVE CRASH", desc: "Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 20 + 40)" },
@@ -37,6 +41,7 @@ const characterData = {
     },
     "Higscrozma": {
         sprite: "/static/sprites/higscrozma.gif",
+        speed: 60, // Speed stat for turn order
         moves: [
             { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers." },
             { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)" },
@@ -60,8 +65,6 @@ const playerQubit = document.getElementById('player-qubit');
 const enemyQubit = document.getElementById('enemy-qubit');
 const turnNumber = document.getElementById('turn-number');
 const battleLog = document.getElementById('battle-log');
-
-// Game state variables - initialized here
 
 // Initialize character selection
 document.addEventListener('DOMContentLoaded', function() {
@@ -130,7 +133,6 @@ async function startBattle(character) {
             turnNumber.textContent = `Turn ${turnCount}`;
             updateBattleDisplay();
             showBattleScreen();
-            addLogEntry(`Battle started with ${character}!`);
             
             // Check for special effects based on move
             if (result.state.log && result.state.log.length > 0) {
@@ -149,153 +151,17 @@ async function startBattle(character) {
     }
 }
 
-// Execute move
-async function executeMove(moveName) {
-    if (!gameState || gameState.turn !== 'player') {
-        addLogEntry("It's not your turn!");
-        return;
-    }
-    
-    // Disable move buttons during execution
-    disableMoveButtons();
-    
-    try {
-        const response = await fetch('/move', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ move: moveName })
-        });
-        
-        const result = await response.json();
-        
-        if (result.state) {
-            gameState = result.state;
-            console.log('Move executed, new game state:', gameState);
-            
-            // Force immediate HP update
-            setTimeout(() => {
-                updateBattleDisplay();
-                refreshHPFromServer(); // Double-check with server
-            }, 100);
-            
-            // Force another update after a delay to ensure it sticks
-            setTimeout(() => {
-                updateBattleDisplay();
-            }, 500);
-            
-            // Check for special effects based on move
-            if (result.state.log && result.state.log.length > 0) {
-                const lastLog = result.state.log[result.state.log.length - 1];
-                if (lastLog.includes('BARRIER')) {
-                    showSpecialEffect('barrier');
-                } else if (lastLog.includes('WAVE CRASH') || lastLog.includes('Q-METRONOME')) {
-                    showSpecialEffect('waveform');
-                }
-            }
-            
-            // Check for game end
-            if (gameState.enemy.hp <= 0) {
-                addLogEntry("🎉 You defeated Singulon! Victory!");
-                endBattle(true);
-                return;
-            }
-            
-            if (gameState.player.hp <= 0) {
-                addLogEntry("💀 You fainted! Game over.");
-                endBattle(false);
-                return;
-            }
-            
-            // Enemy turn
-            if (gameState.turn === 'enemy') {
-                addLogEntry("Singulon is thinking...");
-                setTimeout(() => {
-                    // Force refresh game state from server
-                    fetch('/game-state')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.state) {
-                                gameState = data.state;
-                                updateBattleDisplay();
-                                
-                                // Check for game end after enemy turn
-                                if (gameState.player.hp <= 0) {
-                                    addLogEntry("💀 You fainted! Game over.");
-                                    endBattle(false);
-                                    return;
-                                }
-                            }
-                            enableMoveButtons();
-                            turnCount++;
-                            turnNumber.textContent = `Turn ${turnCount}`;
-                        })
-                        .catch(error => {
-                            console.error('Error fetching game state:', error);
-                            enableMoveButtons();
-                            turnCount++;
-                            turnNumber.textContent = `Turn ${turnCount}`;
-                        });
-                }, 1500);
-            } else {
-                enableMoveButtons();
-            }
-        } else {
-            addLogEntry(`Error: ${result.error || 'Unknown error'}`);
-            enableMoveButtons();
-        }
-    } catch (error) {
-        console.error('Error executing move:', error);
-        addLogEntry('Error executing move');
-        enableMoveButtons();
-    }
-}
-
 // Update battle display
 function updateBattleDisplay() {
-    if (!gameState) {
-        console.log('No game state available for update');
-        return;
-    }
+    if (!gameState) return;
     
-    // Update health bars
-    const playerMaxHp = characterData[currentCharacter].maxHp;
-    const playerHpValue = Math.max(0, gameState.player.hp); // Prevent negative HP
-    const enemyHpValue = Math.max(0, gameState.enemy.hp); // Prevent negative HP
-    const playerHpPercent = (playerHpValue / playerMaxHp) * 100;
-    const enemyHpPercent = (enemyHpValue / 400) * 100;
+    // Update HP bars
+    const playerHpPercent = (gameState.player.hp / 90) * 100; // Assuming max HP is 90 for Bitzy
+    const enemyHpPercent = (gameState.enemy.hp / 400) * 100; // Singulon's max HP is 400
     
-    // Debug logging
-    console.log('HP Update:', {
-        playerHpValue,
-        playerMaxHp,
-        playerHpPercent,
-        enemyHpValue,
-        enemyHpPercent,
-        currentCharacter,
-        gameState: gameState
-    });
+    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
     
-    // Force update player HP display
-    if (playerHp && playerMaxHp) {
-        playerHp.textContent = `${playerHpValue}/${playerMaxHp}`;
-        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        console.log(`Player HP Updated: ${playerHpValue}/${playerMaxHp} (${playerHpPercent.toFixed(1)}%)`);
-    } else {
-        console.error('Player HP elements not found:', { playerHp, playerMaxHp });
-    }
-    
-    // Force update enemy HP display
-    if (enemyHp) {
-        enemyHp.textContent = `${enemyHpValue}/400`;
-        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-        console.log(`Enemy HP Updated: ${enemyHpValue}/400 (${enemyHpPercent.toFixed(1)}%)`);
-    } else {
-        console.error('Enemy HP elements not found:', { enemyHp });
-    }
-    
-    // Update HP bar colors based on percentage
     updateHealthBarColor(playerHealthFill, playerHpPercent);
     updateHealthBarColor(enemyHealthFill, enemyHpPercent);
     
@@ -306,12 +172,6 @@ function updateBattleDisplay() {
     // Convert superposition to "S" for display
     playerQubit.textContent = playerState === "superposition" ? "S" : playerState;
     enemyQubit.textContent = enemyState === "superposition" ? "S" : enemyState;
-    
-    // Update battle log
-    if (gameState.log && gameState.log.length > 0) {
-        const lastEntry = gameState.log[gameState.log.length - 1];
-        addLogEntry(lastEntry);
-    }
 
     // Flip player sprite to face right (towards Singulon)
     if (playerSprite) {
@@ -330,22 +190,6 @@ function updateBattleDisplay() {
 function showBattleScreen() {
     characterSelection.style.display = 'none';
     battleScreen.style.display = 'block';
-}
-
-// Add log entry
-function addLogEntry(message) {
-    const logEntry = document.createElement('div');
-    logEntry.className = 'log-entry';
-    logEntry.textContent = message;
-    battleLog.appendChild(logEntry);
-    
-    // Scroll to bottom
-    battleLog.scrollTop = battleLog.scrollHeight;
-    
-    // Keep only last 10 entries
-    while (battleLog.children.length > 10) {
-        battleLog.removeChild(battleLog.firstChild);
-    }
 }
 
 // Disable move buttons
@@ -474,9 +318,9 @@ function endBattle(victory) {
     disableMoveButtons();
     
     if (victory) {
-        addLogEntry("🎉 Congratulations! You've won the quantum battle!");
+        showBattleMessage("🎉 Congratulations! You've won the quantum battle!");
     } else {
-        addLogEntry("💀 Better luck next time!");
+        showBattleMessage("💀 Better luck next time!");
     }
     
     // Add restart button after a delay
@@ -493,4 +337,92 @@ function endBattle(victory) {
         const moveSelection = document.querySelector('.move-selection');
         moveSelection.appendChild(restartButton);
     }, 2000);
+}
+
+// Simple battle message display - shows one message at a time
+function showBattleMessage(message, duration = 3000) {
+    // Clear any existing message
+    battleLog.innerHTML = '';
+    
+    // Create new message element
+    const messageElement = document.createElement('div');
+    messageElement.className = 'log-entry';
+    messageElement.textContent = message;
+    battleLog.appendChild(messageElement);
+    
+    // Remove message after duration
+    setTimeout(() => {
+        if (messageElement.parentNode) {
+            messageElement.parentNode.removeChild(messageElement);
+        }
+    }, duration);
+}
+
+// Clear battle message screen
+function clearBattleMessage() {
+    battleLog.innerHTML = '';
+}
+
+// Execute move with simple backend log replay
+async function executeMove(moveName) {
+    if (!gameState || gameState.turn !== 'player' || isProcessingMove) {
+        return;
+    }
+    
+    isProcessingMove = true;
+    disableMoveButtons();
+    
+    try {
+        // Store current log length
+        const oldLogLength = gameState.log ? gameState.log.length : 0;
+        
+        // Send move to backend
+        const response = await fetch('/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ move: moveName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.state) {
+            gameState = result.state;
+            
+            // Get new log entries
+            const newLog = gameState.log || [];
+            const newEntries = newLog.slice(oldLogLength);
+            
+            // Display each new log entry one at a time
+            for (const entry of newEntries) {
+                showBattleMessage(entry, 3000);
+                updateBattleDisplay(); // Update UI after each message
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            
+        } else {
+            showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
+        }
+        
+        // Check for game end
+        if (gameState.enemy.hp <= 0) {
+            showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
+            setTimeout(() => endBattle(true), 4000);
+        } else if (gameState.player.hp <= 0) {
+            showBattleMessage("💀 You fainted! Game over.", 4000);
+            setTimeout(() => endBattle(false), 4000);
+        } else {
+            // Clear message screen and continue to next turn
+            clearBattleMessage();
+            turnCount++;
+            turnNumber.textContent = `Turn ${turnCount}`;
+            enableMoveButtons();
+        }
+        
+    } catch (error) {
+        console.error('Error executing move:', error);
+        showBattleMessage('Error executing move', 3000);
+        enableMoveButtons();
+    } finally {
+        isProcessingMove = false;
+    }
 }

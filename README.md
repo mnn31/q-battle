@@ -37,7 +37,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 - **Signature Move**: Q-VOID RIFT (damage + 10% Defense, heals per barrier behind)
 - **Ability**: QUANTUM BULWARK (barriers reduce damage taken/dealt, back barriers boost damage)
 
-A sample CLI game (`sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.
+A sample CLI game (`backend/sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.
 
 ---
 
@@ -62,13 +62,12 @@ pip install qiskit qiskit-aer flask
 
 ### 3. Start the Flask backend:
 ```bash
-python app.py
+python main.py
 ```
 Then go to:
 ```
-http://127.0.0.1:5000/api/hadamard
+http://127.0.0.1:5000
 ```
-You'll see quantum randomness output like `{ "1": 1 }` or `{ "0": 1 }`.
 
 ---
 
@@ -119,20 +118,27 @@ Qiskit lets us embed real quantum logic in our gameplay!
 ## 📁 Repo Structure
 ```
 q-battle/
-├── app.py                  # Flask API
+├── main.py                 # Main entry point
 ├── backend/
-│   ├── characters/         # Quantum character moves and abilities
-│   │   ├── bitzy/         # Superposition master
-│   │   ├── neutrinette/   # Entanglement specialist
-│   │   ├── resona/        # Interference scaler
-│   │   ├── higscrozma/    # Quantum tunneler
-│   │   └── boss/          # Boss character (Singulon)
-│   ├── quantum_gates/     # Quantum gate implementations
-│   ├── sample_game.py     # CLI battle game
-│   └── routes.py          # Flask API routes
-├── environment.yml         # Conda environment
-├── README.md              # Project info
-└── tests/                 # Test scripts
+│   ├── app.py             # Flask API server
+│   ├── characters/        # Quantum character moves and abilities
+│   │   ├── bitzy/        # Superposition master
+│   │   ├── neutrinette/  # Entanglement specialist
+│   │   ├── resona/       # Interference scaler
+│   │   ├── higscrozma/   # Quantum tunneler
+│   │   └── boss/         # Boss character (Singulon)
+│   ├── quantum_gates/    # Quantum gate implementations
+│   ├── sample_game.py    # CLI battle game
+│   └── routes.py         # Flask API routes
+├── frontend/
+│   ├── index.html        # Main game interface
+│   └── static/          # CSS, JS, sprites, and assets
+│       ├── css/
+│       ├── js/
+│       └── sprites/
+├── environment.yml       # Conda environment
+├── README.md            # Project info
+└── tests/               # Test scripts
 ```
 
 ---
