@@ -155,7 +155,26 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
-    // Update qubit states only (HP updates are handled in real-time damage logic)
+    // Update HP bars and text from backend state
+    const playerHpPercent = (gameState.player.hp / 90) * 100;
+    const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+    
+    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+    
+    const playerHp = document.getElementById('player-hp');
+    const enemyHp = document.getElementById('enemy-hp');
+    if (playerHp) {
+        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+    }
+    if (enemyHp) {
+        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    }
+    
+    updateHealthBarColor(playerHealthFill, playerHpPercent);
+    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    
+    // Update qubit states
     const playerState = gameState.player.qubit_state || "|0⟩";
     const enemyState = gameState.enemy.qubit_state || "|0⟩";
     
@@ -378,6 +397,9 @@ async function executeMove(moveName) {
         if (result.state) {
             gameState = result.state;
             
+            // Update HP bars and display from backend state
+            updateBattleDisplay();
+            
             // Get new log entries
             const newLog = gameState.log || [];
             const newEntries = newLog.slice(oldLogLength);
@@ -460,45 +482,8 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Check for damage messages and update HP bars in real-time
-    if (message.includes("Dealt") && message.includes("damage!")) {
-        // Extract damage amount from message
-        const damageMatch = message.match(/Dealt (\d+) damage!/);
-        if (damageMatch) {
-            const damage = parseInt(damageMatch[1]);
-            
-            // Determine if it's player or enemy damage based on context
-            if (message.includes("Singulon used")) {
-                // Enemy dealt damage to player - update visual display only
-                const currentPlayerHp = gameState.player.hp;
-                const newPlayerHp = Math.max(0, currentPlayerHp - damage);
-                
-                // Update player HP bar and text immediately (visual only)
-                const playerHpPercent = (newPlayerHp / 90) * 100;
-                playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-                updateHealthBarColor(playerHealthFill, playerHpPercent);
-                
-                const playerHp = document.getElementById('player-hp');
-                if (playerHp) {
-                    playerHp.textContent = `${newPlayerHp}/90`;
-                }
-            } else {
-                // Player dealt damage to enemy - update visual display only
-                const currentEnemyHp = gameState.enemy.hp;
-                const newEnemyHp = Math.max(0, currentEnemyHp - damage);
-                
-                // Update enemy HP bar and text immediately (visual only)
-                const enemyHpPercent = (newEnemyHp / 400) * 100;
-                enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
-                updateHealthBarColor(enemyHealthFill, enemyHpPercent);
-                
-                const enemyHp = document.getElementById('enemy-hp');
-                if (enemyHp) {
-                    enemyHp.textContent = `${newEnemyHp}/400`;
-                }
-            }
-        }
-    }
+    // Note: HP updates are now handled by the backend only to prevent double damage
+    // The visual HP bars will update when the backend sends the final state
     
     // Check for final qubit state messages and update to current state
     if (message.includes("Your qubit is")) {

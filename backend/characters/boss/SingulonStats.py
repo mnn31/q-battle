@@ -14,7 +14,7 @@ class SingulonQuantumState:
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
         self.attack_stat = 60
-        self.defense = 10  # Much lower defense for better damage scaling
+        self.defense = 50  # Increased defense for more reasonable damage
         self.speed = 5
         self.hp = 400
         self.max_hp = 400
