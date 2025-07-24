@@ -924,6 +924,28 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for Quantum Afterburn recoil damage messages
     if (message.includes("QUANTUM AFTERBURN reflects") && message.includes("damage back to the enemy!")) {
+        console.log('Detected QUANTUM AFTERBURN recoil damage message:', message);
+        
+        // Update enemy HP bar to reflect recoil damage
+        const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+        
+        // Enemy took recoil damage - update visual display immediately
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+        
+        const enemyHp = document.getElementById('enemy-hp');
+        if (enemyHp) {
+            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+        }
+        
+        // Set flag to prevent double update
+        window.visualEnemyHpUpdated = true;
+    }
+    
+    // Check for any recoil damage messages (general fallback)
+    if (message.includes("recoil") && message.includes("damage")) {
+        console.log('Detected general recoil damage message:', message);
+        
         // Update enemy HP bar to reflect recoil damage
         const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
         
