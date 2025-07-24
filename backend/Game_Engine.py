@@ -5,40 +5,40 @@ import os
 # Add the characters directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'characters'))
 
-from backend.characters.bitzy.quantum_move import (
+from characters.bitzy.quantum_move import (
     quantum_move_bitzy_q_thunder,
     quantum_move_bitzy_shock,
     quantum_move_bitzy_dualize,
     quantum_move_bitzy_bit_flip,
     BitzyQuantumState
 )
-from backend.characters.bitzy.ability import ability_superhijack
-from backend.characters.neutrinette.quantum_move import (
+from characters.bitzy.ability import ability_superhijack
+from characters.neutrinette.quantum_move import (
     quantum_move_neutrinette_q_photon_geyser,
     quantum_move_neutrinette_glitch_claw,
     quantum_move_neutrinette_entangle,
     quantum_move_neutrinette_switcheroo,
     NeutrinetteQuantumState
 )
-from backend.characters.neutrinette.ability import ability_quantum_afterburn
-from backend.characters.resona.quantum_move import (
+from characters.neutrinette.ability import ability_quantum_afterburn
+from characters.resona.quantum_move import (
     quantum_move_resona_q_metronome,
     quantum_move_resona_wave_crash,
     quantum_move_resona_metal_noise,
     quantum_move_resona_shift_gear,
     ResonaQuantumState
 )
-from backend.characters.resona.ability import ability_quantum_waveform
-from backend.characters.higscrozma.quantum_move import (
+from characters.resona.ability import ability_quantum_waveform
+from characters.higscrozma.quantum_move import (
     quantum_move_higscrozma_q_void_rift,
     quantum_move_higscrozma_prismatic_laser,
     quantum_move_higscrozma_shadow_force,
     quantum_move_higscrozma_barrier,
     HigscrozmaQuantumState
 )
-from backend.characters.higscrozma.ability import ability_quantum_bulwark
-from backend.characters.boss.SingulonStats import SingulonQuantumState
-from backend.characters.boss.Moves import (
+from characters.higscrozma.ability import ability_quantum_bulwark
+from characters.boss.SingulonStats import SingulonQuantumState
+from characters.boss.Moves import (
     quantum_move_singulon_dualize,
     quantum_move_singulon_haze,
     quantum_move_singulon_bullet_muons,
