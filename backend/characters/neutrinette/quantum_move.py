@@ -23,7 +23,7 @@ class NeutrinetteQuantumState:
         self.is_entangled = False  # Track entanglement state
 
 def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy_hp=100, is_entangled=False, defender_defense=50):
-    """Q-PHOTON GEYSER: Requires |0⟩ or |1⟩ state, deals damage with HP cost"""
+    """Q-PHOTON GEYSER: Requires |0⟩ or |1⟩ state, deals damage"""
     if quantum_state.qubit_state == "superposition":
         return {
             "success": False,
@@ -32,16 +32,13 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
             "qubit_state": quantum_state.qubit_state
         }
     
-    # Calculate HP cost (25% of current HP)
-    hp_cost = int(current_hp * 0.25)
-    
     # Create circuit to measure current qubit state
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (150 base power for Q-Move) with proper RPG formula and damage roll
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 150, defender_defense)
+    # Calculate damage (100 base power for Q-Move) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 100, defender_defense)
     damage = apply_damage_roll(base_damage)
     
     # Collapse qubit randomly
@@ -50,32 +47,17 @@ def quantum_move_neutrinette_q_photon_geyser(quantum_state, current_hp=80, enemy
     else:
         quantum_state.qubit_state = "|0⟩"
     
-    # Handle entanglement effects - boss loses exactly the same HP
-    if is_entangled:
-        enemy_hp_cost = hp_cost  # Boss loses exactly the same amount
-        message = f"Q-PHOTON GEYSER deals {damage} damage! (Cost: {hp_cost} HP, Enemy loses {enemy_hp_cost} HP due to entanglement!)"
-        return {
-            "success": True,
-            "damage": damage,
-            "hp_cost": hp_cost,
-            "enemy_hp_cost": enemy_hp_cost,
-            "message": message,
-            "qubit_state": quantum_state.qubit_state,
-            "quantum_result": result,
-            "entanglement_effect": True
-        }
-    else:
-        message = f"Q-PHOTON GEYSER deals {damage} damage! (Cost: {hp_cost} HP)"
-        return {
-            "success": True,
-            "damage": damage,
-            "hp_cost": hp_cost,
-            "enemy_hp_cost": 0,
-            "message": message,
-            "qubit_state": quantum_state.qubit_state,
-            "quantum_result": result,
-            "entanglement_effect": False
-        }
+    message = f"Q-PHOTON GEYSER deals {damage} damage!"
+    return {
+        "success": True,
+        "damage": damage,
+        "hp_cost": 0,
+        "enemy_hp_cost": 0,
+        "message": message,
+        "qubit_state": quantum_state.qubit_state,
+        "quantum_result": result,
+        "entanglement_effect": False
+    }
 
 def quantum_move_neutrinette_glitch_claw(quantum_state, current_hp=80, defender_defense=50):
     """GLITCH CLAW: Deals damage with chance to heal"""

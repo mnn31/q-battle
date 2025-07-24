@@ -212,7 +212,7 @@ class SampleGame:
             print("Bitzy deals an additional 10 damage when using Q-Thunder or Shock if the enemy's qubit is in the state of 1.")
         elif self.character_name == "Neutrinette":
             print("1. Q-PHOTON GEYSER")
-            print("   Neutrinette's Q-Move. Loses 25% current HP if the qubit is in a state of either 0 or 1, but deals massive damage and collapses the qubit randomly. (DMG: 75)")
+            print("   Neutrinette's Q-Move. Deals massive damage and collapses the qubit randomly. (DMG: 100)")
             print("2. GLITCH CLAW")
             print("   Deals damage and has a chance of healing the user for 20% max HP. (DMG: 40)")
             print("3. ENTANGLE")
@@ -220,7 +220,9 @@ class SampleGame:
             print("4. SWITCHEROO")
             print("   Swaps the states of the qubit and the enemy's qubit.")
             print("\nAbility: QUANTUM AFTERBURN")
-            print("When Neutrinette takes damage while entangled, 25% of that damage is reflected back to the enemy as recoil damage.")
+            print("When Neutrinette is entangled:")
+            print("- When taking damage: 75% of that damage is reflected back to the enemy")
+            print("- When attacking: Deals 30 extra HP damage to the enemy")
         elif self.character_name == "Resona":
             print("1. Q-METRONOME")
             print("   Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)")
@@ -310,8 +312,6 @@ class SampleGame:
         elif self.character_name == "Neutrinette":
             if move_name == "Q-PHOTON GEYSER":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.hp, self.player_state.is_entangled, self.boss_state.defense)
-                if result.get("enemy_hp_cost", 0) > 0:
-                    self.boss_state.hp -= result["enemy_hp_cost"]
             elif move_name == "GLITCH CLAW":
                 result = move_func(self.player_state, self.player_hp, self.boss_state.defense)
                 if result.get("heal", 0) > 0:
@@ -460,8 +460,6 @@ class SampleGame:
             elif self.boss_character == "Neutrinette":
                 if move_name == "Q-PHOTON GEYSER":
                     result = move_func(self.boss_state, self.boss_state.hp, self.player_hp, self.boss_state.is_entangled, self.boss_state.defense)
-                    if result.get("enemy_hp_cost", 0) > 0:
-                        self.player_hp -= result["enemy_hp_cost"]
                 elif move_name == "GLITCH CLAW":
                     result = move_func(self.boss_state, self.boss_state.hp, self.boss_state.defense)
                     if result.get("heal", 0) > 0:

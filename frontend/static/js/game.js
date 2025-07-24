@@ -21,13 +21,13 @@ const characterData = {
         sprite: "/static/sprites/neutrinette.gif",
         speed: 90, // Speed stat for turn order
         moves: [
-            { name: "Q-PHOTON GEYSER", desc: "Neutrinette's Q-Move. Loses 25% current HP if the qubit is in a state of either 0 or 1, but deals massive damage and collapses the qubit randomly. (DMG: 75)" },
+            { name: "Q-PHOTON GEYSER", desc: "Neutrinette's Q-Move. Deals massive damage and collapses the qubit randomly. (DMG: 100)" },
             { name: "GLITCH CLAW", desc: "Deals damage and has a chance of healing the user for 20% max HP. (DMG: 40)" },
             { name: "ENTANGLE", desc: "Puts the qubit and the enemy's qubit in a state of ENTANGLEMENT with each other if it wasn't previously." },
             { name: "SWITCHEROO", desc: "Swaps the states of the qubit and the enemy's qubit." }
         ],
         maxHp: 90,
-        ability: "QUANTUM AFTERBURN: When Neutrinette takes damage while entangled, 25% of that damage is reflected back to the enemy as recoil damage."
+        ability: "QUANTUM AFTERBURN: When Neutrinette is entangled: When taking damage, 75% of that damage is reflected back to the enemy. When attacking, deals 30 extra HP damage to the enemy."
     },
     "Resona": {
         sprite: "/static/sprites/resona.gif",
@@ -288,7 +288,7 @@ window.updateBattleDisplay = updateBattleDisplay;
 function setupSpriteHover(character) {
     const abilityDescriptions = {
         "Bitzy": "SUPERHIJACK: +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩",
-        "Neutrinette": "QUANTUM AFTERBURN: 25% of damage taken while entangled is reflected back to enemy",
+        "Neutrinette": "QUANTUM AFTERBURN: When Neutrinette is entangled: When taking damage, 75% of that damage is reflected back to the enemy. When attacking, deals 30 extra HP damage to the enemy.",
         "Resona": "QUANTUM WAVEFORM: Stacks increase collapse probability and damage",
         "Higscrozma": "QUANTUM BULWARK: Barriers reduce damage taken/dealt, back barriers boost damage"
     };
@@ -801,30 +801,6 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Check for Q-PHOTON GEYSER HP cost
-    if (message.includes("Q-PHOTON GEYSER") && message.includes("Cost:")) {
-        console.log('Detected Q-PHOTON GEYSER HP cost message:', message);
-        
-        // Get character max HP from character data
-        const charData = characterData[currentCharacter];
-        const maxPlayerHp = charData ? charData.maxHp : 90;
-        
-        // Update HP bars to reflect the HP cost
-        const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
-        
-        // Player lost HP from Q-PHOTON GEYSER cost - update visual display immediately
-        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        updateHealthBarColor(playerHealthFill, playerHpPercent);
-        
-        const playerHp = document.getElementById('player-hp');
-        if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
-        }
-        
-        // Set flag to prevent double update
-        window.visualPlayerHpUpdated = true;
-    }
-    
     // Check for SWITCHEROO (swaps qubit states)
     if (message.includes("swaps qubit states")) {
         const playerQubit = document.getElementById('player-qubit');
@@ -945,8 +921,9 @@ function updateQubitStatesFromMessage(message) {
     }
     
     // Check for any recoil damage messages (general fallback)
-    if (message.includes("recoil") && message.includes("damage")) {
-        console.log('Detected general recoil damage message:', message);
+    if ((message.includes("recoil") && message.includes("damage")) || 
+        (message.includes("reflects") && message.includes("damage") && message.includes("enemy"))) {
+        console.log('Detected recoil/reflect damage message:', message);
         
         // Update enemy HP bar to reflect recoil damage
         const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
@@ -965,7 +942,9 @@ function updateQubitStatesFromMessage(message) {
     }
     
     // Check for damage messages and update HP bars visually in real-time
-    if (message.includes("Dealt") && message.includes("damage!")) {
+    if ((message.includes("Dealt") && message.includes("damage!")) || 
+        (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW"))) ||
+        (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage"))) {
         console.log('Detected damage message:', message);
         
         // Get character max HP from character data
@@ -976,10 +955,10 @@ function updateQubitStatesFromMessage(message) {
         const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
         const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
         
-        // Determine if it's player or enemy damage based on the previous message
-        const logIndex = gameState.log.indexOf(message);
-        const previousMessage = logIndex > 0 ? gameState.log[logIndex - 1] : "";
-        const isEnemyDamage = previousMessage.includes("Singulon used");
+        // Determine if it's player or enemy damage based on the message content
+        const isEnemyDamage = message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || 
+                             (message.includes("Dealt") && message.includes("damage!") && 
+                              (gameState.log[gameState.log.length - 2] || "").includes("Singulon used"));
         
         if (isEnemyDamage) {
             // Enemy dealt damage to player - update visual display immediately

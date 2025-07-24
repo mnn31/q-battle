@@ -144,18 +144,10 @@ def process_move(move):
         player_state = neutrinette_state
         if move == "Q-PHOTON GEYSER":
             result = quantum_move_neutrinette_q_photon_geyser(player_state, game_state["player"]["hp"], game_state["enemy"]["hp"], player_state.is_entangled, singulon_state.defense)
-            if result.get("enemy_hp_cost", 0) > 0:
-                game_state["enemy"]["hp"] -= result["enemy_hp_cost"]
-            # Add the specific message from the quantum move
-            if "message" in result:
-                log.append(result["message"])
         elif move == "GLITCH CLAW":
             result = quantum_move_neutrinette_glitch_claw(player_state, game_state["player"]["hp"], singulon_state.defense)
             if result.get("heal", 0) > 0:
                 game_state["player"]["hp"] = min(90, game_state["player"]["hp"] + result["heal"])
-            # Add the specific message from the quantum move
-            if "message" in result:
-                log.append(result["message"])
         elif move == "ENTANGLE":
             result = quantum_move_neutrinette_entangle(player_state, game_state["enemy"]["qubit_state"])
         elif move == "SWITCHEROO":
@@ -217,6 +209,8 @@ def process_move(move):
             singulon_state.qubit_state = result["enemy_qubit_state"]
     
     # Add specific move messages (like HP cost) AFTER the "used" message
+    # Note: Q-PHOTON GEYSER and GLITCH CLAW already have their messages added above
+    # so we don't need to add them again here
     if move == "Q-PHOTON GEYSER" and "message" in result:
         log.append(result["message"])
     elif move == "GLITCH CLAW" and "message" in result:
@@ -250,10 +244,19 @@ def process_move(move):
         
         return {"state": game_state, "enemy_move": enemy_move_info}
     
-    # 2. Dealt <damage> damage! (only if damage > 0)
+    # 2. Dealt <damage> damage! (only if damage > 0 and move doesn't already include damage in message)
     damage = result.get("damage", 0)
-    if damage > 0:
+    if damage > 0 and move not in ["Q-PHOTON GEYSER", "GLITCH CLAW"]:
         log.append(f"Dealt {damage} damage!")
+    
+    # QUANTUM AFTERBURN: Check if Neutrinette is attacking while entangled
+    if character == "Neutrinette" and player_state.is_entangled and damage > 0:
+        from characters.neutrinette.ability import ability_quantum_afterburn
+        afterburn_result = ability_quantum_afterburn(player_state, damage, is_attacking=True)
+        if afterburn_result["extra_damage"] > 0:
+            game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["extra_damage"])
+            log.append(afterburn_result["message"])
+    
     game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
 
     # Update player's qubit state (if not already updated)
@@ -357,17 +360,17 @@ def enemy_attack():
             if "message" in result:
                 log.append(result["message"])
         
-        # 4. Dealt <damage> damage! (only if damage > 0)
-        if damage > 0:
+        # 4. Dealt <damage> damage! (only if damage > 0 and move doesn't already include damage in message)
+        if damage > 0 and move_name not in ["BULLET MUONS", "Q-PRISMATIC LASER"]:
             log.append(f"Dealt {damage} damage!")
-            
-            # QUANTUM AFTERBURN: Check if Neutrinette is entangled and apply recoil damage
-            if character == "Neutrinette" and player_state.is_entangled:
-                from .characters.neutrinette.ability import ability_quantum_afterburn
-                afterburn_result = ability_quantum_afterburn(player_state, damage)
-                if afterburn_result["recoil_damage"] > 0:
-                    game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
-                    log.append(afterburn_result["message"])
+        
+        # QUANTUM AFTERBURN: Check if Neutrinette is entangled and apply recoil damage
+        if character == "Neutrinette" and player_state.is_entangled and damage > 0:
+            from characters.neutrinette.ability import ability_quantum_afterburn
+            afterburn_result = ability_quantum_afterburn(player_state, damage, is_attacking=False)
+            if afterburn_result["recoil_damage"] > 0:
+                game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
+                log.append(afterburn_result["message"])
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
