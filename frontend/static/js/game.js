@@ -1404,6 +1404,7 @@ function updateQubitStatesFromMessage(message) {
         
         // Set flag to prevent double update
         window.visualEnemyHpUpdated = true;
+        console.log('Updated enemy HP bar for QUANTUM AFTERBURN extra damage');
     }
     
     // Check for any recoil damage messages (general fallback)

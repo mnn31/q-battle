@@ -253,9 +253,11 @@ def process_move(move):
     if character == "Neutrinette" and player_state.is_entangled and damage > 0:
         from characters.neutrinette.ability import ability_quantum_afterburn
         afterburn_result = ability_quantum_afterburn(player_state, damage, is_attacking=True)
+        print(f"[DEBUG] QUANTUM AFTERBURN attacking: {afterburn_result}")
         if afterburn_result["extra_damage"] > 0:
             game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["extra_damage"])
             log.append(afterburn_result["message"])
+            print(f"[DEBUG] Applied {afterburn_result['extra_damage']} extra damage to enemy")
     
     game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
 
@@ -368,9 +370,11 @@ def enemy_attack():
         if character == "Neutrinette" and player_state.is_entangled and damage > 0:
             from characters.neutrinette.ability import ability_quantum_afterburn
             afterburn_result = ability_quantum_afterburn(player_state, damage, is_attacking=False)
+            print(f"[DEBUG] QUANTUM AFTERBURN defending: {afterburn_result}")
             if afterburn_result["recoil_damage"] > 0:
                 game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
                 log.append(afterburn_result["message"])
+                print(f"[DEBUG] Applied {afterburn_result['recoil_damage']} recoil damage to enemy")
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
