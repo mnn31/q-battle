@@ -386,7 +386,7 @@ function clearBattleMessage() {
     battleLog.innerHTML = '';
 }
 
-// Execute move with simple backend log replay
+// Execute move with animations
 async function executeMove(moveName) {
     if (!gameState || gameState.turn !== 'player' || isProcessingMove) {
         return;
@@ -394,6 +394,11 @@ async function executeMove(moveName) {
     
     isProcessingMove = true;
     disableMoveButtons();
+    
+    // Trigger animations based on move
+    if (currentCharacter === 'Bitzy') {
+        triggerBitzyAnimation(moveName);
+    }
     
     try {
         // Store current log length
@@ -456,6 +461,287 @@ async function executeMove(moveName) {
     } finally {
         isProcessingMove = false;
     }
+}
+
+// Bitzy Animation System - Based on Pokémon Showdown
+function triggerBitzyAnimation(moveName) {
+    console.log('Triggering Bitzy animation for:', moveName);
+    
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    
+    if (!playerSprite || !enemySprite) {
+        console.log('Animation elements not found:', { playerSprite, enemySprite });
+        return;
+    }
+    
+    switch (moveName) {
+        case 'Q-THUNDER':
+            triggerQThunderAnimation(playerSprite, enemySprite);
+            break;
+        case 'SHOCK':
+            triggerShockAnimation(playerSprite, enemySprite);
+            break;
+        case 'DUALIZE':
+            triggerDualizeAnimation(playerSprite);
+            break;
+        case 'BIT-FLIP':
+            triggerBitFlipAnimation(enemySprite);
+            break;
+    }
+}
+
+// Q-THUNDER Animation - Based on PS's thunder animation
+function triggerQThunderAnimation(playerSprite, enemySprite) {
+    console.log('Q-THUNDER animation triggered');
+    
+    // Create background flash effect (like PS's backgroundEffect)
+    const backgroundFlash = document.createElement('div');
+    backgroundFlash.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        opacity: 0;
+        z-index: 999;
+        pointer-events: none;
+    `;
+    document.body.appendChild(backgroundFlash);
+    
+    // Flash sequence
+    setTimeout(() => {
+        backgroundFlash.style.opacity = '0.7';
+        setTimeout(() => {
+            backgroundFlash.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(backgroundFlash);
+            }, 250);
+        }, 300);
+    }, 100);
+    
+    // Create lightning bolts - MUCH CLOSER to enemy
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const centerX = enemyRect.left + enemyRect.width / 2;
+    const topY = enemyRect.top - 50; // Much closer!
+    
+    // Create MANY lightning bolts for dramatic effect - Q-THUNDER gets 10 MORE
+    for (let i = 0; i < 25; i++) {
+        const offsetX = (Math.random() - 0.5) * 120; // Spread around enemy
+        const delay = i * 40; // Staggered timing
+        createLightningBolt(centerX + offsetX, topY, delay);
+    }
+    
+    // Additional lightning bolts with different timing
+    setTimeout(() => {
+        for (let i = 0; i < 15; i++) {
+            const offsetX = (Math.random() - 0.5) * 100;
+            createLightningBolt(centerX + offsetX, topY, i * 25);
+        }
+    }, 300);
+    
+    // Third wave of lightning
+    setTimeout(() => {
+        for (let i = 0; i < 13; i++) {
+            const offsetX = (Math.random() - 0.5) * 80;
+            createLightningBolt(centerX + offsetX, topY, i * 35);
+        }
+    }, 600);
+}
+
+// SHOCK Animation - Based on PS's thunderbolt animation
+function triggerShockAnimation(playerSprite, enemySprite) {
+    console.log('SHOCK animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const centerX = enemyRect.left + enemyRect.width / 2;
+    const topY = enemyRect.top - 30; // Much closer!
+    
+    // Create background effect
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Background flash
+    setTimeout(() => {
+        backgroundEffect.style.opacity = '0.2';
+        setTimeout(() => {
+            backgroundEffect.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(backgroundEffect);
+            }, 250);
+        }, 600);
+    }, 100);
+    
+    // Create electric sparks for focused effect - SHOCK gets 10 FEWER
+    for (let i = 0; i < 2; i++) {
+        const offsetX = (Math.random() - 0.5) * 60;
+        const delay = i * 50;
+        createElectricSpark(centerX + offsetX, topY, delay);
+    }
+    
+    // Second wave
+    setTimeout(() => {
+        for (let i = 0; i < 3; i++) {
+            const offsetX = (Math.random() - 0.5) * 40;
+            createElectricSpark(centerX + offsetX, topY, i * 40);
+        }
+    }, 200);
+}
+
+// DUALIZE Animation
+function triggerDualizeAnimation(playerSprite) {
+    console.log('DUALIZE animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const centerX = playerRect.left + playerRect.width / 2;
+    const centerY = playerRect.top + playerRect.height / 2;
+    
+    // Create superposition wave effect with FILLED shape
+    const wave = document.createElement('div');
+    wave.style.cssText = `
+        position: fixed;
+        left: ${centerX - 60}px;
+        top: ${centerY - 60}px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(138, 43, 226, 0.8), rgba(138, 43, 226, 0.4), rgba(138, 43, 226, 0.2));
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+        z-index: 1000;
+        pointer-events: none;
+        animation: superpositionWave 1.5s ease-in-out;
+    `;
+    document.body.appendChild(wave);
+    
+    setTimeout(() => {
+        if (wave.parentNode) {
+            document.body.removeChild(wave);
+        }
+    }, 1500);
+}
+
+// BIT-FLIP Animation
+function triggerBitFlipAnimation(enemySprite) {
+    console.log('BIT-FLIP animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    
+    // Create state change flash
+    const flash = document.createElement('div');
+    flash.style.cssText = `
+        position: fixed;
+        left: ${enemyRect.left}px;
+        top: ${enemyRect.top}px;
+        width: ${enemyRect.width}px;
+        height: ${enemyRect.height}px;
+        background: rgba(255, 255, 255, 0.9);
+        z-index: 1000;
+        pointer-events: none;
+        animation: stateChangeFlash 0.6s ease-in-out;
+    `;
+    document.body.appendChild(flash);
+    
+    setTimeout(() => {
+        if (flash.parentNode) {
+            document.body.removeChild(flash);
+        }
+    }, 600);
+}
+
+// Helper function to create lightning bolts using PS's lightning image - MUCH FATTER
+function createLightningBolt(x, y, delay) {
+    setTimeout(() => {
+        const lightning = document.createElement('img');
+        lightning.src = '/static/images/lightning.png';
+        lightning.style.cssText = `
+            position: fixed;
+            left: ${x - 60}px;
+            top: ${y}px;
+            width: 120px;
+            height: 400px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+        `;
+        document.body.appendChild(lightning);
+        
+        // Animate like PS: start with yscale 0, animate to full height
+        setTimeout(() => {
+            lightning.style.opacity = '1';
+            lightning.style.transform = 'scaleY(0)';
+            lightning.style.transformOrigin = 'top';
+            
+            setTimeout(() => {
+                lightning.style.transform = 'scaleY(1)';
+                lightning.style.transition = 'transform 0.3s linear';
+                
+                setTimeout(() => {
+                    lightning.style.opacity = '0';
+                    lightning.style.transition = 'opacity 0.6s linear';
+                    
+                    setTimeout(() => {
+                        if (lightning.parentNode) {
+                            document.body.removeChild(lightning);
+                        }
+                    }, 600);
+                }, 300);
+            }, 50);
+        }, 50);
+    }, delay);
+}
+
+// Helper function to create electric sparks using PS's lightning image - MUCH FATTER
+function createElectricSpark(x, y, delay) {
+    setTimeout(() => {
+        const spark = document.createElement('img');
+        spark.src = '/static/images/lightning.png';
+        spark.style.cssText = `
+            position: fixed;
+            left: ${x - 50}px;
+            top: ${y}px;
+            width: 100px;
+            height: 350px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+        `;
+        document.body.appendChild(spark);
+        
+        // Animate like PS thunderbolt: start with yscale 0, animate to full height
+        setTimeout(() => {
+            spark.style.opacity = '0.9';
+            spark.style.transform = 'scaleY(0)';
+            spark.style.transformOrigin = 'top';
+            
+            setTimeout(() => {
+                spark.style.transform = 'scaleY(1)';
+                spark.style.transition = 'transform 0.25s linear';
+                
+                setTimeout(() => {
+                    spark.style.opacity = '0';
+                    spark.style.transition = 'opacity 0.5s linear';
+                    
+                    setTimeout(() => {
+                        if (spark.parentNode) {
+                            document.body.removeChild(spark);
+                        }
+                    }, 500);
+                }, 250);
+            }, 50);
+        }, 50);
+    }, delay);
 }
 
 // Update qubit states based on the message being displayed
