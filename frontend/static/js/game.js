@@ -802,7 +802,9 @@ function updateQubitStatesFromMessage(message) {
     }
     
     // Check for Q-PHOTON GEYSER HP cost
-    if (message.includes("Q-PHOTON GEYSER") && message.includes("loses 25%")) {
+    if (message.includes("Q-PHOTON GEYSER") && message.includes("Cost:")) {
+        console.log('Detected Q-PHOTON GEYSER HP cost message:', message);
+        
         // Get character max HP from character data
         const charData = characterData[currentCharacter];
         const maxPlayerHp = charData ? charData.maxHp : 90;
