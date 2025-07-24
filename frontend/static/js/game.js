@@ -763,8 +763,500 @@ function createElectricSpark(x, y, delay) {
 // Neutrinette Animation System - Placeholder for now
 function triggerNeutrinetteAnimation(moveName) {
     console.log('Triggering Neutrinette animation for:', moveName);
-    // Placeholder - do nothing for now to prevent errors
-    return;
+    
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    
+    if (!playerSprite || !enemySprite) {
+        console.log('Animation elements not found:', { playerSprite, enemySprite });
+        return;
+    }
+    
+    switch (moveName) {
+        case 'Q-PHOTON GEYSER':
+            triggerPhotonGeyserAnimation(playerSprite, enemySprite);
+            break;
+        case 'GLITCH CLAW':
+            triggerGlitchClawAnimation(playerSprite, enemySprite);
+            break;
+        case 'ENTANGLE':
+            triggerEntangleAnimation(playerSprite, enemySprite);
+            break;
+        case 'SWITCHEROO':
+            triggerSwitcherooAnimation(playerSprite, enemySprite);
+            break;
+    }
+}
+
+// Q-PHOTON GEYSER Animation - Based on PS's psychic moves
+function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
+    console.log('Q-PHOTON GEYSER animation triggered');
+    
+    // Create psychic background effect
+    const psychicBackground = document.createElement('div');
+    psychicBackground.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #8B5CF6, #EC4899, #8B5CF6);
+        opacity: 0;
+        z-index: 999;
+        pointer-events: none;
+        animation: psychicPulse 1.5s ease-in-out;
+    `;
+    document.body.appendChild(psychicBackground);
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes psychicPulse {
+            0% { opacity: 0; }
+            20% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            80% { opacity: 0.3; }
+            100% { opacity: 0; }
+        }
+        @keyframes photonBeam {
+            0% { transform: scaleX(0); opacity: 1; }
+            50% { transform: scaleX(1); opacity: 1; }
+            100% { transform: scaleX(1); opacity: 0; }
+        }
+        @keyframes psychicOrb {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Create photon beam effect
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerRect = playerSprite.getBoundingClientRect();
+    
+    // Create multiple photon beams
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const photonBeam = document.createElement('div');
+            photonBeam.style.cssText = `
+                position: fixed;
+                left: ${playerRect.left + playerRect.width / 2}px;
+                top: ${playerRect.top + playerRect.height / 2}px;
+                width: 16px;
+                height: 16px;
+                background: linear-gradient(90deg, #FFD700, #FFA500, #FF4500);
+                border-radius: 50%;
+                z-index: 1000;
+                pointer-events: none;
+                animation: photonBeam 0.8s ease-out;
+                transform-origin: left center;
+            `;
+            document.body.appendChild(photonBeam);
+            
+            // Animate beam to enemy
+            setTimeout(() => {
+                photonBeam.style.left = `${enemyRect.left + enemyRect.width / 2}px`;
+                photonBeam.style.top = `${enemyRect.top + enemyRect.height / 2}px`;
+                photonBeam.style.width = '400px';
+                photonBeam.style.height = '8px';
+                photonBeam.style.borderRadius = '4px';
+            }, 50);
+            
+            setTimeout(() => {
+                if (document.body.contains(photonBeam)) {
+                    document.body.removeChild(photonBeam);
+                }
+            }, 800);
+        }, i * 150);
+    }
+    
+    // Create MUCH BIGGER psychic orbs around enemy (10x size)
+    setTimeout(() => {
+        for (let i = 0; i < 8; i++) {
+            const orb = document.createElement('div');
+            const angle = (i / 8) * 2 * Math.PI;
+            const radius = 120; // Increased radius
+            const x = enemyRect.left + enemyRect.width / 2 + Math.cos(angle) * radius;
+            const y = enemyRect.top + enemyRect.height / 2 + Math.sin(angle) * radius;
+            
+            orb.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: 200px;
+                height: 200px;
+                background: radial-gradient(circle, #FFD700, #FFA500, #FF4500);
+                border-radius: 50%;
+                z-index: 1000;
+                pointer-events: none;
+                animation: psychicOrb 1s ease-out;
+                box-shadow: 0 0 30px #FFD700;
+            `;
+            document.body.appendChild(orb);
+            
+            setTimeout(() => {
+                if (document.body.contains(orb)) {
+                    document.body.removeChild(orb);
+                }
+            }, 1000);
+        }
+    }, 400);
+    
+    // Clean up background
+    setTimeout(() => {
+        if (document.body.contains(psychicBackground)) {
+            document.body.removeChild(psychicBackground);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+    }, 1500);
+}
+
+// GLITCH CLAW Animation - Based on PS's dragon claw moves
+function triggerGlitchClawAnimation(playerSprite, enemySprite) {
+    console.log('GLITCH CLAW animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerRect = playerSprite.getBoundingClientRect();
+    
+    // Add CSS animation for claw effects
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes glitchClaw {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        @keyframes glitchEffect {
+            0% { transform: translateX(0) skewX(0deg); }
+            25% { transform: translateX(-2px) skewX(-1deg); }
+            50% { transform: translateX(2px) skewX(1deg); }
+            75% { transform: translateX(-1px) skewX(-0.5deg); }
+            100% { transform: translateX(0) skewX(0deg); }
+        }
+        @keyframes clawStrike {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            20% { transform: scale(1.5) rotate(45deg); opacity: 1; }
+            40% { transform: scale(1.2) rotate(90deg); opacity: 0.8; }
+            60% { transform: scale(1.5) rotate(135deg); opacity: 1; }
+            80% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(0) rotate(225deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Create actual claw effect (based on dragon claw)
+    const clawEffect = document.createElement('div');
+    clawEffect.style.cssText = `
+        position: fixed;
+        left: ${enemyRect.left + enemyRect.width / 2 - 100}px;
+        top: ${enemyRect.top + enemyRect.height / 2 - 100}px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, transparent 20%, #4A5568 30%, #2D3748 50%, #1A202C 70%, transparent 80%);
+        z-index: 1000;
+        pointer-events: none;
+        animation: clawStrike 0.8s ease-out;
+    `;
+    document.body.appendChild(clawEffect);
+    
+    // Create individual claw marks (like dragon claw)
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const clawMark = document.createElement('div');
+            const offsetX = (Math.random() - 0.5) * 150;
+            const offsetY = (Math.random() - 0.5) * 150;
+            
+            clawMark.style.cssText = `
+                position: fixed;
+                left: ${enemyRect.left + enemyRect.width / 2 + offsetX}px;
+                top: ${enemyRect.top + enemyRect.height / 2 + offsetY}px;
+                width: 80px;
+                height: 40px;
+                background: linear-gradient(45deg, #2D3748, #4A5568, #2D3748);
+                clip-path: polygon(0 50%, 20% 0, 40% 20%, 60% 0, 80% 20%, 100% 0, 100% 100%, 80% 80%, 60% 100%, 40% 80%, 20% 100%, 0 50%);
+                z-index: 1001;
+                pointer-events: none;
+                animation: clawStrike 0.6s ease-out;
+                transform: rotate(${Math.random() * 360}deg);
+            `;
+            document.body.appendChild(clawMark);
+            
+            setTimeout(() => {
+                if (document.body.contains(clawMark)) {
+                    document.body.removeChild(clawMark);
+                }
+            }, 600);
+        }, i * 100);
+    }
+    
+    // Create glitch effect on enemy sprite
+    enemySprite.style.animation = 'glitchEffect 0.3s ease-in-out';
+    setTimeout(() => {
+        enemySprite.style.animation = '';
+    }, 300);
+    
+    // Create shadow claw trails (MUCH BIGGER)
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const shadowClaw = document.createElement('div');
+            shadowClaw.style.cssText = `
+                position: fixed;
+                left: ${playerRect.left + playerRect.width / 2}px;
+                top: ${playerRect.top + playerRect.height / 2}px;
+                width: 120px;
+                height: 8px;
+                background: linear-gradient(90deg, #2D3748, #4A5568, #2D3748);
+                border-radius: 4px;
+                z-index: 999;
+                pointer-events: none;
+                opacity: 0.7;
+                transform: rotate(${Math.random() * 30 - 15}deg);
+            `;
+            document.body.appendChild(shadowClaw);
+            
+            // Animate shadow claw to enemy
+            setTimeout(() => {
+                shadowClaw.style.left = `${enemyRect.left + enemyRect.width / 2}px`;
+                shadowClaw.style.top = `${enemyRect.top + enemyRect.height / 2}px`;
+                shadowClaw.style.opacity = '0';
+            }, 50);
+            
+            setTimeout(() => {
+                if (document.body.contains(shadowClaw)) {
+                    document.body.removeChild(shadowClaw);
+                }
+            }, 600);
+        }, i * 100);
+    }
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(clawEffect)) {
+            document.body.removeChild(clawEffect);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+    }, 800);
+}
+
+// ENTANGLE Animation - Based on PS's psychic moves
+function triggerEntangleAnimation(playerSprite, enemySprite) {
+    console.log('ENTANGLE animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    
+    // Create MUCH BIGGER entanglement effect
+    const entangleEffect = document.createElement('div');
+    entangleEffect.style.cssText = `
+        position: fixed;
+        left: ${playerRect.left + playerRect.width / 2 - 200}px;
+        top: ${playerRect.top + playerRect.height / 2 - 200}px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, transparent 20%, #8B5CF6 30%, #EC4899 50%, transparent 70%);
+        z-index: 1000;
+        pointer-events: none;
+        animation: entanglePulse 1.2s ease-in-out;
+    `;
+    document.body.appendChild(entangleEffect);
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes entanglePulse {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 0.6; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+        @keyframes quantumLink {
+            0% { stroke-dasharray: 0 1000; opacity: 0; }
+            50% { stroke-dasharray: 500 500; opacity: 1; }
+            100% { stroke-dasharray: 1000 0; opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Create quantum link between sprites
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('style', `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+        pointer-events: none;
+    `);
+    document.body.appendChild(svg);
+    
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    line.setAttribute('x1', playerX);
+    line.setAttribute('y1', playerY);
+    line.setAttribute('x2', enemyX);
+    line.setAttribute('y2', enemyY);
+    line.setAttribute('stroke', '#8B5CF6');
+    line.setAttribute('stroke-width', '8');
+    line.setAttribute('stroke-dasharray', '20,10');
+    line.style.animation = 'quantumLink 1.5s ease-in-out';
+    
+    svg.appendChild(line);
+    
+    // Create MUCH BIGGER quantum particles along the link
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+            const particle = document.createElement('div');
+            const progress = i / 15;
+            const x = playerX + (enemyX - playerX) * progress;
+            const y = playerY + (enemyY - playerY) * progress;
+            
+            particle.style.cssText = `
+                position: fixed;
+                left: ${x}px;
+                top: ${y}px;
+                width: 24px;
+                height: 24px;
+                background: radial-gradient(circle, #EC4899, #8B5CF6);
+                border-radius: 50%;
+                z-index: 1000;
+                pointer-events: none;
+                animation: entanglePulse 0.8s ease-out;
+                box-shadow: 0 0 20px #EC4899;
+            `;
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                if (document.body.contains(particle)) {
+                    document.body.removeChild(particle);
+                }
+            }, 800);
+        }, i * 100);
+    }
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(entangleEffect)) {
+            document.body.removeChild(entangleEffect);
+        }
+        if (document.body.contains(svg)) {
+            document.body.removeChild(svg);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+    }, 1500);
+}
+
+// SWITCHEROO Animation - Based on PS's psychic moves
+function triggerSwitcherooAnimation(playerSprite, enemySprite) {
+    console.log('SWITCHEROO animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    
+    // Create MUCH BIGGER swap effect
+    const swapEffect = document.createElement('div');
+    swapEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #8B5CF6, #EC4899, #8B5CF6);
+        opacity: 0;
+        z-index: 999;
+        pointer-events: none;
+        animation: swapFlash 0.8s ease-in-out;
+    `;
+    document.body.appendChild(swapEffect);
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes swapFlash {
+            0% { opacity: 0; }
+            30% { opacity: 0.4; }
+            70% { opacity: 0.4; }
+            100% { opacity: 0; }
+        }
+        @keyframes swapSpin {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(0.8) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Animate sprites spinning
+    playerSprite.style.animation = 'swapSpin 0.8s ease-in-out';
+    enemySprite.style.animation = 'swapSpin 0.8s ease-in-out';
+    
+    // Create MUCH BIGGER swap arrows
+    setTimeout(() => {
+        const arrow1 = document.createElement('div');
+        arrow1.style.cssText = `
+            position: fixed;
+            left: ${playerRect.left + playerRect.width / 2}px;
+            top: ${playerRect.top + playerRect.height / 2}px;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(90deg, #8B5CF6, #EC4899);
+            clip-path: polygon(0 50%, 100% 0, 100% 100%);
+            z-index: 1000;
+            pointer-events: none;
+            animation: swapFlash 0.8s ease-in-out;
+        `;
+        document.body.appendChild(arrow1);
+        
+        const arrow2 = document.createElement('div');
+        arrow2.style.cssText = `
+            position: fixed;
+            left: ${enemyRect.left + enemyRect.width / 2 - 80}px;
+            top: ${enemyRect.top + enemyRect.height / 2}px;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(90deg, #EC4899, #8B5CF6);
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+            z-index: 1000;
+            pointer-events: none;
+            animation: swapFlash 0.8s ease-in-out;
+        `;
+        document.body.appendChild(arrow2);
+        
+        setTimeout(() => {
+            if (document.body.contains(arrow1)) {
+                document.body.removeChild(arrow1);
+            }
+            if (document.body.contains(arrow2)) {
+                document.body.removeChild(arrow2);
+            }
+        }, 800);
+    }, 200);
+    
+    // Reset sprite animations
+    setTimeout(() => {
+        playerSprite.style.animation = '';
+        enemySprite.style.animation = '';
+    }, 800);
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(swapEffect)) {
+            document.body.removeChild(swapEffect);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+    }, 800);
 }
 
 // Update qubit states based on the message being displayed
