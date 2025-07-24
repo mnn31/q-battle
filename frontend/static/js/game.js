@@ -966,6 +966,8 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for damage messages and update HP bars visually in real-time
     if (message.includes("Dealt") && message.includes("damage!")) {
+        console.log('Detected damage message:', message);
+        
         // Get character max HP from character data
         const charData = characterData[currentCharacter];
         const maxPlayerHp = charData ? charData.maxHp : 90;

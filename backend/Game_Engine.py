@@ -186,10 +186,10 @@ def process_move(move):
         elif move == "BARRIER":
             result = quantum_move_higscrozma_barrier(player_state)
 
-    # 1. Bitzy used <move>!
+    # 1. Character used <move>!
     log.append(f"{character} used {move}!")
     
-    # Add specific move descriptions
+    # Add specific move descriptions AFTER the "used" message
     if move == "DUALIZE":
         log.append(f"{character} put its qubit into superposition!")
         # Update qubit state immediately for real-time display
@@ -215,6 +215,12 @@ def process_move(move):
         if "enemy_qubit_state" in result:
             game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
             singulon_state.qubit_state = result["enemy_qubit_state"]
+    
+    # Add specific move messages (like HP cost) AFTER the "used" message
+    if move == "Q-PHOTON GEYSER" and "message" in result:
+        log.append(result["message"])
+    elif move == "GLITCH CLAW" and "message" in result:
+        log.append(result["message"])
     
     # Check if move failed
     if not result.get("success", True):
@@ -329,7 +335,7 @@ def enemy_attack():
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
         
-        # Add specific move descriptions for enemy
+        # Add specific move descriptions for enemy AFTER the "used" message
         if move_name == "DUALIZE":
             log.append("Singulon put its qubit into superposition!")
             # Update qubit state immediately for real-time display
@@ -342,6 +348,14 @@ def enemy_attack():
             if "qubit_state" in result:
                 singulon_state.qubit_state = result["qubit_state"]
                 game_state["enemy"]["qubit_state"] = result["qubit_state"]
+        elif move_name == "BULLET MUONS":
+            # Add specific message for BULLET MUONS if available
+            if "message" in result:
+                log.append(result["message"])
+        elif move_name == "Q-PRISMATIC LASER":
+            # Add specific message for Q-PRISMATIC LASER if available
+            if "message" in result:
+                log.append(result["message"])
         
         # 4. Dealt <damage> damage! (only if damage > 0)
         if damage > 0:
