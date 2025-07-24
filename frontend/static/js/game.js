@@ -402,7 +402,7 @@ function clearBattleMessage() {
 
 // Execute move with animations
 async function executeMove(moveName) {
-    if (!gameState || gameState.turn !== 'player' || isProcessingMove) {
+    if (!gameState || isProcessingMove) {
         return;
     }
     
@@ -801,6 +801,28 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
+    // Check for Q-PHOTON GEYSER HP cost
+    if (message.includes("Q-PHOTON GEYSER") && message.includes("loses 25%")) {
+        // Get character max HP from character data
+        const charData = characterData[currentCharacter];
+        const maxPlayerHp = charData ? charData.maxHp : 90;
+        
+        // Update HP bars to reflect the HP cost
+        const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
+        
+        // Player lost HP from Q-PHOTON GEYSER cost - update visual display immediately
+        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+        updateHealthBarColor(playerHealthFill, playerHpPercent);
+        
+        const playerHp = document.getElementById('player-hp');
+        if (playerHp) {
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
+        }
+        
+        // Set flag to prevent double update
+        window.visualPlayerHpUpdated = true;
+    }
+    
     // Check for SWITCHEROO (swaps qubit states)
     if (message.includes("swaps qubit states")) {
         const playerQubit = document.getElementById('player-qubit');
@@ -880,8 +902,12 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for healing messages and update HP bars visually in real-time
     if (message.includes("heals") && message.includes("HP!")) {
+        // Get character max HP from character data
+        const charData = characterData[currentCharacter];
+        const maxPlayerHp = charData ? charData.maxHp : 90;
+        
         // Update HP bars to match the current backend state (healing already applied)
-        const playerHpPercent = (gameState.player.hp / 90) * 100;
+        const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
         
         // Player was healed - update visual display immediately
         playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
@@ -889,7 +915,7 @@ function updateQubitStatesFromMessage(message) {
         
         const playerHp = document.getElementById('player-hp');
         if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
         }
         
         // Set flag to prevent double update
@@ -916,8 +942,12 @@ function updateQubitStatesFromMessage(message) {
     
     // Check for damage messages and update HP bars visually in real-time
     if (message.includes("Dealt") && message.includes("damage!")) {
+        // Get character max HP from character data
+        const charData = characterData[currentCharacter];
+        const maxPlayerHp = charData ? charData.maxHp : 90;
+        
         // Update HP bars to match the current backend state (damage already applied)
-        const playerHpPercent = (gameState.player.hp / 90) * 100;
+        const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
         const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
         
         // Determine if it's player or enemy damage based on the previous message
@@ -932,7 +962,7 @@ function updateQubitStatesFromMessage(message) {
             
             const playerHp = document.getElementById('player-hp');
             if (playerHp) {
-                playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+                playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
             }
             
             // Mark that we've updated player HP visually to prevent override
