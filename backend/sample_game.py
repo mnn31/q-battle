@@ -143,7 +143,7 @@ class SampleGame:
             self.ability_desc = "Gains waveform stacks on collapse, increases Q-METRONOME damage"
             self.moves = [
                 ("Q-METRONOME", "Deals 95 damage if |1⟩, 10 damage if |0⟩, scales with stacks"),
-                ("WAVE CRASH", "Deals 20 damage + 40 if superposition, gains stack"),
+                ("WAVE CRASH", "Deals 15 damage + 20 if superposition, gains stack"),
                 ("METAL NOISE", "Blocks enemy state changes, deals 20 damage if enemy |0⟩"),
                 ("SHIFT GEAR", "Creates superposition, +25% collapse to |1⟩ next turn")
             ]
@@ -227,13 +227,13 @@ class SampleGame:
             print("1. Q-METRONOME")
             print("   Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)")
             print("2. WAVE CRASH")
-            print("   Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 20 + 40)")
+            print("   Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 15 + 20)")
             print("3. METAL NOISE")
             print("   Prevents the enemy from using moves that change their qubit state for the next turn. If the enemy's qubit is in a state of 1, they may not use a Q-Move. If it is in a state of 0, deal damage. (DMG: 20)")
             print("4. SHIFT GEAR")
             print("   Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%.")
             print("\nAbility: QUANTUM WAVEFORM")
-            print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 1.")
+            print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 15.")
         elif self.character_name == "Higscrozma":
             print("1. Q-VOID RIFT")
             print("   Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers.")

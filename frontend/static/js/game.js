@@ -32,9 +32,11 @@ const characterData = {
     "Resona": {
         sprite: "/static/sprites/resona.gif",
         speed: 70, // Speed stat for turn order
+        hp: 95,
+        defense: 100,
         moves: [
-            { name: "Q-METRONOME", desc: "Resona's Q-Move. Collapses the qubit. If it is in a state of 1, deals 100% of max HP as damage. If it is in a state of 0, deal base damage. (DMG: 10)." },
-            { name: "WAVE CRASH", desc: "Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 20 + 40)" },
+            { name: "Q-METRONOME", desc: "Resona's Q-Move. Requires superposition state. Collapses the qubit. If it collapses to |1⟩, deals 100% of max HP as damage. If it collapses to |0⟩, deals base damage (10). Gains a waveform stack. Each waveform stack adds +15 damage." },
+            { name: "WAVE CRASH", desc: "Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 15 + 20)" },
             { name: "METAL NOISE", desc: "Prevents the enemy from using moves that change their qubit state for the next turn. If the enemy's qubit is in a state of 1, they may not use a Q-Move. If it is in a state of 0, deal damage. (DMG: 20)" },
             { name: "SHIFT GEAR", desc: "Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%." }
         ],
@@ -207,6 +209,38 @@ function updateBattleDisplay() {
         } else {
             playerQubit.classList.remove('entangled');
             enemyQubit.classList.remove('entangled');
+        }
+    }
+
+    // Update waveform display for Resona
+    const waveformDisplay = document.getElementById('waveform-display');
+    const waveformStacks = document.getElementById('waveform-stacks');
+    if (waveformDisplay && waveformStacks && gameState) {
+        if (currentCharacter === "Resona") {
+            waveformDisplay.style.display = 'flex';
+            const stacks = gameState.player.waveform_stacks || 0;
+            waveformStacks.textContent = stacks;
+        } else {
+            waveformDisplay.style.display = 'none';
+        }
+    }
+
+    // Update Metal Noise indicator for Resona
+    const metalNoiseIndicator = document.getElementById('metal-noise-indicator');
+    const metalNoiseText = document.getElementById('metal-noise-text');
+    if (metalNoiseIndicator && metalNoiseText && gameState) {
+        if (currentCharacter === "Resona" && gameState.metal_noise_active) {
+            metalNoiseIndicator.style.display = 'flex';
+            const blockType = gameState.metal_noise_block_type;
+            if (blockType === "q_moves") {
+                metalNoiseText.textContent = "Q-Moves";
+            } else if (blockType === "state_changes") {
+                metalNoiseText.textContent = "States";
+            } else {
+                metalNoiseText.textContent = "Active";
+            }
+        } else {
+            metalNoiseIndicator.style.display = 'none';
         }
     }
 
@@ -409,74 +443,80 @@ async function executeMove(moveName) {
     isProcessingMove = true;
     disableMoveButtons();
     
-    // Trigger animations based on move
-    if (currentCharacter === 'Bitzy') {
+    // Trigger character-specific animations
+    if (currentCharacter === "Bitzy") {
         triggerBitzyAnimation(moveName);
-    } else if (currentCharacter === 'Neutrinette') {
+    } else if (currentCharacter === "Neutrinette") {
         triggerNeutrinetteAnimation(moveName);
+    } else if (currentCharacter === "Resona") {
+        triggerResonaAnimation(moveName);
     }
     
-    try {
-        // Store current log length
-        const oldLogLength = gameState.log ? gameState.log.length : 0;
+    // Wait for animations to complete before processing response
+    setTimeout(async () => {
         
-        // Send move to backend
-        const response = await fetch('/move', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ move: moveName })
-        });
-        
-        const result = await response.json();
-        
-        if (result.state) {
-            gameState = result.state;
+        try {
+            // Store current log length
+            const oldLogLength = gameState.log ? gameState.log.length : 0;
             
-            // Get new log entries
-            const newLog = gameState.log || [];
-            const newEntries = newLog.slice(oldLogLength);
+            // Send move to backend
+            const response = await fetch('/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ move: moveName })
+            });
             
-            // Display each new log entry one at a time with real-time updates
-            for (let i = 0; i < newEntries.length; i++) {
-                const entry = newEntries[i];
-                showBattleMessage(entry, 3000);
+            const result = await response.json();
+            
+            if (result.state) {
+                gameState = result.state;
                 
-                // Update qubit states based on the message being displayed
-                updateQubitStatesFromMessage(entry);
+                // Get new log entries
+                const newLog = gameState.log || [];
+                const newEntries = newLog.slice(oldLogLength);
                 
-                // Wait for message to be seen
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // Display each new log entry one at a time with real-time updates
+                for (let i = 0; i < newEntries.length; i++) {
+                    const entry = newEntries[i];
+                    showBattleMessage(entry, 3000);
+                    
+                    // Update qubit states based on the message being displayed
+                    updateQubitStatesFromMessage(entry);
+                    
+                    // Wait for message to be seen
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                }
+                
+                // Sync HP bars with backend state after all real-time updates
+                updateBattleDisplay();
+                
+            } else {
+                showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
             }
             
-            // Sync HP bars with backend state after all real-time updates
-            updateBattleDisplay();
+            // Check for game end
+            if (gameState.enemy.hp <= 0) {
+                showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
+                setTimeout(() => endBattle(true), 4000);
+            } else if (gameState.player.hp <= 0) {
+                showBattleMessage("💀 You fainted! Game over.", 4000);
+                setTimeout(() => endBattle(false), 4000);
+            } else {
+                // Clear message screen and continue to next turn
+                clearBattleMessage();
+                turnCount++;
+                turnNumber.textContent = `Turn ${turnCount}`;
+                enableMoveButtons();
+            }
             
-        } else {
-            showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
-        }
-        
-        // Check for game end
-        if (gameState.enemy.hp <= 0) {
-            showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
-            setTimeout(() => endBattle(true), 4000);
-        } else if (gameState.player.hp <= 0) {
-            showBattleMessage("💀 You fainted! Game over.", 4000);
-            setTimeout(() => endBattle(false), 4000);
-        } else {
-            // Clear message screen and continue to next turn
-            clearBattleMessage();
-            turnCount++;
-            turnNumber.textContent = `Turn ${turnCount}`;
+        } catch (error) {
+            console.error('Error executing move:', error);
+            showBattleMessage('Error executing move', 3000);
             enableMoveButtons();
+        } finally {
+            isProcessingMove = false;
         }
-        
-    } catch (error) {
-        console.error('Error executing move:', error);
-        showBattleMessage('Error executing move', 3000);
-        enableMoveButtons();
-    } finally {
-        isProcessingMove = false;
-    }
+    }, 1000); // Wait for animations to complete
 }
 
 // Bitzy Animation System - Based on Pokémon Showdown
@@ -1259,91 +1299,1279 @@ function triggerSwitcherooAnimation(playerSprite, enemySprite) {
     }, 800);
 }
 
+// Trigger Resona animations
+function triggerResonaAnimation(moveName) {
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    
+    if (!playerSprite || !enemySprite) return;
+    
+    switch (moveName) {
+        case "Q-METRONOME":
+            triggerQMetronomeAnimation(playerSprite, enemySprite);
+            break;
+        case "WAVE CRASH":
+            triggerWaveCrashAnimation(playerSprite, enemySprite);
+            break;
+        case "METAL NOISE":
+            triggerMetalNoiseAnimation(playerSprite, enemySprite);
+            break;
+        case "SHIFT GEAR":
+            triggerShiftGearAnimation(playerSprite);
+            break;
+    }
+}
+
+function triggerQMetronomeAnimation(playerSprite, enemySprite) {
+    // Create intense wagging finger animation with massive effects above Resona's head
+    const finger = document.createElement('img');
+    finger.src = '/static/images/wagging-finger.png';
+    
+    // Position above Resona's head
+    const resonaRect = playerSprite.getBoundingClientRect();
+    const fingerX = resonaRect.left + resonaRect.width / 2;
+    const fingerY = resonaRect.top - 50; // 50px above Resona's head
+    
+    finger.style.cssText = `
+        position: absolute;
+        top: ${fingerY}px;
+        left: ${fingerX}px;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        height: 150px;
+        pointer-events: none;
+        z-index: 1000;
+        animation: waggingFingerIntense 2s ease-out;
+        filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 20px #FFD700);
+    `;
+    
+    // Add intense wagging finger animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes waggingFingerIntense {
+            0% { 
+                transform: translate(-50%, -50%) scale(0) rotate(-20deg); 
+                opacity: 1; 
+                filter: brightness(2.0) contrast(1.5) drop-shadow(0 0 30px #FFD700);
+            }
+            10% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(-20deg); 
+                opacity: 1; 
+                filter: brightness(1.8) contrast(1.3) drop-shadow(0 0 25px #FFD700);
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1) rotate(20deg); 
+                opacity: 1; 
+                filter: brightness(1.6) contrast(1.2) drop-shadow(0 0 20px #FFD700);
+            }
+            30% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(-20deg); 
+                opacity: 1; 
+                filter: brightness(1.7) contrast(1.3) drop-shadow(0 0 22px #FFD700);
+            }
+            40% { 
+                transform: translate(-50%, -50%) scale(1) rotate(20deg); 
+                opacity: 1; 
+                filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 20px #FFD700);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(-20deg); 
+                opacity: 1; 
+                filter: brightness(1.6) contrast(1.3) drop-shadow(0 0 22px #FFD700);
+            }
+            60% { 
+                transform: translate(-50%, -50%) scale(1) rotate(20deg); 
+                opacity: 1; 
+                filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 20px #FFD700);
+            }
+            70% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(-20deg); 
+                opacity: 1; 
+                filter: brightness(1.6) contrast(1.3) drop-shadow(0 0 22px #FFD700);
+            }
+            80% { 
+                transform: translate(-50%, -50%) scale(1) rotate(20deg); 
+                opacity: 1; 
+                filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 20px #FFD700);
+            }
+            90% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(-20deg); 
+                opacity: 0.8; 
+                filter: brightness(1.4) contrast(1.1) drop-shadow(0 0 15px #FFD700);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0) rotate(0deg); 
+                opacity: 0; 
+                filter: brightness(1.0) contrast(1.0) drop-shadow(0 0 0px #FFD700);
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(finger);
+    
+    // Create massive amounts of quantum sparkles (80 sparkles - 10x more)
+    for (let i = 0; i < 80; i++) {
+        setTimeout(() => {
+            const sparkle = document.createElement('div');
+            const size = 15 + Math.random() * 25; // Random sizes
+            const colors = ['#FFD700', '#FFA500', '#FF6B35', '#FF4500', '#FFD700', '#FFFF00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            sparkle.style.cssText = `
+                position: absolute;
+                top: ${fingerY}px;
+                left: ${fingerX}px;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, ${color}, ${color}80);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1001;
+                animation: sparkleFloatIntense 1.5s ease-out;
+                box-shadow: 0 0 ${size/2}px ${color};
+            `;
+            
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                if (document.body.contains(sparkle)) {
+                    document.body.removeChild(sparkle);
+                }
+            }, 1500);
+        }, i * 20); // Much faster spawning
+    }
+    
+    // Add intense sparkle animation
+    const sparkleStyle = document.createElement('style');
+    sparkleStyle.textContent = `
+        @keyframes sparkleFloatIntense {
+            0% { 
+                transform: translate(-50%, -50%) scale(0) rotate(0deg); 
+                opacity: 1; 
+                filter: brightness(2.0) contrast(1.5);
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(90deg) translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px); 
+                opacity: 0.9; 
+                filter: brightness(1.8) contrast(1.3);
+            }
+            40% { 
+                transform: translate(-50%, -50%) scale(1.5) rotate(180deg) translate(${Math.random() * 300 - 150}px, ${Math.random() * 300 - 150}px); 
+                opacity: 0.8; 
+                filter: brightness(1.6) contrast(1.2);
+            }
+            60% { 
+                transform: translate(-50%, -50%) scale(1.3) rotate(270deg) translate(${Math.random() * 400 - 200}px, ${Math.random() * 400 - 200}px); 
+                opacity: 0.6; 
+                filter: brightness(1.4) contrast(1.1);
+            }
+            80% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(360deg) translate(${Math.random() * 500 - 250}px, ${Math.random() * 500 - 250}px); 
+                opacity: 0.3; 
+                filter: brightness(1.2) contrast(1.0);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0) rotate(720deg) translate(${Math.random() * 600 - 300}px, ${Math.random() * 600 - 300}px); 
+                opacity: 0; 
+                filter: brightness(1.0) contrast(1.0);
+            }
+        }
+    `;
+    
+    document.head.appendChild(sparkleStyle);
+    
+    // Create additional energy waves (20 waves)
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const wave = document.createElement('div');
+            wave.style.cssText = `
+                position: absolute;
+                top: ${fingerY}px;
+                left: ${fingerX}px;
+                width: 100px;
+                height: 100px;
+                border: 3px solid #FFD700;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1002;
+                animation: energyWaveExpand 1.5s ease-out;
+                opacity: 0.8;
+            `;
+            
+            document.body.appendChild(wave);
+            
+            setTimeout(() => {
+                if (document.body.contains(wave)) {
+                    document.body.removeChild(wave);
+                }
+            }, 1500);
+        }, i * 75);
+    }
+    
+    // Add energy wave animation
+    const waveStyle = document.createElement('style');
+    waveStyle.textContent = `
+        @keyframes energyWaveExpand {
+            0% { 
+                transform: translate(-50%, -50%) scale(0); 
+                opacity: 0.8; 
+                border-color: #FFD700;
+                filter: brightness(1.5) contrast(1.2);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(2); 
+                opacity: 0.6; 
+                border-color: #FFA500;
+                filter: brightness(1.3) contrast(1.1);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(4); 
+                opacity: 0; 
+                border-color: #FF4500;
+                filter: brightness(1.0) contrast(1.0);
+            }
+        }
+    `;
+    
+    document.head.appendChild(waveStyle);
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(finger)) {
+            document.body.removeChild(finger);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+        if (document.head.contains(sparkleStyle)) {
+            document.head.removeChild(sparkleStyle);
+        }
+        if (document.head.contains(waveStyle)) {
+            document.head.removeChild(waveStyle);
+        }
+    }, 2500);
+}
+
+function triggerWaveCrashAnimation(playerSprite, enemySprite) {
+    // Get positions for the animation
+    const resonaRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    
+    const resonaX = resonaRect.left + resonaRect.width / 2;
+    const resonaY = resonaRect.top + resonaRect.height / 2;
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Phase 1: Resona becomes cloaked in water
+    const waterCloak = document.createElement('div');
+    waterCloak.style.cssText = `
+        position: absolute;
+        top: ${resonaY}px;
+        left: ${resonaX}px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(0, 150, 255, 0.8), rgba(0, 100, 200, 0.6));
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1000;
+        animation: waterCloakForm 0.8s ease-out;
+        box-shadow: 0 0 30px rgba(0, 150, 255, 0.6);
+    `;
+    
+    document.body.appendChild(waterCloak);
+    
+    // Add water cloak formation animation
+    const cloakStyle = document.createElement('style');
+    cloakStyle.textContent = `
+        @keyframes waterCloakForm {
+            0% { 
+                transform: translate(-50%, -50%) scale(0); 
+                opacity: 0; 
+                filter: brightness(1.0) blur(0px);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.2); 
+                opacity: 0.8; 
+                filter: brightness(1.3) blur(2px);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1); 
+                opacity: 1; 
+                filter: brightness(1.5) blur(1px);
+            }
+        }
+    `;
+    
+    document.head.appendChild(cloakStyle);
+    
+    // Phase 2: Resona charges forward cloaked in water
+    setTimeout(() => {
+        waterCloak.style.animation = 'waterCloakCharge 1.2s ease-in-out';
+        
+        // Add charging animation
+        const chargeStyle = document.createElement('style');
+        chargeStyle.textContent = `
+            @keyframes waterCloakCharge {
+                0% { 
+                    transform: translate(-50%, -50%) scale(1) translateX(0px); 
+                    opacity: 1; 
+                    filter: brightness(1.5) blur(1px);
+                }
+                25% { 
+                    transform: translate(-50%, -50%) scale(1.1) translateX(${(enemyX - resonaX) * 0.25}px); 
+                    opacity: 1; 
+                    filter: brightness(1.8) blur(0px);
+                }
+                50% { 
+                    transform: translate(-50%, -50%) scale(1.2) translateX(${(enemyX - resonaX) * 0.5}px); 
+                    opacity: 1; 
+                    filter: brightness(2.0) blur(0px);
+                }
+                75% { 
+                    transform: translate(-50%, -50%) scale(1.1) translateX(${(enemyX - resonaX) * 0.75}px); 
+                    opacity: 0.9; 
+                    filter: brightness(1.8) blur(0px);
+                }
+                100% { 
+                    transform: translate(-50%, -50%) scale(1) translateX(${enemyX - resonaX}px); 
+                    opacity: 0.8; 
+                    filter: brightness(1.5) blur(0px);
+                }
+            }
+        `;
+        
+        document.head.appendChild(chargeStyle);
+        
+        // Create water trail effect during charge
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                const waterTrail = document.createElement('div');
+                const trailX = resonaX + (enemyX - resonaX) * (i / 8);
+                waterTrail.style.cssText = `
+                    position: absolute;
+                    top: ${resonaY}px;
+                    left: ${trailX}px;
+                    width: 60px;
+                    height: 60px;
+                    background: radial-gradient(circle, rgba(0, 150, 255, 0.4), transparent);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 999;
+                    animation: waterTrailFade 0.8s ease-out;
+                `;
+                
+                document.body.appendChild(waterTrail);
+                
+                setTimeout(() => {
+                    if (document.body.contains(waterTrail)) {
+                        document.body.removeChild(waterTrail);
+                    }
+                }, 800);
+            }, i * 150);
+        }
+        
+        // Add water trail fade animation
+        const trailStyle = document.createElement('style');
+        trailStyle.textContent = `
+            @keyframes waterTrailFade {
+                0% { 
+                    transform: translate(-50%, -50%) scale(0.5); 
+                    opacity: 0.6; 
+                }
+                50% { 
+                    transform: translate(-50%, -50%) scale(1); 
+                    opacity: 0.4; 
+                }
+                100% { 
+                    transform: translate(-50%, -50%) scale(0.5); 
+                    opacity: 0; 
+                }
+            }
+        `;
+        
+        document.head.appendChild(trailStyle);
+        
+        // Phase 3: Impact explosion when hitting the enemy
+        setTimeout(() => {
+            waterCloak.style.animation = 'waterCloakImpact 0.6s ease-out';
+            
+            // Add impact animation
+            const impactStyle = document.createElement('style');
+            impactStyle.textContent = `
+                @keyframes waterCloakImpact {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(1) translateX(${enemyX - resonaX}px); 
+                        opacity: 0.8; 
+                        filter: brightness(1.5) blur(0px);
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) scale(2) translateX(${enemyX - resonaX}px); 
+                        opacity: 1; 
+                        filter: brightness(2.5) blur(3px);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(0) translateX(${enemyX - resonaX}px); 
+                        opacity: 0; 
+                        filter: brightness(1.0) blur(0px);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(impactStyle);
+            
+            // Create impact water explosion
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    const waterExplosion = document.createElement('div');
+                    const angle = (i * 30) * (Math.PI / 180);
+                    const distance = 80 + Math.random() * 40;
+                    const explosionX = enemyX + Math.cos(angle) * distance;
+                    const explosionY = enemyY + Math.sin(angle) * distance;
+                    
+                    waterExplosion.style.cssText = `
+                        position: absolute;
+                        top: ${explosionY}px;
+                        left: ${explosionX}px;
+                        width: 40px;
+                        height: 40px;
+                        background: radial-gradient(circle, rgba(0, 200, 255, 0.8), rgba(0, 150, 255, 0.4));
+                        border-radius: 50%;
+                        pointer-events: none;
+                        z-index: 1001;
+                        animation: waterExplosionParticle 0.8s ease-out;
+                        box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+                    `;
+                    
+                    document.body.appendChild(waterExplosion);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(waterExplosion)) {
+                            document.body.removeChild(waterExplosion);
+                        }
+                    }, 800);
+                }, i * 50);
+            }
+            
+            // Add water explosion particle animation
+            const explosionStyle = document.createElement('style');
+            explosionStyle.textContent = `
+                @keyframes waterExplosionParticle {
+                    0% { 
+                        transform: translate(-50%, -50%) scale(0); 
+                        opacity: 1; 
+                        filter: brightness(1.5) contrast(1.2);
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) scale(1.2); 
+                        opacity: 0.8; 
+                        filter: brightness(1.3) contrast(1.1);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) scale(0); 
+                        opacity: 0; 
+                        filter: brightness(1.0) contrast(1.0);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(explosionStyle);
+            
+            // Create screen shake effect
+            document.body.style.animation = 'screenShake 0.3s ease-out';
+            
+            const shakeStyle = document.createElement('style');
+            shakeStyle.textContent = `
+                @keyframes screenShake {
+                    0% { transform: translateX(0px) translateY(0px); }
+                    25% { transform: translateX(-5px) translateY(-3px); }
+                    50% { transform: translateX(5px) translateY(3px); }
+                    75% { transform: translateX(-3px) translateY(-2px); }
+                    100% { transform: translateX(0px) translateY(0px); }
+                }
+            `;
+            
+            document.head.appendChild(shakeStyle);
+            
+            // Clean up screen shake
+            setTimeout(() => {
+                document.body.style.animation = '';
+                if (document.head.contains(shakeStyle)) {
+                    document.head.removeChild(shakeStyle);
+                }
+            }, 300);
+            
+        }, 1200); // After charge completes
+        
+    }, 800); // After cloak forms
+    
+    // Clean up all elements
+    setTimeout(() => {
+        if (document.body.contains(waterCloak)) {
+            document.body.removeChild(waterCloak);
+        }
+        if (document.head.contains(cloakStyle)) {
+            document.head.removeChild(cloakStyle);
+        }
+        if (document.head.contains(chargeStyle)) {
+            document.head.removeChild(chargeStyle);
+        }
+        if (document.head.contains(trailStyle)) {
+            document.head.removeChild(trailStyle);
+        }
+        if (document.head.contains(impactStyle)) {
+            document.head.removeChild(impactStyle);
+        }
+        if (document.head.contains(explosionStyle)) {
+            document.head.removeChild(explosionStyle);
+        }
+    }, 3000);
+}
+
+// BOSS HAZE Animation - MASSIVE & VIVID VERSION
+function triggerBossHazeAnimation(enemySprite) {
+    console.log('BOSS HAZE MASSIVE animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes massiveHazeBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.7; background: linear-gradient(45deg, #000000, #1F2937, #374151, #000000); }
+            50% { opacity: 0.9; background: linear-gradient(45deg, #000000, #4B5563, #6B7280, #9CA3AF, #000000); }
+            75% { opacity: 0.7; background: linear-gradient(45deg, #000000, #D1D5DB, #E5E7EB, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes massiveHazeWisp {
+            0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+            25% { transform: translate(0, 0) scale(3) rotate(90deg); opacity: 1; }
+            50% { transform: translate(0, 0) scale(6) rotate(180deg); opacity: 0.9; }
+            75% { transform: translate(0, 0) scale(9) rotate(270deg); opacity: 0.7; }
+            100% { transform: translate(0, 0) scale(12) rotate(360deg); opacity: 0; }
+        }
+        @keyframes massiveHazeScreenShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-8px, -4px); }
+            20% { transform: translate(8px, -4px); }
+            30% { transform: translate(-8px, 4px); }
+            40% { transform: translate(8px, 4px); }
+            50% { transform: translate(-4px, -8px); }
+            60% { transform: translate(4px, -8px); }
+            70% { transform: translate(-4px, 8px); }
+            80% { transform: translate(4px, 8px); }
+            90% { transform: translate(0, 0); }
+        }
+        @keyframes massiveHazePulse {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1) rotate(180deg); opacity: 1; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: MASSIVE Background effect with gray cycling
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: massiveHazeBackground 2s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: MASSIVE Haze wisps (based on Pokemon Showdown's haze animation)
+    const wispPositions = [
+        { x: enemyX + 120, y: enemyY },
+        { x: enemyX - 120, y: enemyY },
+        { x: enemyX, y: enemyY + 120 },
+        { x: enemyX, y: enemyY - 120 },
+        { x: enemyX + 113, y: enemyY + 97 },
+        { x: enemyX - 113, y: enemyY - 97 },
+        { x: enemyX + 97, y: enemyY - 113 },
+        { x: enemyX - 97, y: enemyY + 113 }
+    ];
+    
+    wispPositions.forEach((pos, index) => {
+        const wisp = document.createElement('div');
+        wisp.style.cssText = `
+            position: absolute;
+            top: ${pos.y}px;
+            left: ${pos.x}px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #1F2937, #374151, #4B5563, #6B7280, #9CA3AF);
+            border-radius: 50%;
+            box-shadow: 0 0 40px #1F2937, 0 0 80px #374151, 0 0 120px #4B5563;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveHazeWisp ${0.6 + index * 0.1}s ease-out;
+        `;
+        document.body.appendChild(wisp);
+        
+        setTimeout(() => {
+            wisp.remove();
+        }, (0.6 + index * 0.1) * 1000);
+    });
+    
+    // Phase 3: Screen shake effect
+    document.body.style.animation = 'massiveHazeScreenShake 2s ease-in-out';
+    
+    // Phase 4: Pulse effects around enemy
+    for (let i = 0; i < 6; i++) {
+        const pulse = document.createElement('div');
+        const angle = (i * 60) * (Math.PI / 180);
+        const distance = 100;
+        const px = enemyX + Math.cos(angle) * distance;
+        const py = enemyY + Math.sin(angle) * distance;
+        
+        pulse.style.cssText = `
+            position: absolute;
+            top: ${py}px;
+            left: ${px}px;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #9CA3AF, #D1D5DB, #E5E7EB);
+            border-radius: 50%;
+            box-shadow: 0 0 25px #9CA3AF, 0 0 50px #D1D5DB;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveHazePulse ${1 + i * 0.2}s ease-out;
+        `;
+        document.body.appendChild(pulse);
+        
+        setTimeout(() => {
+            pulse.remove();
+        }, (1 + i * 0.2) * 1000);
+    }
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        document.body.style.animation = '';
+        style.remove();
+    }, 2500);
+}
+
+// BOSS DUALIZE Animation - MASSIVE & VIVID VERSION
+function triggerBossDualizeAnimation(enemySprite) {
+    console.log('BOSS DUALIZE MASSIVE animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes massiveDualizeBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.6; background: linear-gradient(45deg, #000000, #7C3AED, #A855F7, #000000); }
+            50% { opacity: 0.8; background: linear-gradient(45deg, #000000, #C084FC, #E879F9, #F0ABFC, #000000); }
+            75% { opacity: 0.6; background: linear-gradient(45deg, #000000, #F3E8FF, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes massiveDualizeSuperposition {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            25% { transform: scale(4) rotate(90deg); opacity: 1; }
+            50% { transform: scale(8) rotate(180deg); opacity: 0.9; }
+            75% { transform: scale(12) rotate(270deg); opacity: 0.7; }
+            100% { transform: scale(16) rotate(360deg); opacity: 0; }
+        }
+        @keyframes massiveDualizeScreenShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-6px, -3px); }
+            20% { transform: translate(6px, -3px); }
+            30% { transform: translate(-6px, 3px); }
+            40% { transform: translate(6px, 3px); }
+            50% { transform: translate(-3px, -6px); }
+            60% { transform: translate(3px, -6px); }
+            70% { transform: translate(-3px, 6px); }
+            80% { transform: translate(3px, 6px); }
+            90% { transform: translate(0, 0); }
+        }
+        @keyframes massiveDualizeOrbital {
+            0% { transform: rotate(0deg) translateX(0) scale(0); opacity: 0; }
+            50% { transform: rotate(180deg) translateX(80px) scale(1); opacity: 1; }
+            100% { transform: rotate(360deg) translateX(0) scale(0); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: MASSIVE Background effect with purple cycling
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: massiveDualizeBackground 2s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: MASSIVE Superposition wave effect
+    const superpositionWave = document.createElement('div');
+    superpositionWave.style.cssText = `
+        position: absolute;
+        top: ${enemyY - 100}px;
+        left: ${enemyX - 100}px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.9), rgba(168, 85, 247, 0.7), rgba(192, 132, 252, 0.5), rgba(232, 121, 249, 0.3));
+        border-radius: 50%;
+        box-shadow: 0 0 60px rgba(124, 58, 237, 0.8), 0 0 120px rgba(168, 85, 247, 0.6), 0 0 180px rgba(192, 132, 252, 0.4);
+        z-index: 999;
+        pointer-events: none;
+        animation: massiveDualizeSuperposition 2s ease-in-out;
+    `;
+    document.body.appendChild(superpositionWave);
+    
+    // Phase 3: Screen shake effect
+    document.body.style.animation = 'massiveDualizeScreenShake 2s ease-in-out';
+    
+    // Phase 4: Orbital effects around enemy
+    for (let i = 0; i < 8; i++) {
+        const orbital = document.createElement('div');
+        orbital.style.cssText = `
+            position: absolute;
+            top: ${enemyY}px;
+            left: ${enemyX}px;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #E879F9, #F0ABFC, #7C3AED);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #E879F9, 0 0 30px #F0ABFC;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveDualizeOrbital ${1.5 + i * 0.15}s ease-out;
+        `;
+        document.body.appendChild(orbital);
+        
+        setTimeout(() => {
+            orbital.remove();
+        }, (1.5 + i * 0.15) * 1000);
+    }
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        superpositionWave.remove();
+        document.body.style.animation = '';
+        style.remove();
+    }, 2500);
+}
+
+function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
+    // Create massive amounts of metal grey triangles radiating out with intense wavy effects
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    // Create primary triangles (24 large triangles) - 3x more
+    for (let i = 0; i < 24; i++) {
+        setTimeout(() => {
+            const triangle = document.createElement('div');
+            const angle = (i * 15) * (Math.PI / 180); // 24 triangles in a circle
+            const distance = 120 + (i * 25); // Increasing distance for each triangle
+            
+            triangle.style.cssText = `
+                position: absolute;
+                top: ${centerY}px;
+                left: ${centerX}px;
+                width: 0;
+                height: 0;
+                border-left: 20px solid transparent;
+                border-right: 20px solid transparent;
+                border-bottom: 35px solid #808080;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                pointer-events: none;
+                z-index: 1000;
+                animation: metalTriangleRadiateIntense 2s ease-out;
+            `;
+            
+            document.body.appendChild(triangle);
+            
+            // Add intense triangle animation with wavy effects
+            const triangleStyle = document.createElement('style');
+            triangleStyle.textContent = `
+                @keyframes metalTriangleRadiateIntense {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(0px) translateY(0px); 
+                        opacity: 1; 
+                        border-bottom-color: #E0E0E0;
+                        filter: brightness(1.5) contrast(1.2);
+                    }
+                    10% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0.8) translateX(${distance * 0.1}px) translateY(${Math.sin(angle) * 20}px); 
+                        opacity: 0.95; 
+                        border-bottom-color: #C0C0C0;
+                        filter: brightness(1.3) contrast(1.1);
+                    }
+                    25% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.2) translateX(${distance * 0.3}px) translateY(${Math.sin(angle * 2) * 30}px); 
+                        opacity: 0.9; 
+                        border-bottom-color: #A0A0A0;
+                        filter: brightness(1.1) contrast(1.0);
+                    }
+                    40% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.5) translateX(${distance * 0.5}px) translateY(${Math.sin(angle * 3) * 25}px); 
+                        opacity: 0.8; 
+                        border-bottom-color: #808080;
+                        filter: brightness(1.0) contrast(1.0);
+                    }
+                    60% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.3) translateX(${distance * 0.7}px) translateY(${Math.sin(angle * 4) * 20}px); 
+                        opacity: 0.6; 
+                        border-bottom-color: #606060;
+                        filter: brightness(0.9) contrast(1.1);
+                    }
+                    80% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.1) translateX(${distance * 0.9}px) translateY(${Math.sin(angle * 5) * 15}px); 
+                        opacity: 0.3; 
+                        border-bottom-color: #404040;
+                        filter: brightness(0.8) contrast(1.2);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.sin(angle * 6) * 10}px); 
+                        opacity: 0; 
+                        border-bottom-color: #202020;
+                        filter: brightness(0.7) contrast(1.3);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(triangleStyle);
+            
+            // Clean up individual triangle
+            setTimeout(() => {
+                if (document.body.contains(triangle)) {
+                    document.body.removeChild(triangle);
+                }
+                if (document.head.contains(triangleStyle)) {
+                    document.head.removeChild(triangleStyle);
+                }
+            }, 2000);
+        }, i * 50); // Faster staggering
+    }
+    
+    // Create secondary triangles (36 medium triangles) - 3x more
+    for (let i = 0; i < 36; i++) {
+        setTimeout(() => {
+            const mediumTriangle = document.createElement('div');
+            const angle = (i * 10) * (Math.PI / 180); // 36 triangles
+            const distance = 100 + (i * 20);
+            
+            mediumTriangle.style.cssText = `
+                position: absolute;
+                top: ${centerY}px;
+                left: ${centerX}px;
+                width: 0;
+                height: 0;
+                border-left: 12px solid transparent;
+                border-right: 12px solid transparent;
+                border-bottom: 22px solid #A0A0A0;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                pointer-events: none;
+                z-index: 1001;
+                animation: mediumMetalTriangleRadiate 1.8s ease-out;
+            `;
+            
+            document.body.appendChild(mediumTriangle);
+            
+            // Add medium triangle animation with wavy effects
+            const mediumTriangleStyle = document.createElement('style');
+            mediumTriangleStyle.textContent = `
+                @keyframes mediumMetalTriangleRadiate {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(0px) translateY(0px); 
+                        opacity: 1; 
+                        border-bottom-color: #D0D0D0;
+                        filter: brightness(1.4) contrast(1.1);
+                    }
+                    15% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0.9) translateX(${distance * 0.15}px) translateY(${Math.cos(angle) * 25}px); 
+                        opacity: 0.9; 
+                        border-bottom-color: #B0B0B0;
+                        filter: brightness(1.2) contrast(1.0);
+                    }
+                    35% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.3) translateX(${distance * 0.4}px) translateY(${Math.cos(angle * 2) * 35}px); 
+                        opacity: 0.8; 
+                        border-bottom-color: #909090;
+                        filter: brightness(1.0) contrast(1.0);
+                    }
+                    55% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.4) translateX(${distance * 0.65}px) translateY(${Math.cos(angle * 3) * 30}px); 
+                        opacity: 0.6; 
+                        border-bottom-color: #707070;
+                        filter: brightness(0.9) contrast(1.1);
+                    }
+                    75% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.2) translateX(${distance * 0.85}px) translateY(${Math.cos(angle * 4) * 20}px); 
+                        opacity: 0.4; 
+                        border-bottom-color: #505050;
+                        filter: brightness(0.8) contrast(1.2);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.cos(angle * 5) * 15}px); 
+                        opacity: 0; 
+                        border-bottom-color: #303030;
+                        filter: brightness(0.7) contrast(1.3);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(mediumTriangleStyle);
+            
+            // Clean up medium triangle
+            setTimeout(() => {
+                if (document.body.contains(mediumTriangle)) {
+                    document.body.removeChild(mediumTriangle);
+                }
+                if (document.head.contains(mediumTriangleStyle)) {
+                    document.head.removeChild(mediumTriangleStyle);
+                }
+            }, 1800);
+        }, i * 40 + 100); // Faster staggering with delay
+    }
+    
+    // Create tertiary triangles (48 small triangles) - 4x more
+    for (let i = 0; i < 48; i++) {
+        setTimeout(() => {
+            const smallTriangle = document.createElement('div');
+            const angle = (i * 7.5) * (Math.PI / 180); // 48 triangles
+            const distance = 80 + (i * 15);
+            
+            smallTriangle.style.cssText = `
+                position: absolute;
+                top: ${centerY}px;
+                left: ${centerX}px;
+                width: 0;
+                height: 0;
+                border-left: 8px solid transparent;
+                border-right: 8px solid transparent;
+                border-bottom: 15px solid #B0B0B0;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                pointer-events: none;
+                z-index: 1002;
+                animation: smallMetalTriangleRadiateIntense 1.5s ease-out;
+            `;
+            
+            document.body.appendChild(smallTriangle);
+            
+            // Add small triangle animation with intense wavy effects
+            const smallTriangleStyle = document.createElement('style');
+            smallTriangleStyle.textContent = `
+                @keyframes smallMetalTriangleRadiateIntense {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(0px) translateY(0px); 
+                        opacity: 1; 
+                        border-bottom-color: #E0E0E0;
+                        filter: brightness(1.6) contrast(1.2);
+                    }
+                    20% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.1) translateX(${distance * 0.2}px) translateY(${Math.sin(angle * 1.5) * 30}px); 
+                        opacity: 0.95; 
+                        border-bottom-color: #C0C0C0;
+                        filter: brightness(1.4) contrast(1.1);
+                    }
+                    40% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.4) translateX(${distance * 0.45}px) translateY(${Math.sin(angle * 2.5) * 40}px); 
+                        opacity: 0.8; 
+                        border-bottom-color: #A0A0A0;
+                        filter: brightness(1.2) contrast(1.0);
+                    }
+                    60% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.3) translateX(${distance * 0.7}px) translateY(${Math.sin(angle * 3.5) * 35}px); 
+                        opacity: 0.6; 
+                        border-bottom-color: #808080;
+                        filter: brightness(1.0) contrast(1.0);
+                    }
+                    80% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.1) translateX(${distance * 0.9}px) translateY(${Math.sin(angle * 4.5) * 25}px); 
+                        opacity: 0.3; 
+                        border-bottom-color: #606060;
+                        filter: brightness(0.8) contrast(1.2);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.sin(angle * 5.5) * 20}px); 
+                        opacity: 0; 
+                        border-bottom-color: #404040;
+                        filter: brightness(0.7) contrast(1.3);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(smallTriangleStyle);
+            
+            // Clean up small triangle
+            setTimeout(() => {
+                if (document.body.contains(smallTriangle)) {
+                    document.body.removeChild(smallTriangle);
+                }
+                if (document.head.contains(smallTriangleStyle)) {
+                    document.head.removeChild(smallTriangleStyle);
+                }
+            }, 1500);
+        }, i * 30 + 200); // Even faster staggering
+    }
+    
+    // Create micro triangles (60 tiny triangles) - 5x more
+    for (let i = 0; i < 60; i++) {
+        setTimeout(() => {
+            const microTriangle = document.createElement('div');
+            const angle = (i * 6) * (Math.PI / 180); // 60 triangles
+            const distance = 60 + (i * 12);
+            
+            microTriangle.style.cssText = `
+                position: absolute;
+                top: ${centerY}px;
+                left: ${centerX}px;
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 10px solid #C0C0C0;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                pointer-events: none;
+                z-index: 1003;
+                animation: microMetalTriangleRadiate 1.2s ease-out;
+            `;
+            
+            document.body.appendChild(microTriangle);
+            
+            // Add micro triangle animation
+            const microTriangleStyle = document.createElement('style');
+            microTriangleStyle.textContent = `
+                @keyframes microMetalTriangleRadiate {
+                    0% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(0px) translateY(0px); 
+                        opacity: 1; 
+                        border-bottom-color: #F0F0F0;
+                        filter: brightness(1.8) contrast(1.3);
+                    }
+                    25% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.2) translateX(${distance * 0.25}px) translateY(${Math.cos(angle * 2) * 25}px); 
+                        opacity: 0.9; 
+                        border-bottom-color: #D0D0D0;
+                        filter: brightness(1.5) contrast(1.1);
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.5) translateX(${distance * 0.5}px) translateY(${Math.cos(angle * 3) * 35}px); 
+                        opacity: 0.7; 
+                        border-bottom-color: #B0B0B0;
+                        filter: brightness(1.2) contrast(1.0);
+                    }
+                    75% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(1.3) translateX(${distance * 0.75}px) translateY(${Math.cos(angle * 4) * 30}px); 
+                        opacity: 0.4; 
+                        border-bottom-color: #909090;
+                        filter: brightness(0.9) contrast(1.1);
+                    }
+                    100% { 
+                        transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.cos(angle * 5) * 20}px); 
+                        opacity: 0; 
+                        border-bottom-color: #707070;
+                        filter: brightness(0.7) contrast(1.3);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(microTriangleStyle);
+            
+            // Clean up micro triangle
+            setTimeout(() => {
+                if (document.body.contains(microTriangle)) {
+                    document.body.removeChild(microTriangle);
+                }
+                if (document.head.contains(microTriangleStyle)) {
+                    document.head.removeChild(microTriangleStyle);
+                }
+            }, 1200);
+        }, i * 25 + 300); // Very fast staggering
+    }
+}
+
+function triggerShiftGearAnimation(playerSprite) {
+    // Get player sprite position to place gear on top of Resona
+    const playerRect = playerSprite.getBoundingClientRect();
+    const playerCenterX = playerRect.left + playerRect.width / 2;
+    const playerTop = playerRect.top;
+    
+    // Create gear rotation effect using actual gear.png, positioned on top of Resona
+    const gear = document.createElement('img');
+    gear.src = '/static/images/gear.png';
+    gear.style.cssText = `
+        position: fixed;
+        top: ${playerTop - 50}px;
+        left: ${playerCenterX}px;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        height: 150px;
+        pointer-events: none;
+        z-index: 1000;
+        animation: gearRotateOnResona 1.5s ease-out;
+    `;
+    
+    // Add gear rotation animation on top of Resona
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes gearRotateOnResona {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1) rotate(180deg); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(0) rotate(360deg); opacity: 0; }
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(gear);
+    
+    // Create quantum particles around the gear on top of Resona
+    for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: fixed;
+                top: ${playerTop - 50}px;
+                left: ${playerCenterX}px;
+                width: 30px;
+                height: 30px;
+                background: radial-gradient(circle, #4a90e2, #357abd);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1001;
+                animation: quantumParticleOnResona 1.2s ease-out;
+            `;
+            
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                if (document.body.contains(particle)) {
+                    document.body.removeChild(particle);
+                }
+            }, 1200);
+        }, i * 100);
+    }
+    
+    // Add particle animation for particles around Resona
+    const particleStyle = document.createElement('style');
+    particleStyle.textContent = `
+        @keyframes quantumParticleOnResona {
+            0% { 
+                transform: translate(-50%, -50%) scale(0); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1) translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px); 
+                opacity: 0.8; 
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0) translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px); 
+                opacity: 0; 
+            }
+        }
+    `;
+    
+    document.head.appendChild(particleStyle);
+    
+    // Clean up
+    setTimeout(() => {
+        if (document.body.contains(gear)) {
+            document.body.removeChild(gear);
+        }
+        if (document.head.contains(style)) {
+            document.head.removeChild(style);
+        }
+        if (document.head.contains(particleStyle)) {
+            document.head.removeChild(particleStyle);
+        }
+    }, 2000);
+}
+
 // Update qubit states based on the message being displayed
 function updateQubitStatesFromMessage(message) {
-    // Check for player DUALIZE (only when player uses it, not enemy)
-    if (message.includes("put its qubit into superposition") && !message.includes("Singulon")) {
-        const playerQubit = document.getElementById('player-qubit');
-        if (playerQubit) {
-            playerQubit.textContent = "S";
+    // Check for waveform stack updates for Resona
+    if (currentCharacter === "Resona" && (message.includes("gained waveform stack") || message.includes("waveform"))) {
+        console.log('Detected waveform stack update:', message);
+        
+        // Update waveform display immediately
+        const waveformDisplay = document.getElementById('waveform-display');
+        const waveformStacks = document.getElementById('waveform-stacks');
+        if (waveformDisplay && waveformStacks && gameState) {
+            const stacks = gameState.player.waveform_stacks || 0;
+            waveformStacks.textContent = stacks;
+            console.log('Updated waveform stacks to:', stacks);
         }
     }
     
-    // Check for Q-THUNDER qubit collapse (when qubit collapses from superposition)
-    if (message.includes("Q-THUNDER strikes for")) {
-        // Q-THUNDER collapses the qubit - update from current game state
-        const playerQubit = document.getElementById('player-qubit');
-        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
-            const collapsedState = gameState.player.qubit_state;
-            // Remove trailing period and convert superposition to S
-            const cleanState = collapsedState.replace(/\.$/, '');
-            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+    // Check for turn start glow for Resona
+    if (currentCharacter === "Resona" && message.includes("Your qubit is")) {
+        // Add yellow glow aura for turn start (bigger)
+        const playerSprite = document.getElementById('player-sprite');
+        if (playerSprite) {
+            playerSprite.style.filter = 'drop-shadow(0 0 40px yellow) brightness(1.4)';
+            setTimeout(() => {
+                playerSprite.style.filter = '';
+            }, 2000); // Glow for 2 seconds
         }
     }
     
-    // Check for Q-PHOTON GEYSER qubit collapse
-    if (message.includes("Q-PHOTON GEYSER") && message.includes("damage")) {
-        // Q-PHOTON GEYSER collapses the qubit - update from current game state
-        const playerQubit = document.getElementById('player-qubit');
-        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
-            const collapsedState = gameState.player.qubit_state;
-            // Remove trailing period and convert superposition to S
-            const cleanState = collapsedState.replace(/\.$/, '');
-            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
-        }
-    }
-    
-    // Check for SWITCHEROO (swaps qubit states)
-    if (message.includes("swaps qubit states")) {
-        const playerQubit = document.getElementById('player-qubit');
-        const enemyQubit = document.getElementById('enemy-qubit');
-        if (playerQubit && enemyQubit) {
-            // Temporarily store the current states
-            const tempPlayerState = playerQubit.textContent;
-            const tempEnemyState = enemyQubit.textContent;
-            // Swap them
-            playerQubit.textContent = tempEnemyState;
-            enemyQubit.textContent = tempPlayerState;
-        }
-    }
-    
-    // Check for "Your qubit is" messages and update visual qubit state
-    if (message.includes("Your qubit is")) {
-        const playerQubit = document.getElementById('player-qubit');
-        if (playerQubit) {
-            // Extract the qubit state from the message
-            const qubitMatch = message.match(/Your qubit is (.+)/);
-            if (qubitMatch) {
-                const qubitState = qubitMatch[1];
-                // Remove trailing period and convert superposition to S
-                const cleanState = qubitState.replace(/\.$/, '');
-                playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+    // Check for Metal Noise activation/deactivation
+    if (currentCharacter === "Resona" && message.includes("METAL NOISE")) {
+        console.log('Detected Metal Noise message:', message);
+        
+        // Update Metal Noise indicator immediately
+        const metalNoiseIndicator = document.getElementById('metal-noise-indicator');
+        const metalNoiseText = document.getElementById('metal-noise-text');
+        if (metalNoiseIndicator && metalNoiseText && gameState) {
+            if (message.includes("blocks enemy Q-Moves")) {
+                metalNoiseIndicator.style.display = 'flex';
+                metalNoiseText.textContent = "Q-Moves";
+            } else if (message.includes("blocks enemy state changes")) {
+                metalNoiseIndicator.style.display = 'flex';
+                metalNoiseText.textContent = "States";
+            } else if (message.includes("deals") && message.includes("damage")) {
+                metalNoiseIndicator.style.display = 'flex';
+                metalNoiseText.textContent = "Active";
             }
         }
     }
     
-    // Check for entanglement messages and update visual state
-    if (message.includes("creates quantum entanglement")) {
-        const playerQubit = document.getElementById('player-qubit');
-        const enemyQubit = document.getElementById('enemy-qubit');
-        if (playerQubit && enemyQubit) {
-            playerQubit.classList.add('entangled');
-            enemyQubit.classList.add('entangled');
+    // Check for Metal Noise blocking enemy moves
+    if (message.includes("But it failed!") && message.includes("blocked by METAL NOISE")) {
+        console.log('Detected Metal Noise blocking:', message);
+        
+        // Hide Metal Noise indicator after blocking
+        const metalNoiseIndicator = document.getElementById('metal-noise-indicator');
+        if (metalNoiseIndicator) {
+            setTimeout(() => {
+                metalNoiseIndicator.style.display = 'none';
+            }, 3000); // Hide after 3 seconds
         }
     }
     
-    // Check for entanglement breaking messages
-    if (message.includes("Entanglement broken")) {
+    // Real-time qubit state updates based on specific messages
+    if (message.includes("put its qubit into superposition") && !message.includes("Singulon")) {
+        // Player used DUALIZE
         const playerQubit = document.getElementById('player-qubit');
-        const enemyQubit = document.getElementById('enemy-qubit');
-        if (playerQubit && enemyQubit) {
-            playerQubit.classList.remove('entangled');
-            enemyQubit.classList.remove('entangled');
+        if (playerQubit) {
+            playerQubit.textContent = "S";
         }
-    }
-    
-    // Check for BIT-FLIP
-    if (message.includes("flipped Singulon's qubit to")) {
+    } else if (message.includes("flipped Singulon's qubit to")) {
+        // Player used BIT-FLIP
         const enemyQubit = document.getElementById('enemy-qubit');
         if (enemyQubit) {
             if (message.includes("to |1⟩")) {
@@ -1352,10 +2580,69 @@ function updateQubitStatesFromMessage(message) {
                 enemyQubit.textContent = "|0⟩";
             }
         }
-    }
-    
-    // Check for enemy qubit state updates
-    if (message.includes("Singulon's qubit is")) {
+    } else if (message.includes("swaps qubit states")) {
+        // Player used SWITCHEROO
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            const tempPlayerState = playerQubit.textContent;
+            const tempEnemyState = enemyQubit.textContent;
+            playerQubit.textContent = tempEnemyState;
+            enemyQubit.textContent = tempPlayerState;
+        }
+    } else if (message.includes("creates quantum entanglement")) {
+        // Player used ENTANGLE
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            playerQubit.classList.add('entangled');
+            enemyQubit.classList.add('entangled');
+        }
+    } else if (message.includes("Q-THUNDER strikes for") || message.includes("Q-PHOTON GEYSER") || message.includes("Q-METRONOME") || message.includes("WAVE CRASH")) {
+        // Q-moves that collapse qubits - update from current game state
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
+            const collapsedState = gameState.player.qubit_state;
+            const cleanState = collapsedState.replace(/\.$/, '');
+            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+        }
+    } else if (message.includes("Singulon put its qubit into superposition")) {
+        // Enemy used DUALIZE
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            enemyQubit.textContent = "S";
+        }
+        
+        // Trigger boss DUALIZE animation
+        const enemySprite = document.querySelector('.enemy-sprite img');
+        if (enemySprite) {
+            triggerBossDualizeAnimation(enemySprite);
+        }
+    } else if (message.includes("Singulon reset its qubit to |0⟩")) {
+        // Enemy used HAZE
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            enemyQubit.textContent = "|0⟩";
+        }
+        
+        // Trigger boss HAZE animation
+        const enemySprite = document.querySelector('.enemy-sprite img');
+        if (enemySprite) {
+            triggerBossHazeAnimation(enemySprite);
+        }
+    } else if (message.includes("Your qubit is")) {
+        // End of turn qubit state update
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit) {
+            const qubitMatch = message.match(/Your qubit is (.+)/);
+            if (qubitMatch) {
+                const qubitState = qubitMatch[1];
+                const cleanState = qubitState.replace(/\.$/, '');
+                playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+            }
+        }
+    } else if (message.includes("Singulon's qubit is")) {
+        // End of turn enemy qubit state update
         const enemyQubit = document.getElementById('enemy-qubit');
         if (enemyQubit) {
             const qubitMatch = message.match(/Singulon's qubit is (.+)/);
@@ -1363,21 +2650,6 @@ function updateQubitStatesFromMessage(message) {
                 const qubitState = qubitMatch[1];
                 const cleanState = qubitState.replace(/\.$/, '');
                 enemyQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
-            }
-        }
-    }
-    
-    // Check for entanglement state updates
-    if (message.includes("entanglement")) {
-        const playerQubit = document.getElementById('player-qubit');
-        const enemyQubit = document.getElementById('enemy-qubit');
-        if (playerQubit && enemyQubit) {
-            if (message.includes("entangled")) {
-                playerQubit.classList.add('entangled');
-                enemyQubit.classList.add('entangled');
-            } else if (message.includes("not entangled")) {
-                playerQubit.classList.remove('entangled');
-                enemyQubit.classList.remove('entangled');
             }
         }
     }
@@ -1428,12 +2700,38 @@ function updateQubitStatesFromMessage(message) {
         window.visualEnemyHpUpdated = true;
     }
     
+    // Check for boss move usage messages (for animations)
+    if (message.includes("Singulon used")) {
+        if (message.includes("Q-PRISMATIC LASER")) {
+            const enemySprite = document.querySelector('.enemy-sprite img');
+            const playerSprite = document.getElementById('player-sprite');
+            if (enemySprite && playerSprite) {
+                triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite);
+            }
+        }
+    }
+    
     // Check for SPECIFIC damage messages and update HP bars visually in real-time
     // Only update HP for actual damage messages, not move usage messages
     if ((message.includes("Dealt") && message.includes("damage!")) || 
-        (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW"))) ||
+        (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW") || message.includes("Q-METRONOME") || message.includes("WAVE CRASH") || message.includes("METAL NOISE"))) ||
         (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage"))) {
         console.log('Detected damage message:', message);
+        
+        // Trigger boss animations for enemy moves
+        if (message.includes("BULLET MUONS") && message.includes("deals")) {
+            const enemySprite = document.querySelector('.enemy-sprite img');
+            const playerSprite = document.getElementById('player-sprite');
+            if (enemySprite && playerSprite) {
+                triggerBossBulletMuonsAnimation(enemySprite, playerSprite);
+            }
+        } else if (message.includes("Q-PRISMATIC LASER") && message.includes("deals")) {
+            const enemySprite = document.querySelector('.enemy-sprite img');
+            const playerSprite = document.getElementById('player-sprite');
+            if (enemySprite && playerSprite) {
+                triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite);
+            }
+        }
         
         // Get character max HP from character data
         const charData = characterData[currentCharacter];
@@ -1498,4 +2796,381 @@ function updateHPDisplay() {
     
     updateHealthBarColor(playerHealthFill, playerHpPercent);
     updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+}
+
+// Boss Animation Functions
+
+// Q-PRISMATIC LASER Animation - MASSIVE & VIVID VERSION
+function triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite) {
+    console.log('Q-PRISMATIC LASER MASSIVE animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerRect = playerSprite.getBoundingClientRect();
+    
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes massiveSpacialRendBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.8; background: linear-gradient(45deg, #000000, #4C1D95, #000000); }
+            50% { opacity: 0.9; background: linear-gradient(45deg, #000000, #7C3AED, #A855F7, #000000); }
+            75% { opacity: 0.8; background: linear-gradient(45deg, #000000, #C084FC, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes massiveSpacialRendMistball {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            20% { transform: scale(3) rotate(90deg); opacity: 1; }
+            50% { transform: scale(8) rotate(180deg); opacity: 0.9; }
+            80% { transform: scale(12) rotate(270deg); opacity: 0.7; }
+            100% { transform: scale(15) rotate(360deg); opacity: 0; }
+        }
+        @keyframes massiveSpacialRendSlash {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            25% { transform: scale(5) rotate(45deg); opacity: 1; }
+            50% { transform: scale(10) rotate(90deg); opacity: 0.9; }
+            75% { transform: scale(15) rotate(135deg); opacity: 0.7; }
+            100% { transform: scale(20) rotate(180deg); opacity: 0; }
+        }
+        @keyframes massiveSpacialRendDefender {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(-20px, -20px) scale(0.8) rotate(5deg); }
+            50% { transform: translate(-40px, -40px) scale(0.6) rotate(10deg); }
+            75% { transform: translate(-30px, -30px) scale(0.7) rotate(5deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+        @keyframes massiveSpacialRendScreenShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-10px, -5px); }
+            20% { transform: translate(10px, -5px); }
+            30% { transform: translate(-10px, 5px); }
+            40% { transform: translate(10px, 5px); }
+            50% { transform: translate(-5px, -10px); }
+            60% { transform: translate(5px, -10px); }
+            70% { transform: translate(-5px, 10px); }
+            80% { transform: translate(5px, 10px); }
+            90% { transform: translate(0, 0); }
+        }
+        @keyframes massiveSpacialRendLightning {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1) rotate(180deg); opacity: 1; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: MASSIVE Background effect with color cycling
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: massiveSpacialRendBackground 1.5s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: MASSIVE Multiple mistball effects (20x bigger!)
+    const mistballPositions = [
+        { x: playerX + 50, y: playerY + 50 },
+        { x: playerX - 50, y: playerY - 50 },
+        { x: playerX + 100, y: playerY + 25 },
+        { x: playerX - 100, y: playerY - 25 },
+        { x: playerX + 25, y: playerY + 100 },
+        { x: playerX - 25, y: playerY - 100 },
+        { x: playerX + 75, y: playerY + 75 },
+        { x: playerX - 75, y: playerY - 75 }
+    ];
+    
+    mistballPositions.forEach((pos, index) => {
+        const mistball = document.createElement('div');
+        mistball.style.cssText = `
+            position: absolute;
+            top: ${pos.y}px;
+            left: ${pos.x}px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #8B5CF6, #A855F7, #C084FC, #F59E0B, #EF4444);
+            border-radius: 50%;
+            box-shadow: 0 0 50px #8B5CF6, 0 0 100px #A855F7, 0 0 150px #C084FC;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveSpacialRendMistball ${0.5 + index * 0.2}s ease-out;
+        `;
+        document.body.appendChild(mistball);
+        
+        setTimeout(() => {
+            mistball.remove();
+        }, (0.5 + index * 0.2) * 1000);
+    });
+    
+    // Phase 3: MASSIVE Slash effect (10x bigger!)
+    const slashEffect = document.createElement('div');
+    slashEffect.style.cssText = `
+        position: absolute;
+        top: ${playerY - 50}px;
+        left: ${playerX - 50}px;
+        width: 300px;
+        height: 300px;
+        background: linear-gradient(45deg, transparent 20%, #8B5CF6 40%, #A855F7 50%, #C084FC 60%, #F59E0B 70%, transparent 80%);
+        clip-path: polygon(0 50%, 100% 0, 100% 100%);
+        box-shadow: 0 0 100px #8B5CF6, 0 0 200px #A855F7;
+        z-index: 999;
+        pointer-events: none;
+        animation: massiveSpacialRendSlash 1s ease-out;
+    `;
+    document.body.appendChild(slashEffect);
+    
+    // Phase 4: Screen shake effect
+    document.body.style.animation = 'massiveSpacialRendScreenShake 1.5s ease-in-out';
+    
+    // Phase 5: Lightning effects around player
+    for (let i = 0; i < 8; i++) {
+        const lightning = document.createElement('div');
+        const angle = (i * 45) * (Math.PI / 180);
+        const distance = 150;
+        const lx = playerX + Math.cos(angle) * distance;
+        const ly = playerY + Math.sin(angle) * distance;
+        
+        lightning.style.cssText = `
+            position: absolute;
+            top: ${ly}px;
+            left: ${lx}px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #F59E0B, #EF4444, #8B5CF6);
+            border-radius: 50%;
+            box-shadow: 0 0 30px #F59E0B, 0 0 60px #EF4444;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveSpacialRendLightning ${0.8 + i * 0.1}s ease-out;
+        `;
+        document.body.appendChild(lightning);
+        
+        setTimeout(() => {
+            lightning.remove();
+        }, (0.8 + i * 0.1) * 1000);
+    }
+    
+    // Phase 6: Player sprite effect (more dramatic)
+    playerSprite.style.animation = 'massiveSpacialRendDefender 1.5s ease-out';
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        slashEffect.remove();
+        document.body.style.animation = '';
+        playerSprite.style.animation = '';
+        style.remove();
+    }, 2000);
+}
+
+// BULLET MUONS Animation - MASSIVE & VIVID VERSION
+function triggerBossBulletMuonsAnimation(enemySprite, playerSprite) {
+    console.log('BULLET MUONS MASSIVE animation triggered');
+    
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerRect = playerSprite.getBoundingClientRect();
+    
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes massiveShadowBallBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.6; background: linear-gradient(45deg, #000000, #4C1D95, #000000); }
+            50% { opacity: 0.8; background: linear-gradient(45deg, #000000, #7C3AED, #A855F7, #000000); }
+            75% { opacity: 0.6; background: linear-gradient(45deg, #000000, #C084FC, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes massiveShadowBallWisp {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            25% { transform: translate(0, 0) scale(2); opacity: 1; }
+            50% { transform: translate(0, 0) scale(4); opacity: 0.9; }
+            75% { transform: translate(0, 0) scale(6); opacity: 0.7; }
+            100% { transform: translate(0, 0) scale(8); opacity: 0; }
+        }
+        @keyframes massiveShadowBallProjectile {
+            0% { transform: scale(0) translate(0, 0); opacity: 0; }
+            25% { transform: scale(2) translate(0, 0); opacity: 0.8; }
+            50% { transform: scale(4) translate(${(playerX - enemyX) / 2}px, ${(playerY - enemyY) / 2}px); opacity: 1; }
+            75% { transform: scale(6) translate(${(playerX - enemyX) * 0.75}px, ${(playerY - enemyY) * 0.75}px); opacity: 0.9; }
+            100% { transform: scale(8) translate(${playerX - enemyX}px, ${playerY - enemyY}px); opacity: 0.8; }
+        }
+        @keyframes massiveShadowBallExplode {
+            0% { transform: scale(0); opacity: 0; }
+            25% { transform: scale(5); opacity: 1; }
+            50% { transform: scale(10); opacity: 0.9; }
+            75% { transform: scale(15); opacity: 0.7; }
+            100% { transform: scale(20); opacity: 0; }
+        }
+        @keyframes massiveShadowBallDefender {
+            0% { transform: translateZ(0) scale(1) rotate(0deg); }
+            25% { transform: translateZ(20px) scale(0.8) rotate(5deg); }
+            50% { transform: translateZ(40px) scale(0.6) rotate(10deg); }
+            75% { transform: translateZ(20px) scale(0.8) rotate(5deg); }
+            100% { transform: translateZ(0) scale(1) rotate(0deg); }
+        }
+        @keyframes massiveShadowBallScreenShake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-15px, -8px); }
+            20% { transform: translate(15px, -8px); }
+            30% { transform: translate(-15px, 8px); }
+            40% { transform: translate(15px, 8px); }
+            50% { transform: translate(-8px, -15px); }
+            60% { transform: translate(8px, -15px); }
+            70% { transform: translate(-8px, 15px); }
+            80% { transform: translate(8px, 15px); }
+            90% { transform: translate(0, 0); }
+        }
+        @keyframes massiveShadowBallOrbital {
+            0% { transform: rotate(0deg) translateX(0) scale(0); opacity: 0; }
+            50% { transform: rotate(180deg) translateX(100px) scale(1); opacity: 1; }
+            100% { transform: rotate(360deg) translateX(0) scale(0); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: MASSIVE Background effect with color cycling
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: massiveShadowBallBackground 2s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: MASSIVE Poison wisp gathering effects (20x bigger!)
+    const wispPositions = [
+        { x: enemyX, y: enemyY + 150 },
+        { x: enemyX - 100, y: enemyY - 120 },
+        { x: enemyX + 100, y: enemyY - 120 },
+        { x: enemyX - 150, y: enemyY + 60 },
+        { x: enemyX + 150, y: enemyY + 60 },
+        { x: enemyX - 80, y: enemyY + 200 },
+        { x: enemyX + 80, y: enemyY + 200 },
+        { x: enemyX - 120, y: enemyY - 60 },
+        { x: enemyX + 120, y: enemyY - 60 },
+        { x: enemyX, y: enemyY - 200 }
+    ];
+    
+    wispPositions.forEach((pos, index) => {
+        const wisp = document.createElement('div');
+        wisp.style.cssText = `
+            position: absolute;
+            top: ${pos.y}px;
+            left: ${pos.x}px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #4C1D95, #7C3AED, #A855F7, #C084FC, #F59E0B);
+            border-radius: 50%;
+            box-shadow: 0 0 60px #4C1D95, 0 0 120px #7C3AED, 0 0 180px #A855F7;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveShadowBallWisp ${0.4 + index * 0.15}s ease-out;
+        `;
+        document.body.appendChild(wisp);
+        
+        setTimeout(() => {
+            wisp.remove();
+        }, (0.4 + index * 0.15) * 1000);
+    });
+    
+    // Phase 3: MASSIVE Shadow ball projectile (10x bigger!)
+    const shadowBall = document.createElement('div');
+    shadowBall.style.cssText = `
+        position: absolute;
+        top: ${enemyY}px;
+        left: ${enemyX}px;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, #4C1D95, #7C3AED, #A855F7, #C084FC, #F59E0B, #EF4444);
+        border-radius: 50%;
+        box-shadow: 0 0 80px #4C1D95, 0 0 160px #7C3AED, 0 0 240px #A855F7;
+        z-index: 999;
+        pointer-events: none;
+        animation: massiveShadowBallProjectile 1.5s ease-out;
+    `;
+    document.body.appendChild(shadowBall);
+    
+    // Phase 4: Orbital effects around enemy
+    for (let i = 0; i < 6; i++) {
+        const orbital = document.createElement('div');
+        orbital.style.cssText = `
+            position: absolute;
+            top: ${enemyY}px;
+            left: ${enemyX}px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #F59E0B, #EF4444, #4C1D95);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #F59E0B, 0 0 40px #EF4444;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveShadowBallOrbital ${1 + i * 0.2}s ease-out;
+        `;
+        document.body.appendChild(orbital);
+        
+        setTimeout(() => {
+            orbital.remove();
+        }, (1 + i * 0.2) * 1000);
+    }
+    
+    // Phase 5: Screen shake effect
+    document.body.style.animation = 'massiveShadowBallScreenShake 2s ease-in-out';
+    
+    // Phase 6: MASSIVE Explosion effect at player
+    setTimeout(() => {
+        const explosion = document.createElement('div');
+        explosion.style.cssText = `
+            position: absolute;
+            top: ${playerY}px;
+            left: ${playerX}px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #4C1D95, #7C3AED, #A855F7, #C084FC, #F59E0B, #EF4444);
+            border-radius: 50%;
+            box-shadow: 0 0 100px #4C1D95, 0 0 200px #7C3AED, 0 0 300px #A855F7;
+            z-index: 999;
+            pointer-events: none;
+            animation: massiveShadowBallExplode 0.8s ease-out;
+        `;
+        document.body.appendChild(explosion);
+        
+        // Player sprite effect (more dramatic)
+        playerSprite.style.animation = 'massiveShadowBallDefender 0.8s ease-out';
+        
+        setTimeout(() => {
+            explosion.remove();
+            playerSprite.style.animation = '';
+        }, 800);
+    }, 1500);
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        shadowBall.remove();
+        document.body.style.animation = '';
+        style.remove();
+    }, 3000);
 }

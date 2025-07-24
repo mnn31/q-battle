@@ -85,7 +85,9 @@ def start_game(character="Bitzy"):
             "hp": hp,
             "moves": moves,
             "character": character,
-            "qubit_state": "|0⟩"  # Player qubit state
+            "qubit_state": "|0⟩",  # Player qubit state
+            "waveform_stacks": 0,  # Resona's waveform stacks
+            "next_turn_collapse_bonus": 0  # Resona's collapse bonus
         },
         "enemy": {
             "hp": 400,  # Singulon's HP
@@ -93,7 +95,9 @@ def start_game(character="Bitzy"):
         },
         "turn": "player",
         "log": [],
-        "is_entangled": False  # Track entanglement state
+        "is_entangled": False,  # Track entanglement state
+        "metal_noise_active": False,  # Track Metal Noise blocking
+        "metal_noise_block_type": None  # Track what type of moves are blocked
     }
     
     # Reset quantum states
@@ -215,6 +219,14 @@ def process_move(move):
         log.append(result["message"])
     elif move == "GLITCH CLAW" and "message" in result:
         log.append(result["message"])
+    elif move == "Q-METRONOME" and "message" in result:
+        log.append(result["message"])
+    elif move == "WAVE CRASH" and "message" in result:
+        log.append(result["message"])
+    elif move == "METAL NOISE" and "message" in result:
+        log.append(result["message"])
+    elif move == "SHIFT GEAR" and "message" in result:
+        log.append(result["message"])
     
     # Check if move failed
     if not result.get("success", True):
@@ -246,7 +258,7 @@ def process_move(move):
     
     # 2. Dealt <damage> damage! (only if damage > 0 and move doesn't already include damage in message)
     damage = result.get("damage", 0)
-    if damage > 0 and move not in ["Q-PHOTON GEYSER", "GLITCH CLAW"]:
+    if damage > 0 and move not in ["Q-PHOTON GEYSER", "GLITCH CLAW", "Q-METRONOME", "WAVE CRASH", "METAL NOISE"]:
         log.append(f"Dealt {damage} damage!")
     
     # QUANTUM AFTERBURN: Check if Neutrinette is attacking while entangled
@@ -265,6 +277,24 @@ def process_move(move):
     if "qubit_state" in result and move != "DUALIZE" and move != "BIT-FLIP":
         player_state.qubit_state = result["qubit_state"]
         game_state["player"]["qubit_state"] = result["qubit_state"]
+    
+    # Update waveform stacks for Resona
+    if character == "Resona" and "waveform_stacks" in result:
+        player_state.waveform_stacks = result["waveform_stacks"]
+        game_state["player"]["waveform_stacks"] = result["waveform_stacks"]
+    
+    # Update next turn collapse bonus for Resona
+    if character == "Resona" and "next_turn_collapse_bonus" in result:
+        player_state.next_turn_collapse_bonus = result["next_turn_collapse_bonus"]
+        game_state["player"]["next_turn_collapse_bonus"] = result["next_turn_collapse_bonus"]
+    
+    # Update Metal Noise blocking status
+    if character == "Resona" and move == "METAL NOISE" and "enemy_state_blocked" in result:
+        game_state["metal_noise_active"] = True
+        if "q_move_blocked" in result and result["q_move_blocked"]:
+            game_state["metal_noise_block_type"] = "q_moves"
+        else:
+            game_state["metal_noise_block_type"] = "state_changes"
 
     # Update enemy's qubit state if changed (if not already updated)
     if "enemy_qubit_state" in result and move != "BIT-FLIP":
@@ -321,6 +351,35 @@ def enemy_attack():
         result = move_func(singulon_state, player_state.defense)
     else:
         result = move_func(singulon_state)
+    
+    # Check Metal Noise blocking
+    if game_state.get("metal_noise_active", False):
+        block_type = game_state.get("metal_noise_block_type")
+        
+        # Check if the move should be blocked
+        should_block = False
+        if block_type == "q_moves" and move_name in ["Q-PRISMATIC LASER"]:
+            should_block = True
+        elif block_type == "state_changes" and move_name in ["DUALIZE", "HAZE"]:
+            should_block = True
+        
+        if should_block:
+            # Block the move
+            log.append(f"Singulon used {move_name}!")
+            log.append("But it failed! (blocked by METAL NOISE)")
+            
+            # Reset Metal Noise status
+            game_state["metal_noise_active"] = False
+            game_state["metal_noise_block_type"] = None
+            
+            # Continue to player's turn
+            game_state["turn"] = "player"
+            return {
+                "move_name": move_name,
+                "damage": 0,
+                "success": False,
+                "blocked": True
+            }
     
     # Update Singulon's qubit state
     if "qubit_state" in result:

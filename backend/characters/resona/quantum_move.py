@@ -19,13 +19,23 @@ class ResonaQuantumState:
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
         self.attack_stat = 55  # Reduced by 10
-        self.defense = 75  # Increased by 5
+        self.defense = 100  # Updated to 100
         self.speed = 6
         self.waveform_stacks = 0  # Track waveform stacks
         self.next_turn_collapse_bonus = 0  # For SHIFT GEAR effect
 
 def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_state="|0⟩", defender_defense=50):
-    """Q-METRONOME: Collapses qubit, deals 100% max HP if |1⟩, base damage if |0⟩"""
+    """Q-METRONOME: Requires superposition, collapses qubit, deals 100% max HP if |1⟩, base damage if |0⟩"""
+    
+    # Check if qubit is in superposition - if not, fail
+    if quantum_state.qubit_state != "superposition":
+        return {
+            "success": False,
+            "damage": 0,
+            "message": "",
+            "qubit_state": quantum_state.qubit_state
+        }
+    
     # Apply waveform ability effects
     from .ability import ability_quantum_waveform
     waveform_effect = ability_quantum_waveform(quantum_state.waveform_stacks)
@@ -43,9 +53,6 @@ def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_st
         qc = measure_qubit(qc, 0)
         result = run_quantum_circuit(qc, shots=1)
     
-    # Check if qubit was in superposition before collapsing
-    was_in_superposition = quantum_state.qubit_state == "superposition"
-    
     # Determine collapse result with waveform bonus
     if "1" in result:
         quantum_state.qubit_state = "|1⟩"
@@ -53,21 +60,19 @@ def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_st
         base_power = current_hp + damage_bonus
         base_damage = calculate_damage_rpg(quantum_state.attack_stat, base_power, defender_defense)
         damage = apply_damage_roll(base_damage)
-        message = f"Q-METRONOME deals {damage} damage! (|1⟩ state + {damage_bonus} waveform bonus)"
+        message = f"Q-METRONOME deals {damage} damage! (|1⟩ state, {quantum_state.waveform_stacks} waveform stacks)"
     else:
         quantum_state.qubit_state = "|0⟩"
         # Calculate damage: 10 base + waveform bonus with proper RPG formula and damage roll
         base_power = 10 + damage_bonus
         base_damage = calculate_damage_rpg(quantum_state.attack_stat, base_power, defender_defense)
         damage = apply_damage_roll(base_damage)
-        message = f"Q-METRONOME deals {damage} damage! (|0⟩ state + {damage_bonus} waveform bonus)"
+        message = f"Q-METRONOME deals {damage} damage! (|0⟩ state, {quantum_state.waveform_stacks} waveform stacks)"
     
-    # Gain waveform stack only if qubit was in superposition before collapsing
-    waveform_gained = 0
-    if was_in_superposition:
-        quantum_state.waveform_stacks += 1
-        waveform_gained = 1
-        message += " (gained waveform stack)"
+    # Gain waveform stack since qubit was in superposition before collapsing
+    quantum_state.waveform_stacks += 1
+    waveform_gained = 1
+    message += " (gained waveform stack)"
     
     return {
         "success": True,
@@ -84,9 +89,9 @@ def quantum_move_resona_wave_crash(quantum_state, enemy_qubit_state="|0⟩", def
     # Check for superposition bonus
     superposition_bonus = 0
     if quantum_state.qubit_state == "superposition":
-        superposition_bonus += 40
+        superposition_bonus += 20
     if enemy_qubit_state == "superposition":
-        superposition_bonus += 40
+        superposition_bonus += 20
     
     # Create circuit for quantum randomness with collapse probability bonus
     if quantum_state.next_turn_collapse_bonus > 0:
@@ -99,8 +104,8 @@ def quantum_move_resona_wave_crash(quantum_state, enemy_qubit_state="|0⟩", def
         qc = measure_qubit(qc, 0)
         result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate base damage (20) with proper RPG formula
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 20, defender_defense)
+    # Calculate base damage (15) with proper RPG formula
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 15, defender_defense)
     total_damage = base_damage
     
     # Check if qubit was in superposition before collapsing
