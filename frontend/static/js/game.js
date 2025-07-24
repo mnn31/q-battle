@@ -398,6 +398,8 @@ async function executeMove(moveName) {
     // Trigger animations based on move
     if (currentCharacter === 'Bitzy') {
         triggerBitzyAnimation(moveName);
+    } else if (currentCharacter === 'Neutrinette') {
+        triggerNeutrinetteAnimation(moveName);
     }
     
     try {
@@ -742,6 +744,35 @@ function createElectricSpark(x, y, delay) {
             }, 50);
         }, 50);
     }, delay);
+}
+
+// Neutrinette Animation System - Placeholder for now
+function triggerNeutrinetteAnimation(moveName) {
+    console.log('Triggering Neutrinette animation for:', moveName);
+    
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    
+    if (!playerSprite || !enemySprite) {
+        console.log('Animation elements not found:', { playerSprite, enemySprite });
+        return;
+    }
+    
+    // Placeholder - just log the move for now
+    switch (moveName) {
+        case 'Q-PHOTON GEYSER':
+            console.log('Q-PHOTON GEYSER animation triggered');
+            break;
+        case 'GLITCH CLAW':
+            console.log('GLITCH CLAW animation triggered');
+            break;
+        case 'ENTANGLE':
+            console.log('ENTANGLE animation triggered');
+            break;
+        case 'SWITCHEROO':
+            console.log('SWITCHEROO animation triggered');
+            break;
+    }
 }
 
 // Update qubit states based on the message being displayed
