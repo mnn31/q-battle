@@ -144,18 +144,15 @@ def process_move(move):
         player_state = neutrinette_state
         if move == "Q-PHOTON GEYSER":
             result = quantum_move_neutrinette_q_photon_geyser(player_state, game_state["player"]["hp"], game_state["enemy"]["hp"], player_state.is_entangled, singulon_state.defense)
+            # Apply HP cost to player
+            if result.get("hp_cost", 0) > 0:
+                game_state["player"]["hp"] = max(0, game_state["player"]["hp"] - result["hp_cost"])
             if result.get("enemy_hp_cost", 0) > 0:
                 game_state["enemy"]["hp"] -= result["enemy_hp_cost"]
-            # Add the specific message from the quantum move
-            if "message" in result:
-                log.append(result["message"])
         elif move == "GLITCH CLAW":
             result = quantum_move_neutrinette_glitch_claw(player_state, game_state["player"]["hp"], singulon_state.defense)
             if result.get("heal", 0) > 0:
                 game_state["player"]["hp"] = min(90, game_state["player"]["hp"] + result["heal"])
-            # Add the specific message from the quantum move
-            if "message" in result:
-                log.append(result["message"])
         elif move == "ENTANGLE":
             result = quantum_move_neutrinette_entangle(player_state, game_state["enemy"]["qubit_state"])
         elif move == "SWITCHEROO":
