@@ -1354,52 +1354,46 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Check for enemy DUALIZE
-    if (message.includes("Singulon put its qubit into superposition")) {
+    // Check for enemy qubit state updates
+    if (message.includes("Singulon's qubit is")) {
         const enemyQubit = document.getElementById('enemy-qubit');
         if (enemyQubit) {
-            enemyQubit.textContent = "S";
+            const qubitMatch = message.match(/Singulon's qubit is (.+)/);
+            if (qubitMatch) {
+                const qubitState = qubitMatch[1];
+                const cleanState = qubitState.replace(/\.$/, '');
+                enemyQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+            }
         }
     }
     
-    // Check for enemy HAZE
-    if (message.includes("Singulon reset its qubit to |0⟩")) {
+    // Check for entanglement state updates
+    if (message.includes("entanglement")) {
+        const playerQubit = document.getElementById('player-qubit');
         const enemyQubit = document.getElementById('enemy-qubit');
-        if (enemyQubit) {
-            enemyQubit.textContent = "|0⟩";
+        if (playerQubit && enemyQubit) {
+            if (message.includes("entangled")) {
+                playerQubit.classList.add('entangled');
+                enemyQubit.classList.add('entangled');
+            } else if (message.includes("not entangled")) {
+                playerQubit.classList.remove('entangled');
+                enemyQubit.classList.remove('entangled');
+            }
         }
     }
     
-    // Check for healing messages and update HP bars visually in real-time
-    if (message.includes("heals") && message.includes("HP!")) {
+    // Check for QUANTUM AFTERBURN extra damage messages
+    if (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage")) {
+        console.log('Detected QUANTUM AFTERBURN extra damage message:', message);
+        
         // Get character max HP from character data
         const charData = characterData[currentCharacter];
         const maxPlayerHp = charData ? charData.maxHp : 90;
         
-        // Update HP bars to match the current backend state (healing already applied)
-        const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
-        
-        // Player was healed - update visual display immediately
-        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        updateHealthBarColor(playerHealthFill, playerHpPercent);
-        
-        const playerHp = document.getElementById('player-hp');
-        if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
-        }
-        
-        // Set flag to prevent double update
-        window.visualPlayerHpUpdated = true;
-    }
-    
-    // Check for Quantum Afterburn recoil damage messages
-    if (message.includes("QUANTUM AFTERBURN reflects") && message.includes("damage back to the enemy!")) {
-        console.log('Detected QUANTUM AFTERBURN recoil damage message:', message);
-        
-        // Update enemy HP bar to reflect recoil damage
+        // Update enemy HP bar to reflect extra damage
         const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
         
-        // Enemy took recoil damage - update visual display immediately
+        // Enemy took extra damage - update visual display immediately
         enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
         updateHealthBarColor(enemyHealthFill, enemyHpPercent);
         
@@ -1433,7 +1427,8 @@ function updateQubitStatesFromMessage(message) {
         window.visualEnemyHpUpdated = true;
     }
     
-    // Check for damage messages and update HP bars visually in real-time
+    // Check for SPECIFIC damage messages and update HP bars visually in real-time
+    // Only update HP for actual damage messages, not move usage messages
     if ((message.includes("Dealt") && message.includes("damage!")) || 
         (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW"))) ||
         (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage"))) {
