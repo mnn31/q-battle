@@ -156,8 +156,12 @@ async function startBattle(character) {
 function updateBattleDisplay() {
     if (!gameState) return;
     
+    // Get character max HP from character data
+    const charData = characterData[currentCharacter];
+    const maxPlayerHp = charData ? charData.maxHp : 90;
+    
     // Update HP bars and text from backend state, but preserve real-time visual updates
-    const playerHpPercent = (gameState.player.hp / 90) * 100;
+    const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
     const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
     
     // Only update HP bars if we haven't already updated them in real-time
@@ -165,7 +169,7 @@ function updateBattleDisplay() {
         playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
         const playerHp = document.getElementById('player-hp');
         if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/90`;
+            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
         }
         updateHealthBarColor(playerHealthFill, playerHpPercent);
     }
@@ -183,9 +187,19 @@ function updateBattleDisplay() {
     window.visualPlayerHpUpdated = null;
     window.visualEnemyHpUpdated = null;
 
-    // Update entanglement visual state
+    // Update qubit states from backend
     const playerQubit = document.getElementById('player-qubit');
     const enemyQubit = document.getElementById('enemy-qubit');
+    if (playerQubit && gameState.player && gameState.player.qubit_state) {
+        const qubitState = gameState.player.qubit_state;
+        playerQubit.textContent = qubitState === "superposition" ? "S" : qubitState;
+    }
+    if (enemyQubit && gameState.enemy && gameState.enemy.qubit_state) {
+        const qubitState = gameState.enemy.qubit_state;
+        enemyQubit.textContent = qubitState === "superposition" ? "S" : qubitState;
+    }
+
+    // Update entanglement visual state
     if (playerQubit && enemyQubit && gameState) {
         if (gameState.is_entangled) {
             playerQubit.classList.add('entangled');
@@ -749,30 +763,8 @@ function createElectricSpark(x, y, delay) {
 // Neutrinette Animation System - Placeholder for now
 function triggerNeutrinetteAnimation(moveName) {
     console.log('Triggering Neutrinette animation for:', moveName);
-    
-    const playerSprite = document.getElementById('player-sprite');
-    const enemySprite = document.querySelector('.enemy-sprite img');
-    
-    if (!playerSprite || !enemySprite) {
-        console.log('Animation elements not found:', { playerSprite, enemySprite });
-        return;
-    }
-    
-    // Placeholder - just log the move for now
-    switch (moveName) {
-        case 'Q-PHOTON GEYSER':
-            console.log('Q-PHOTON GEYSER animation triggered');
-            break;
-        case 'GLITCH CLAW':
-            console.log('GLITCH CLAW animation triggered');
-            break;
-        case 'ENTANGLE':
-            console.log('ENTANGLE animation triggered');
-            break;
-        case 'SWITCHEROO':
-            console.log('SWITCHEROO animation triggered');
-            break;
-    }
+    // Placeholder - do nothing for now to prevent errors
+    return;
 }
 
 // Update qubit states based on the message being displayed
@@ -794,6 +786,32 @@ function updateQubitStatesFromMessage(message) {
             // Remove trailing period and convert superposition to S
             const cleanState = collapsedState.replace(/\.$/, '');
             playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+        }
+    }
+    
+    // Check for Q-PHOTON GEYSER qubit collapse
+    if (message.includes("Q-PHOTON GEYSER") && message.includes("damage")) {
+        // Q-PHOTON GEYSER collapses the qubit - update from current game state
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
+            const collapsedState = gameState.player.qubit_state;
+            // Remove trailing period and convert superposition to S
+            const cleanState = collapsedState.replace(/\.$/, '');
+            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+        }
+    }
+    
+    // Check for SWITCHEROO (swaps qubit states)
+    if (message.includes("swaps qubit states")) {
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            // Temporarily store the current states
+            const tempPlayerState = playerQubit.textContent;
+            const tempEnemyState = enemyQubit.textContent;
+            // Swap them
+            playerQubit.textContent = tempEnemyState;
+            enemyQubit.textContent = tempPlayerState;
         }
     }
     
