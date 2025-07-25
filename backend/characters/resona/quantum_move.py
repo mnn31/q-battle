@@ -204,7 +204,4 @@ def quantum_move_resona_shift_gear(quantum_state):
         "next_turn_collapse_bonus": 0.25
     }
 
-def ability_quantum_waveform(quantum_state):
-    """QUANTUM WAVEFORM: Returns current waveform effects"""
-    from .ability import ability_quantum_waveform
-    return ability_quantum_waveform(quantum_state.waveform_stacks) 
+# Removed duplicate function - use imported ability directly 

@@ -304,21 +304,21 @@ function updateBattleDisplay() {
     
     // Only update HP bars if we haven't already updated them in real-time
     if (!window.visualPlayerHpUpdated) {
-        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        const playerHp = document.getElementById('player-hp');
-        if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
-        }
+    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    const playerHp = document.getElementById('player-hp');
+    if (playerHp) {
+        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
+    }
         updateHealthBarColor(playerHealthFill, playerHpPercent);
     }
     
     if (!window.visualEnemyHpUpdated) {
         enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
         const enemyHp = document.getElementById('enemy-hp');
-        if (enemyHp) {
-            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
-        }
-        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    if (enemyHp) {
+        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    }
+    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
     }
     
     // Clear visual HP flags after sync
@@ -593,21 +593,21 @@ async function executeMove(moveName) {
     
     // Wait for animations to complete before processing response
     setTimeout(async () => {
-        
-        try {
+    
+    try {
             // Store current log length
             const oldLogLength = gameState.log ? gameState.log.length : 0;
             
-            // Send move to backend
-            const response = await fetch('/move', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ move: moveName })
-            });
-            
-            const result = await response.json();
-            
-            if (result.state) {
+        // Send move to backend
+        const response = await fetch('/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ move: moveName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.state) {
                 gameState = result.state;
                 
                 // Get new log entries
@@ -617,44 +617,44 @@ async function executeMove(moveName) {
                 // Display each new log entry one at a time with real-time updates
                 for (let i = 0; i < newEntries.length; i++) {
                     const entry = newEntries[i];
-                    showBattleMessage(entry, 3000);
-                    
-                    // Update qubit states based on the message being displayed
-                    updateQubitStatesFromMessage(entry);
-                    
-                    // Wait for message to be seen
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-                }
+                showBattleMessage(entry, 3000);
                 
+                // Update qubit states based on the message being displayed
+                updateQubitStatesFromMessage(entry);
+                
+                // Wait for message to be seen
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            
                 // Sync HP bars with backend state after all real-time updates
-                updateBattleDisplay();
-                
-            } else {
-                showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
-            }
+            updateBattleDisplay();
             
-            // Check for game end
-            if (gameState.enemy.hp <= 0) {
-                showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
-                setTimeout(() => endBattle(true), 4000);
-            } else if (gameState.player.hp <= 0) {
-                showBattleMessage("💀 You fainted! Game over.", 4000);
-                setTimeout(() => endBattle(false), 4000);
-            } else {
-                // Clear message screen and continue to next turn
-                clearBattleMessage();
-                turnCount++;
-                turnNumber.textContent = `Turn ${turnCount}`;
-                enableMoveButtons();
-            }
-            
-        } catch (error) {
-            console.error('Error executing move:', error);
-            showBattleMessage('Error executing move', 3000);
-            enableMoveButtons();
-        } finally {
-            isProcessingMove = false;
+        } else {
+            showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
         }
+        
+        // Check for game end
+        if (gameState.enemy.hp <= 0) {
+            showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
+            setTimeout(() => endBattle(true), 4000);
+        } else if (gameState.player.hp <= 0) {
+            showBattleMessage("💀 You fainted! Game over.", 4000);
+            setTimeout(() => endBattle(false), 4000);
+        } else {
+            // Clear message screen and continue to next turn
+            clearBattleMessage();
+            turnCount++;
+            turnNumber.textContent = `Turn ${turnCount}`;
+            enableMoveButtons();
+        }
+        
+    } catch (error) {
+        console.error('Error executing move:', error);
+        showBattleMessage('Error executing move', 3000);
+        enableMoveButtons();
+    } finally {
+        isProcessingMove = false;
+    }
     }, 1000); // Wait for animations to complete
 }
 
@@ -1016,7 +1016,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
     
     // Create multiple photon beams
     for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const photonBeam = document.createElement('div');
             photonBeam.style.cssText = `
                 position: fixed;
@@ -1034,7 +1034,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
             document.body.appendChild(photonBeam);
             
             // Animate beam to enemy
-            setTimeout(() => {
+        setTimeout(() => {
                 photonBeam.style.left = `${enemyRect.left + enemyRect.width / 2}px`;
                 photonBeam.style.top = `${enemyRect.top + enemyRect.height / 2}px`;
                 photonBeam.style.width = '400px';
@@ -1051,7 +1051,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
     }
     
     // Create MUCH BIGGER psychic orbs around enemy (10x size)
-    setTimeout(() => {
+        setTimeout(() => {
         for (let i = 0; i < 8; i++) {
             const orb = document.createElement('div');
             const angle = (i / 8) * 2 * Math.PI;
@@ -1292,7 +1292,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
     
     // Create MUCH BIGGER quantum particles along the link
     for (let i = 0; i < 15; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const particle = document.createElement('div');
             const progress = i / 15;
             const x = playerX + (enemyX - playerX) * progress;
@@ -1313,7 +1313,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
             `;
             document.body.appendChild(particle);
             
-            setTimeout(() => {
+        setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
@@ -1322,7 +1322,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
     }
     
     // Clean up
-    setTimeout(() => {
+        setTimeout(() => {
         if (document.body.contains(entangleEffect)) {
             document.body.removeChild(entangleEffect);
         }
@@ -1422,13 +1422,13 @@ function triggerSwitcherooAnimation(playerSprite, enemySprite) {
     }, 200);
     
     // Reset sprite animations
-    setTimeout(() => {
+            setTimeout(() => {
         playerSprite.style.animation = '';
         enemySprite.style.animation = '';
     }, 800);
     
     // Clean up
-    setTimeout(() => {
+        setTimeout(() => {
         if (document.body.contains(swapEffect)) {
             document.body.removeChild(swapEffect);
         }
@@ -1551,7 +1551,7 @@ function triggerQMetronomeAnimation(playerSprite, enemySprite) {
     
     // Create massive amounts of quantum sparkles (80 sparkles - 10x more)
     for (let i = 0; i < 80; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const sparkle = document.createElement('div');
             const size = 15 + Math.random() * 25; // Random sizes
             const colors = ['#FFD700', '#FFA500', '#FF6B35', '#FF4500', '#FFD700', '#FFFF00'];
@@ -1564,8 +1564,8 @@ function triggerQMetronomeAnimation(playerSprite, enemySprite) {
                 width: ${size}px;
                 height: ${size}px;
                 background: radial-gradient(circle, ${color}, ${color}80);
-                border-radius: 50%;
-                pointer-events: none;
+            border-radius: 50%;
+            pointer-events: none;
                 z-index: 1001;
                 animation: sparkleFloatIntense 1.5s ease-out;
                 box-shadow: 0 0 ${size/2}px ${color};
@@ -1612,12 +1612,12 @@ function triggerQMetronomeAnimation(playerSprite, enemySprite) {
             }
             100% { 
                 transform: translate(-50%, -50%) scale(0) rotate(720deg) translate(${Math.random() * 600 - 300}px, ${Math.random() * 600 - 300}px); 
-                opacity: 0; 
+            opacity: 0;
                 filter: brightness(1.0) contrast(1.0);
             }
         }
-    `;
-    
+        `;
+        
     document.head.appendChild(sparkleStyle);
     
     // Create additional energy waves (20 waves)
@@ -1711,8 +1711,8 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
         width: 120px;
         height: 120px;
         background: radial-gradient(circle, rgba(0, 150, 255, 0.8), rgba(0, 100, 200, 0.6));
-        border-radius: 50%;
-        pointer-events: none;
+            border-radius: 50%;
+            pointer-events: none;
         z-index: 1000;
         animation: waterCloakForm 0.8s ease-out;
         box-shadow: 0 0 30px rgba(0, 150, 255, 0.6);
@@ -1726,7 +1726,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
         @keyframes waterCloakForm {
             0% { 
                 transform: translate(-50%, -50%) scale(0); 
-                opacity: 0; 
+            opacity: 0;
                 filter: brightness(1.0) blur(0px);
             }
             50% { 
@@ -1745,7 +1745,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
     document.head.appendChild(cloakStyle);
     
     // Phase 2: Resona charges forward cloaked in water
-    setTimeout(() => {
+        setTimeout(() => {
         waterCloak.style.animation = 'waterCloakCharge 1.2s ease-in-out';
         
         // Add charging animation
@@ -1832,7 +1832,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
         document.head.appendChild(trailStyle);
         
         // Phase 3: Impact explosion when hitting the enemy
-        setTimeout(() => {
+    setTimeout(() => {
             waterCloak.style.animation = 'waterCloakImpact 0.6s ease-out';
             
             // Add impact animation
@@ -1872,11 +1872,11 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
                         position: absolute;
                         top: ${explosionY}px;
                         left: ${explosionX}px;
-                        width: 40px;
-                        height: 40px;
+            width: 40px;
+            height: 40px;
                         background: radial-gradient(circle, rgba(0, 200, 255, 0.8), rgba(0, 150, 255, 0.4));
-                        border-radius: 50%;
-                        pointer-events: none;
+            border-radius: 50%;
+            pointer-events: none;
                         z-index: 1001;
                         animation: waterExplosionParticle 0.8s ease-out;
                         box-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
@@ -1908,7 +1908,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
                     }
                     100% { 
                         transform: translate(-50%, -50%) scale(0); 
-                        opacity: 0; 
+            opacity: 0;
                         filter: brightness(1.0) contrast(1.0);
                     }
                 }
@@ -1933,7 +1933,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
             document.head.appendChild(shakeStyle);
             
             // Clean up screen shake
-            setTimeout(() => {
+        setTimeout(() => {
                 document.body.style.animation = '';
                 if (document.head.contains(shakeStyle)) {
                     document.head.removeChild(shakeStyle);
@@ -1945,7 +1945,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
     }, 800); // After cloak forms
     
     // Clean up all elements
-    setTimeout(() => {
+            setTimeout(() => {
         if (document.body.contains(waterCloak)) {
             document.body.removeChild(waterCloak);
         }
@@ -2028,7 +2028,15 @@ function triggerBossHazeAnimation(enemySprite) {
     `;
     document.body.appendChild(backgroundEffect);
     
-    // Phase 2: MASSIVE Haze wisps (based on Pokemon Showdown's haze animation)
+    // Phase 2: MASSIVE Haze wisps with Pokemon Showdown images
+    const wispImages = [
+        '/static/images/wisp.png',
+        '/static/images/mistball.png', 
+        '/static/images/shadowball.png',
+        '/static/images/waterwisp.png',
+        '/static/images/poisonwisp.png'
+    ];
+    
     const wispPositions = [
         { x: enemyX + 120, y: enemyY },
         { x: enemyX - 120, y: enemyY },
@@ -2041,19 +2049,19 @@ function triggerBossHazeAnimation(enemySprite) {
     ];
     
     wispPositions.forEach((pos, index) => {
-        const wisp = document.createElement('div');
+        const wisp = document.createElement('img');
+        const wispImage = wispImages[index % wispImages.length];
+        wisp.src = wispImage;
         wisp.style.cssText = `
             position: absolute;
             top: ${pos.y}px;
             left: ${pos.x}px;
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, #1F2937, #374151, #4B5563, #6B7280, #9CA3AF);
-            border-radius: 50%;
-            box-shadow: 0 0 40px #1F2937, 0 0 80px #374151, 0 0 120px #4B5563;
+            width: 100px;
+            height: 100px;
             z-index: 999;
             pointer-events: none;
             animation: massiveHazeWisp ${0.6 + index * 0.1}s ease-out;
+            filter: brightness(1.3) contrast(1.4);
         `;
         document.body.appendChild(wisp);
         
@@ -2065,9 +2073,10 @@ function triggerBossHazeAnimation(enemySprite) {
     // Phase 3: Screen shake effect
     document.body.style.animation = 'massiveHazeScreenShake 2s ease-in-out';
     
-    // Phase 4: Pulse effects around enemy
+    // Phase 4: Pulse effects around enemy with images
     for (let i = 0; i < 6; i++) {
-        const pulse = document.createElement('div');
+        const pulse = document.createElement('img');
+        pulse.src = '/static/images/mistball.png';
         const angle = (i * 60) * (Math.PI / 180);
         const distance = 100;
         const px = enemyX + Math.cos(angle) * distance;
@@ -2077,14 +2086,12 @@ function triggerBossHazeAnimation(enemySprite) {
             position: absolute;
             top: ${py}px;
             left: ${px}px;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #9CA3AF, #D1D5DB, #E5E7EB);
-            border-radius: 50%;
-            box-shadow: 0 0 25px #9CA3AF, 0 0 50px #D1D5DB;
+            width: 80px;
+            height: 80px;
             z-index: 999;
             pointer-events: none;
             animation: massiveHazePulse ${1 + i * 0.2}s ease-out;
+            filter: brightness(1.4) contrast(1.5);
         `;
         document.body.appendChild(pulse);
         
@@ -2149,7 +2156,7 @@ function triggerBossDualizeAnimation(enemySprite) {
     // Phase 1: MASSIVE Background effect with purple cycling
     const backgroundEffect = document.createElement('div');
     backgroundEffect.style.cssText = `
-        position: fixed;
+            position: fixed;
         top: 0;
         left: 0;
         width: 100%;
@@ -2237,7 +2244,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                 border-bottom: 35px solid #808080;
                 transform: translate(-50%, -50%) rotate(${angle}rad);
                 pointer-events: none;
-                z-index: 1000;
+            z-index: 1000;
                 animation: metalTriangleRadiateIntense 2s ease-out;
             `;
             
@@ -2323,7 +2330,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                 border-right: 12px solid transparent;
                 border-bottom: 22px solid #A0A0A0;
                 transform: translate(-50%, -50%) rotate(${angle}rad);
-                pointer-events: none;
+            pointer-events: none;
                 z-index: 1001;
                 animation: mediumMetalTriangleRadiate 1.8s ease-out;
             `;
@@ -2366,17 +2373,17 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                     }
                     100% { 
                         transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.cos(angle * 5) * 15}px); 
-                        opacity: 0; 
+            opacity: 0;
                         border-bottom-color: #303030;
                         filter: brightness(0.7) contrast(1.3);
                     }
                 }
-            `;
-            
+        `;
+        
             document.head.appendChild(mediumTriangleStyle);
             
             // Clean up medium triangle
-            setTimeout(() => {
+        setTimeout(() => {
                 if (document.body.contains(mediumTriangle)) {
                     document.body.removeChild(mediumTriangle);
                 }
@@ -2389,7 +2396,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
     
     // Create tertiary triangles (48 small triangles) - 4x more
     for (let i = 0; i < 48; i++) {
-        setTimeout(() => {
+            setTimeout(() => {
             const smallTriangle = document.createElement('div');
             const angle = (i * 7.5) * (Math.PI / 180); // 48 triangles
             const distance = 80 + (i * 15);
@@ -2457,7 +2464,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
             document.head.appendChild(smallTriangleStyle);
             
             // Clean up small triangle
-            setTimeout(() => {
+                setTimeout(() => {
                 if (document.body.contains(smallTriangle)) {
                     document.body.removeChild(smallTriangle);
                 }
@@ -2580,24 +2587,24 @@ function triggerShiftGearAnimation(playerSprite) {
     
     // Create quantum particles around the gear on top of Resona
     for (let i = 0; i < 12; i++) {
-        setTimeout(() => {
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: fixed;
+    setTimeout(() => {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
                 top: ${playerTop - 50}px;
                 left: ${playerCenterX}px;
                 width: 30px;
                 height: 30px;
                 background: radial-gradient(circle, #4a90e2, #357abd);
-                border-radius: 50%;
-                pointer-events: none;
+            border-radius: 50%;
+            pointer-events: none;
                 z-index: 1001;
                 animation: quantumParticleOnResona 1.2s ease-out;
-            `;
+        `;
             
-            document.body.appendChild(particle);
-            
-            setTimeout(() => {
+        document.body.appendChild(particle);
+        
+        setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
@@ -2627,7 +2634,7 @@ function triggerShiftGearAnimation(playerSprite) {
     document.head.appendChild(particleStyle);
     
     // Clean up
-    setTimeout(() => {
+            setTimeout(() => {
         if (document.body.contains(gear)) {
             document.body.removeChild(gear);
         }
@@ -2662,7 +2669,7 @@ function updateQubitStatesFromMessage(message) {
         const playerSprite = document.getElementById('player-sprite');
         if (playerSprite) {
             playerSprite.style.filter = 'drop-shadow(0 0 40px yellow) brightness(1.4)';
-            setTimeout(() => {
+                setTimeout(() => {
                 playerSprite.style.filter = '';
             }, 2000); // Glow for 2 seconds
         }
@@ -2842,6 +2849,12 @@ function updateQubitStatesFromMessage(message) {
     // Check for boss move usage messages (for animations)
     // Note: Q-PRISMATIC LASER animation is handled in the damage section below
     if (message.includes("Singulon used")) {
+        if (message.includes("HAZE")) {
+            const enemySprite = document.querySelector('.enemy-sprite img');
+            if (enemySprite) {
+                triggerBossHazeAnimation(enemySprite);
+            }
+        }
         // Other boss move animations can be added here
     }
     

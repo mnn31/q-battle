@@ -412,10 +412,15 @@ def enemy_attack():
                 game_state["enemy"]["qubit_state"] = result["qubit_state"]
         elif move_name == "HAZE":
             log.append("Singulon reset its qubit to |0⟩!")
+            log.append("Your qubit was also reset to |0⟩!")
             # Update qubit state immediately for real-time display
             if "qubit_state" in result:
                 singulon_state.qubit_state = result["qubit_state"]
                 game_state["enemy"]["qubit_state"] = result["qubit_state"]
+            # Also reset player's qubit
+            if "player_qubit_state" in result:
+                player_state.qubit_state = result["player_qubit_state"]
+                game_state["player"]["qubit_state"] = result["player_qubit_state"]
         elif move_name == "BULLET MUONS":
             # Add specific message for BULLET MUONS if available
             if "message" in result:
