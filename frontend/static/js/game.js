@@ -4,6 +4,136 @@ let gameState = null;
 let turnCount = 1;
 let isProcessingMove = false; // Prevent multiple move processing
 
+// Music system
+let backgroundMusic = null;
+let musicVolume = 0.5; // Default volume 50%
+let isMusicMuted = false;
+
+// Music functions
+function initializeMusic() {
+    // Create audio element for Ultra Necrozma background music
+    backgroundMusic = new Audio('/static/audio/ultra-necrozma-battle.mp3');
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = musicVolume;
+    
+    // Add error handling for missing audio file
+    backgroundMusic.addEventListener('error', function(e) {
+        console.log('Music file not found. Please add ultra-necrozma-battle.mp3 to /static/audio/');
+        // Hide music controls if file doesn't exist
+        const musicControls = document.getElementById('music-controls');
+        if (musicControls) {
+            musicControls.style.display = 'none';
+        }
+    });
+    
+    // Set up music controls
+    setupMusicControls();
+    
+    // Only show controls if audio loads successfully
+    backgroundMusic.addEventListener('canplaythrough', function() {
+        console.log('Music file loaded successfully');
+        const musicControls = document.getElementById('music-controls');
+        if (musicControls) {
+            musicControls.style.display = 'block';
+        }
+    });
+    
+    console.log('Music system initialized');
+}
+
+function setupMusicControls() {
+    // Create music control panel
+    const musicPanel = document.createElement('div');
+    musicPanel.id = 'music-controls';
+    musicPanel.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        z-index: 1000;
+        font-family: 'Arial', sans-serif;
+        font-size: 14px;
+        backdrop-filter: blur(10px);
+        border: 2px solid #7C3AED;
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+    `;
+    
+    musicPanel.innerHTML = `
+        <div style="margin-bottom: 10px; font-weight: bold; color: #C084FC;">🎵 Ultra Necrozma Battle Music</div>
+        <div style="margin-bottom: 10px;">
+            <label style="display: block; margin-bottom: 5px;">Volume:</label>
+            <input type="range" id="music-volume" min="0" max="100" value="${musicVolume * 100}" style="width: 100%;">
+        </div>
+        <div>
+            <button id="music-toggle" style="
+                background: ${isMusicMuted ? '#EF4444' : '#10B981'};
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 12px;
+                width: 100%;
+            ">${isMusicMuted ? '🔇 Unmute' : '🔊 Mute'}</button>
+        </div>
+    `;
+    
+    document.body.appendChild(musicPanel);
+    
+    // Start with controls hidden until audio loads
+    musicPanel.style.display = 'none';
+    
+    // Add event listeners
+    document.getElementById('music-volume').addEventListener('input', function(e) {
+        musicVolume = e.target.value / 100;
+        if (backgroundMusic) {
+            backgroundMusic.volume = musicVolume;
+        }
+    });
+    
+    document.getElementById('music-toggle').addEventListener('click', function() {
+        isMusicMuted = !isMusicMuted;
+        if (isMusicMuted) {
+            pauseMusic();
+        } else {
+            playMusic();
+        }
+        updateMusicControls();
+    });
+}
+
+function updateMusicControls() {
+    const toggleBtn = document.getElementById('music-toggle');
+    if (toggleBtn) {
+        toggleBtn.style.background = isMusicMuted ? '#EF4444' : '#10B981';
+        toggleBtn.textContent = isMusicMuted ? '🔇 Unmute' : '🔊 Mute';
+    }
+}
+
+function playMusic() {
+    if (backgroundMusic && !isMusicMuted) {
+        backgroundMusic.play().catch(e => {
+            console.log('Music autoplay blocked:', e);
+        });
+    }
+}
+
+function pauseMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+    }
+}
+
+function stopMusic() {
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+    }
+}
+
 // Character data with speed stats
 const characterData = {
     "Bitzy": {
@@ -71,6 +201,9 @@ const battleLog = document.getElementById('battle-log');
 
 // Initialize character selection
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize music system
+    initializeMusic();
+    
     const characterOptions = document.querySelectorAll('.character-option');
     
     characterOptions.forEach(option => {
@@ -136,6 +269,9 @@ async function startBattle(character) {
             turnNumber.textContent = `Turn ${turnCount}`;
             updateBattleDisplay();
             showBattleScreen();
+            
+            // Start background music when battle begins
+            playMusic();
             
             // Check for special effects based on move
             if (result.state.log && result.state.log.length > 0) {
@@ -387,6 +523,9 @@ function showSpecialEffect(effectType) {
 // End battle
 function endBattle(victory) {
     disableMoveButtons();
+    
+    // Stop background music when battle ends
+    stopMusic();
     
     if (victory) {
         showBattleMessage("🎉 Congratulations! You've won the quantum battle!");
@@ -2701,14 +2840,9 @@ function updateQubitStatesFromMessage(message) {
     }
     
     // Check for boss move usage messages (for animations)
+    // Note: Q-PRISMATIC LASER animation is handled in the damage section below
     if (message.includes("Singulon used")) {
-        if (message.includes("Q-PRISMATIC LASER")) {
-            const enemySprite = document.querySelector('.enemy-sprite img');
-            const playerSprite = document.getElementById('player-sprite');
-            if (enemySprite && playerSprite) {
-                triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite);
-            }
-        }
+        // Other boss move animations can be added here
     }
     
     // Check for SPECIFIC damage messages and update HP bars visually in real-time
