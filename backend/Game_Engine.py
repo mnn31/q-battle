@@ -104,6 +104,10 @@ def start_game(character="Bitzy"):
     player_state.qubit_state = "|0⟩"
     singulon_state.qubit_state = "|0⟩"
     
+    # Explicitly reset Resona's waveform stacks
+    if character == "Resona":
+        resona_state.waveform_stacks = 0
+    
     # Reset entanglement state
     if hasattr(player_state, 'is_entangled'):
         player_state.is_entangled = False
