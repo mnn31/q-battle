@@ -2845,12 +2845,38 @@ function updateQubitStatesFromMessage(message) {
         // Other boss move animations can be added here
     }
     
-    // Check for SPECIFIC damage messages and update HP bars visually in real-time
-    // Only update HP for actual damage messages, not move usage messages
+    // Check for SPECIFIC damage messages and healing messages and update HP bars visually in real-time
+    // Only update HP for actual damage/healing messages, not move usage messages
     if ((message.includes("Dealt") && message.includes("damage!")) || 
         (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW") || message.includes("Q-METRONOME") || message.includes("WAVE CRASH") || message.includes("METAL NOISE"))) ||
-        (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage"))) {
-        console.log('Detected damage message:', message);
+        (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage")) ||
+        (message.includes("heals") && message.includes("HP"))) {
+        console.log('Detected damage/healing message:', message);
+        
+        // Check if this is a healing message
+        if (message.includes("heals") && message.includes("HP")) {
+            console.log('Detected healing message:', message);
+            
+            // Get character max HP from character data
+            const charData = characterData[currentCharacter];
+            const maxPlayerHp = charData ? charData.maxHp : 90;
+            
+            // Update HP bars to match the current backend state (healing already applied)
+            const playerHpPercent = (gameState.player.hp / maxPlayerHp) * 100;
+            
+            // Player was healed - update visual display immediately
+            playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+            updateHealthBarColor(playerHealthFill, playerHpPercent);
+            
+            const playerHp = document.getElementById('player-hp');
+            if (playerHp) {
+                playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
+            }
+            
+            // Mark that we've updated player HP visually to prevent override
+            window.visualPlayerHpUpdated = true;
+            return; // Exit early since we handled healing
+        }
         
         // Trigger boss animations for enemy moves
         if (message.includes("BULLET MUONS") && message.includes("deals")) {
