@@ -34,7 +34,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 
 ### **HIGSCROZMA** - The Quantum Tunneler
 - **Theme**: Quantum tunneling through energy barriers
-- **Signature Move**: Q-VOID RIFT (damage + 10% Defense, heals per barrier behind)
+- **Signature Move**: Q-VOID RIFT (damage + 10% Defense, heals per barrier behind, shatters all front barriers)
 - **Ability**: QUANTUM BULWARK (barriers reduce damage taken/dealt, back barriers boost damage)
 
 A sample CLI game (`backend/sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.

@@ -56,17 +56,17 @@ def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_st
     # Determine collapse result with waveform bonus
     if "1" in result:
         quantum_state.qubit_state = "|1⟩"
-        # Calculate damage: 100% max HP + waveform bonus with proper RPG formula and damage roll
-        base_power = current_hp + damage_bonus
-        base_damage = calculate_damage_rpg(quantum_state.attack_stat, base_power, defender_defense)
-        damage = apply_damage_roll(base_damage)
+        # Calculate damage: 100% max HP with proper RPG formula, then add waveform bonus as flat damage
+        base_damage = calculate_damage_rpg(quantum_state.attack_stat, current_hp, defender_defense)
+        total_damage = base_damage + damage_bonus  # Add waveform bonus as flat damage after RPG calculation
+        damage = apply_damage_roll(total_damage)
         message = f"Q-METRONOME deals {damage} damage! (|1⟩ state, {quantum_state.waveform_stacks} waveform stacks)"
     else:
         quantum_state.qubit_state = "|0⟩"
-        # Calculate damage: 10 base + waveform bonus with proper RPG formula and damage roll
-        base_power = 10 + damage_bonus
-        base_damage = calculate_damage_rpg(quantum_state.attack_stat, base_power, defender_defense)
-        damage = apply_damage_roll(base_damage)
+        # Calculate damage: 10 base with proper RPG formula, then add waveform bonus as flat damage
+        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 10, defender_defense)
+        total_damage = base_damage + damage_bonus  # Add waveform bonus as flat damage after RPG calculation
+        damage = apply_damage_roll(total_damage)
         message = f"Q-METRONOME deals {damage} damage! (|0⟩ state, {quantum_state.waveform_stacks} waveform stacks)"
     
     # Gain waveform stack since qubit was in superposition before collapsing

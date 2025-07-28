@@ -176,12 +176,12 @@ const characterData = {
         sprite: "/static/sprites/higscrozma.gif",
         speed: 60, // Speed stat for turn order
         moves: [
-            { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers." },
-            { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)" },
-            { name: "SHADOW FORCE", desc: "If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)" },
+                    { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers. (DMG: 200)" },
+        { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 120)" },
+        { name: "SHADOW FORCE", desc: "If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 100, DMG 1: 150)" },
             { name: "BARRIER", desc: "Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION." }
         ],
-        maxHp: 100
+        maxHp: 110
     }
 };
 
@@ -204,6 +204,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize music system
     initializeMusic();
     
+    // Initialize barrier system
+    initializeBarrierSystem();
+    
     const characterOptions = document.querySelectorAll('.character-option');
     
     characterOptions.forEach(option => {
@@ -213,6 +216,130 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Higscrozma Barrier System
+let barrierState = {
+    barriersInFront: 3,
+    barriersBehind: 0,
+    isActive: false
+};
+
+function initializeBarrierSystem() {
+    const barrierContainer = document.getElementById('barrier-container');
+    if (barrierContainer) {
+        barrierContainer.style.display = 'none';
+        updateBarrierDisplay();
+    }
+}
+
+function updateBarrierDisplay() {
+    const barrierContainer = document.getElementById('barrier-container');
+    const barrierFront = document.getElementById('barrier-front');
+    const barrierMiddle = document.getElementById('barrier-middle');
+    const barrierBack = document.getElementById('barrier-back');
+    
+    if (!barrierContainer || !barrierFront || !barrierMiddle || !barrierBack) return;
+    
+    // Show barrier system only for Higscrozma
+    if (currentCharacter === "Higscrozma" && barrierState.isActive) {
+        barrierContainer.style.display = 'block';
+        
+        // Show barriers based on their actual positions
+        // barrierFront = closest to enemy (35%), barrierMiddle = middle (50%), barrierBack = closest to Higscrozma (65%)
+        
+        // Show front barriers (in front of Higscrozma) - these should be in front and middle positions
+        if (barrierState.barriersInFront >= 1) {
+            barrierFront.style.display = 'block';
+        } else {
+            barrierFront.style.display = 'none';
+        }
+        
+        if (barrierState.barriersInFront >= 2) {
+            barrierMiddle.style.display = 'block';
+        } else {
+            barrierMiddle.style.display = 'none';
+        }
+        
+        // Show back barriers (behind Higscrozma) - these should be in the back position
+        if (barrierState.barriersBehind >= 1) {
+            barrierBack.style.display = 'block';
+        } else {
+            barrierBack.style.display = 'none';
+        }
+        
+        // Update Higscrozma's position based on barriers behind
+        updateHigscrozmaPosition();
+    } else {
+        barrierContainer.style.display = 'none';
+    }
+}
+
+function updateHigscrozmaPosition() {
+    const playerSprite = document.getElementById('player-sprite');
+    if (!playerSprite || currentCharacter !== "Higscrozma") return;
+    
+    // Calculate position based on barriers behind
+    const barriersBehind = barrierState.barriersBehind;
+    let positionClass = '';
+    
+    if (barriersBehind === 0) {
+        positionClass = 'higscrozma-position-0';
+    } else if (barriersBehind === 1) {
+        positionClass = 'higscrozma-position-1';
+    } else if (barriersBehind === 2) {
+        positionClass = 'higscrozma-position-2';
+    } else if (barriersBehind === 3) {
+        positionClass = 'higscrozma-position-3';
+    }
+    
+    // Remove all position classes
+    playerSprite.classList.remove('higscrozma-position-0', 'higscrozma-position-1', 'higscrozma-position-2', 'higscrozma-position-3');
+    
+    // Add new position class
+    if (positionClass) {
+        playerSprite.classList.add(positionClass);
+    }
+}
+
+function shatterBarrier(barrierType) {
+    const barrierElement = document.getElementById(`barrier-${barrierType}`);
+    if (barrierElement) {
+        barrierElement.classList.add('barrier-shatter');
+        setTimeout(() => {
+            barrierElement.classList.remove('barrier-shatter');
+            updateBarrierDisplay();
+        }, 500);
+    }
+}
+
+function moveBarrier() {
+    // Update barrier state: move one barrier from front to back
+    if (barrierState.barriersInFront > 0) {
+        barrierState.barriersInFront -= 1;
+        barrierState.barriersBehind += 1;
+        console.log('Updated barrier state:', barrierState);
+        updateBarrierDisplay();
+    }
+    
+    // Animate barrier movement with teleportation
+    const barrierContainer = document.getElementById('barrier-container');
+    const playerSprite = document.getElementById('player-sprite');
+    
+    if (barrierContainer) {
+        barrierContainer.style.transition = 'all 0.5s ease-in-out';
+        setTimeout(() => {
+            barrierContainer.style.transition = '';
+        }, 500);
+    }
+    
+    // Add teleportation effect when barriers move
+    if (playerSprite && currentCharacter === "Higscrozma") {
+        playerSprite.classList.add('higscrozma-teleport');
+        setTimeout(() => {
+            playerSprite.classList.remove('higscrozma-teleport');
+        }, 600);
+    }
+}
 
 // Character selection handler
 function selectCharacter(character) {
@@ -269,6 +396,14 @@ async function startBattle(character) {
             turnNumber.textContent = `Turn ${turnCount}`;
             updateBattleDisplay();
             showBattleScreen();
+            
+            // Initialize barrier system for Higscrozma
+            if (character === "Higscrozma") {
+                barrierState.isActive = true;
+                barrierState.barriersInFront = 3;
+                barrierState.barriersBehind = 0;
+                updateBarrierDisplay();
+            }
             
             // Start background music when battle begins
             playMusic();
@@ -460,7 +595,7 @@ function setupSpriteHover(character) {
         "Bitzy": "SUPERHIJACK: +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩",
         "Neutrinette": "QUANTUM AFTERBURN: When Neutrinette is entangled: When taking damage, 75% of that damage is reflected back to the enemy. When attacking, deals 30 extra HP damage to the enemy.",
         "Resona": "QUANTUM WAVEFORM: Stacks increase collapse probability and damage",
-        "Higscrozma": "QUANTUM BULWARK: Barriers reduce damage taken/dealt, back barriers boost damage"
+        "Higscrozma": "QUANTUM BULWARK: Front barriers reduce damage taken by 10% each, back barriers increase damage dealt by 10% each"
     };
     
     const sprite = document.querySelector('.player-sprite');
@@ -589,6 +724,8 @@ async function executeMove(moveName) {
         triggerNeutrinetteAnimation(moveName);
     } else if (currentCharacter === "Resona") {
         triggerResonaAnimation(moveName);
+    } else if (currentCharacter === "Higscrozma") {
+        triggerHigscrozmaAnimation(moveName);
     }
     
     // Wait for animations to complete before processing response
@@ -964,6 +1101,42 @@ function triggerNeutrinetteAnimation(moveName) {
         case 'SWITCHEROO':
             triggerSwitcherooAnimation(playerSprite, enemySprite);
             break;
+    }
+}
+
+// Higscrozma Animation System
+function triggerHigscrozmaAnimation(moveName) {
+    console.log('Triggering Higscrozma animation for:', moveName);
+    
+    const playerSprite = document.getElementById('player-sprite');
+    const enemySprite = document.querySelector('.enemy-sprite img');
+    
+    if (!playerSprite || !enemySprite) {
+        console.log('Animation elements not found:', { playerSprite, enemySprite });
+        return;
+    }
+    
+    // Add teleportation effect for all Higscrozma moves
+    playerSprite.classList.add('higscrozma-teleport');
+    setTimeout(() => {
+        playerSprite.classList.remove('higscrozma-teleport');
+    }, 600);
+    
+    switch (moveName) {
+        case 'Q-VOID RIFT':
+            triggerQVoidRiftAnimation(playerSprite, enemySprite);
+            break;
+        case 'PRISMATIC LASER':
+            triggerPrismaticLaserAnimation(playerSprite, enemySprite);
+            break;
+        case 'SHADOW FORCE':
+            triggerShadowForceAnimation(playerSprite, enemySprite);
+            break;
+        case 'BARRIER':
+            triggerBarrierAnimation(playerSprite);
+            break;
+        default:
+            console.log('No animation for move:', moveName);
     }
 }
 
@@ -2702,12 +2875,66 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
+    // Higscrozma Barrier System Integration
+    if (currentCharacter === "Higscrozma" && message.includes("Barriers:")) {
+        console.log('Detected barrier update:', message);
+        
+        // Parse barrier information from message
+        const barrierMatch = message.match(/Barriers: (\d+) front, (\d+) back/);
+        if (barrierMatch) {
+            const frontBarriers = parseInt(barrierMatch[1]);
+            const backBarriers = parseInt(barrierMatch[2]);
+            
+            barrierState.barriersInFront = frontBarriers;
+            barrierState.barriersBehind = backBarriers;
+            
+            console.log('Updated barrier state:', barrierState);
+            updateBarrierDisplay();
+        }
+    }
+    
+    // Check for barrier shattering
+    if (currentCharacter === "Higscrozma" && message.includes("Shatters")) {
+        console.log('Detected barrier shatter:', message);
+        
+        if (message.includes("front barrier")) {
+            shatterBarrier('front');
+        } else if (message.includes("back barrier")) {
+            shatterBarrier('back');
+        } else if (message.includes("barriers")) {
+            // Multiple barriers shattered
+            shatterBarrier('front');
+            shatterBarrier('middle');
+            shatterBarrier('back');
+        }
+    }
+    
+    // Check for barrier movement
+    if (currentCharacter === "Higscrozma" && message.includes("Moved up one barrier")) {
+        console.log('Detected barrier movement:', message);
+        moveBarrier();
+    }
+    
     // Real-time qubit state updates based on specific messages
     if (message.includes("put its qubit into superposition") && !message.includes("Singulon")) {
         // Player used DUALIZE
         const playerQubit = document.getElementById('player-qubit');
         if (playerQubit) {
             playerQubit.textContent = "S";
+        }
+    } else if (currentCharacter === "Higscrozma" && (message.includes("puts its qubit into superposition") || message.includes("Qubit in superposition"))) {
+        // Higscrozma specific qubit state updates
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit) {
+            playerQubit.textContent = "S";
+        }
+    } else if (currentCharacter === "Neutrinette" && message.includes("creates quantum entanglement")) {
+        // Neutrinette ENTANGLE - update both qubits immediately
+        const playerQubit = document.getElementById('player-qubit');
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (playerQubit && enemyQubit) {
+            playerQubit.classList.add('entangled');
+            enemyQubit.classList.add('entangled');
         }
     } else if (message.includes("flipped Singulon's qubit to")) {
         // Player used BIT-FLIP
@@ -2745,6 +2972,14 @@ function updateQubitStatesFromMessage(message) {
             const cleanState = collapsedState.replace(/\.$/, '');
             playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
         }
+    } else if (currentCharacter === "Higscrozma" && (message.includes("Q-VOID RIFT") || message.includes("PRISMATIC LASER") || message.includes("SHADOW FORCE"))) {
+        // Higscrozma moves that collapse qubits - update from current game state
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit && gameState && gameState.player && gameState.player.qubit_state) {
+            const collapsedState = gameState.player.qubit_state;
+            const cleanState = collapsedState.replace(/\.$/, '');
+            playerQubit.textContent = cleanState === "superposition" ? "S" : cleanState;
+        }
     } else if (message.includes("Singulon put its qubit into superposition")) {
         // Enemy used DUALIZE
         const enemyQubit = document.getElementById('enemy-qubit');
@@ -2756,6 +2991,20 @@ function updateQubitStatesFromMessage(message) {
         const enemySprite = document.querySelector('.enemy-sprite img');
         if (enemySprite) {
             triggerBossDualizeAnimation(enemySprite);
+        }
+    } else if (currentCharacter === "Neutrinette" && message.includes("Singulon used") && (message.includes("DUALIZE") || message.includes("BIT-FLIP") || message.includes("HAZE"))) {
+        // Neutrinette vs Singulon - immediate enemy qubit state updates
+        const enemyQubit = document.getElementById('enemy-qubit');
+        if (enemyQubit) {
+            if (message.includes("DUALIZE")) {
+                enemyQubit.textContent = "S";
+            } else if (message.includes("BIT-FLIP")) {
+                // BIT-FLIP flips the qubit state
+                const currentState = enemyQubit.textContent;
+                enemyQubit.textContent = currentState === "|0⟩" ? "|1⟩" : "|0⟩";
+            } else if (message.includes("HAZE")) {
+                enemyQubit.textContent = "|0⟩";
+            }
         }
     } else if (message.includes("Singulon reset its qubit to |0⟩")) {
         // Enemy used HAZE
@@ -2816,6 +3065,27 @@ function updateQubitStatesFromMessage(message) {
         // Set flag to prevent double update
         window.visualEnemyHpUpdated = true;
         console.log('Updated enemy HP bar for QUANTUM AFTERBURN extra damage');
+    }
+    
+    // Check for QUANTUM AFTERBURN reflects damage messages (defending)
+    if (message.includes("QUANTUM AFTERBURN") && message.includes("reflects") && message.includes("damage back to the enemy")) {
+        console.log('Detected QUANTUM AFTERBURN reflects damage message:', message);
+        
+        // Update enemy HP bar to reflect recoil damage
+        const enemyHpPercent = (gameState.enemy.hp / 400) * 100;
+        
+        // Enemy took recoil damage - update visual display immediately
+        enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+        
+        const enemyHp = document.getElementById('enemy-hp');
+        if (enemyHp) {
+            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+        }
+        
+        // Set flag to prevent double update
+        window.visualEnemyHpUpdated = true;
+        console.log('Updated enemy HP bar for QUANTUM AFTERBURN reflects damage');
     }
     
     // Check for any recoil damage messages (general fallback)
@@ -2890,6 +3160,34 @@ function updateQubitStatesFromMessage(message) {
             const playerSprite = document.getElementById('player-sprite');
             if (enemySprite && playerSprite) {
                 triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite);
+            }
+        }
+        
+        // Trigger Higscrozma animations for player moves
+        if (currentCharacter === "Higscrozma") {
+            if ((message.includes("Q-VOID RIFT") && message.includes("deals")) || (message.includes("Higscrozma used Q-VOID RIFT"))) {
+                const playerSprite = document.getElementById('player-sprite');
+                const enemySprite = document.querySelector('.enemy-sprite img');
+                if (playerSprite && enemySprite) {
+                    triggerQVoidRiftAnimation(playerSprite, enemySprite);
+                }
+            } else if ((message.includes("PRISMATIC LASER") && message.includes("deals")) || (message.includes("Higscrozma used PRISMATIC LASER"))) {
+                const playerSprite = document.getElementById('player-sprite');
+                const enemySprite = document.querySelector('.enemy-sprite img');
+                if (playerSprite && enemySprite) {
+                    triggerPrismaticLaserAnimation(playerSprite, enemySprite);
+                }
+            } else if ((message.includes("SHADOW FORCE") && message.includes("deals")) || (message.includes("Higscrozma used SHADOW FORCE"))) {
+                const playerSprite = document.getElementById('player-sprite');
+                const enemySprite = document.querySelector('.enemy-sprite img');
+                if (playerSprite && enemySprite) {
+                    triggerShadowForceAnimation(playerSprite, enemySprite);
+                }
+            } else if ((message.includes("BARRIER") && (message.includes("increases Defense") || message.includes("creates new barrier"))) || (message.includes("Higscrozma used BARRIER"))) {
+                const playerSprite = document.getElementById('player-sprite');
+                if (playerSprite) {
+                    triggerBarrierAnimation(playerSprite);
+                }
             }
         }
         
@@ -3333,4 +3631,334 @@ function triggerBossBulletMuonsAnimation(enemySprite, playerSprite) {
         document.body.style.animation = '';
         style.remove();
     }, 3000);
+}
+
+// Higscrozma Animation Functions
+function triggerQVoidRiftAnimation(playerSprite, enemySprite) {
+    console.log('Q-VOID RIFT animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes voidRiftBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.8; background: linear-gradient(45deg, #000000, #1F2937, #374151, #000000); }
+            50% { opacity: 1; background: linear-gradient(45deg, #000000, #4B5563, #6B7280, #9CA3AF, #000000); }
+            75% { opacity: 0.8; background: linear-gradient(45deg, #000000, #D1D5DB, #E5E7EB, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes voidRiftBeam {
+            0% { transform: scaleX(0) scaleY(0); opacity: 1; }
+            50% { transform: scaleX(1) scaleY(1); opacity: 1; }
+            100% { transform: scaleX(1) scaleY(1); opacity: 0; }
+        }
+        @keyframes voidRiftOrb {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: Dark background effect
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: voidRiftBackground 2s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: Void rift beam
+    const voidBeam = document.createElement('div');
+    voidBeam.style.cssText = `
+        position: fixed;
+        left: ${playerX}px;
+        top: ${playerY}px;
+        width: 20px;
+        height: ${Math.sqrt(Math.pow(enemyX - playerX, 2) + Math.pow(enemyY - playerY, 2))}px;
+        background: linear-gradient(90deg, #8B5CF6, #EC4899, #8B5CF6);
+        transform-origin: top;
+        transform: rotate(${Math.atan2(enemyY - playerY, enemyX - playerX) * 180 / Math.PI}deg);
+        z-index: 1000;
+        pointer-events: none;
+        animation: voidRiftBeam 1.5s ease-out;
+    `;
+    document.body.appendChild(voidBeam);
+    
+    // Phase 3: Orbital effects
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+            const orb = document.createElement('div');
+            orb.style.cssText = `
+                position: fixed;
+                left: ${enemyX + (Math.random() - 0.5) * 100}px;
+                top: ${enemyY + (Math.random() - 0.5) * 100}px;
+                width: 30px;
+                height: 30px;
+                background: radial-gradient(circle, #8B5CF6, #EC4899, #8B5CF6);
+                border-radius: 50%;
+                box-shadow: 0 0 20px #8B5CF6;
+                z-index: 1000;
+                pointer-events: none;
+                animation: voidRiftOrb 1s ease-out;
+            `;
+            document.body.appendChild(orb);
+            
+            setTimeout(() => {
+                orb.remove();
+            }, 1000);
+        }, i * 200);
+    }
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        voidBeam.remove();
+        style.remove();
+    }, 2500);
+}
+
+function triggerPrismaticLaserAnimation(playerSprite, enemySprite) {
+    console.log('PRISMATIC LASER animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes prismaticLaserBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.6; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
+            50% { opacity: 0.8; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
+            75% { opacity: 0.6; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes prismaticLaserBeam {
+            0% { transform: scaleX(0) scaleY(0); opacity: 1; }
+            50% { transform: scaleX(1) scaleY(1); opacity: 1; }
+            100% { transform: scaleX(1) scaleY(1); opacity: 0; }
+        }
+        @keyframes prismaticLaserOrb {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 0.9; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: Prismatic background effect
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: prismaticLaserBackground 2s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: Prismatic laser beam
+    const laserBeam = document.createElement('div');
+    laserBeam.style.cssText = `
+        position: fixed;
+        left: ${playerX}px;
+        top: ${playerY}px;
+        width: 20px;
+        height: ${Math.sqrt(Math.pow(enemyX - playerX, 2) + Math.pow(enemyY - playerY, 2))}px;
+        background: linear-gradient(90deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+        transform-origin: top;
+        transform: rotate(${Math.atan2(enemyY - playerY, enemyX - playerX) * 180 / Math.PI}deg);
+        z-index: 1000;
+        pointer-events: none;
+        animation: prismaticLaserBeam 1.5s ease-out;
+        box-shadow: 0 0 30px #FF0000;
+    `;
+    document.body.appendChild(laserBeam);
+    
+    // Phase 3: Prismatic orbs
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+            const orb = document.createElement('div');
+            orb.style.cssText = `
+                position: fixed;
+                left: ${enemyX + (Math.random() - 0.5) * 100}px;
+                top: ${enemyY + (Math.random() - 0.5) * 100}px;
+                width: 35px;
+                height: 35px;
+                background: radial-gradient(circle, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+                border-radius: 50%;
+                box-shadow: 0 0 25px #FF0000;
+                z-index: 1000;
+                pointer-events: none;
+                animation: prismaticLaserOrb 1s ease-out;
+            `;
+            document.body.appendChild(orb);
+            
+            setTimeout(() => {
+                orb.remove();
+            }, 1000);
+        }, i * 200);
+    }
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        laserBeam.remove();
+        style.remove();
+    }, 2500);
+}
+
+function triggerShadowForceAnimation(playerSprite, enemySprite) {
+    console.log('SHADOW FORCE animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    const enemyX = enemyRect.left + enemyRect.width / 2;
+    const enemyY = enemyRect.top + enemyRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes shadowForceBackground {
+            0% { opacity: 0; background: #000000; }
+            25% { opacity: 0.6; background: linear-gradient(45deg, #000000, #1F2937, #374151, #000000); }
+            50% { opacity: 0.8; background: linear-gradient(45deg, #000000, #4B5563, #6B7280, #9CA3AF, #000000); }
+            75% { opacity: 0.6; background: linear-gradient(45deg, #000000, #D1D5DB, #E5E7EB, #000000); }
+            100% { opacity: 0; background: #000000; }
+        }
+        @keyframes shadowForceStrike {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Phase 1: Dark background effect
+    const backgroundEffect = document.createElement('div');
+    backgroundEffect.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        opacity: 0;
+        z-index: 998;
+        pointer-events: none;
+        animation: shadowForceBackground 1.5s ease-in-out;
+    `;
+    document.body.appendChild(backgroundEffect);
+    
+    // Phase 2: Shadow force strikes
+    for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+            const strike = document.createElement('div');
+            strike.style.cssText = `
+                position: fixed;
+                left: ${enemyX + (Math.random() - 0.5) * 120}px;
+                top: ${enemyY + (Math.random() - 0.5) * 120}px;
+                width: 40px;
+                height: 40px;
+                background: radial-gradient(circle, #4C1D95, #7C3AED, #A855F7);
+                border-radius: 50%;
+                box-shadow: 0 0 25px #4C1D95;
+                z-index: 1000;
+                pointer-events: none;
+                animation: shadowForceStrike 0.8s ease-out;
+            `;
+            document.body.appendChild(strike);
+            
+            setTimeout(() => {
+                strike.remove();
+            }, 800);
+        }, i * 300);
+    }
+    
+    // Cleanup
+    setTimeout(() => {
+        backgroundEffect.remove();
+        style.remove();
+    }, 2000);
+}
+
+function triggerBarrierAnimation(playerSprite) {
+    console.log('BARRIER animation triggered');
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const playerX = playerRect.left + playerRect.width / 2;
+    const playerY = playerRect.top + playerRect.height / 2;
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes barrierCreate {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 0.8; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Create barrier effect
+    const barrierEffect = document.createElement('div');
+    barrierEffect.style.cssText = `
+        position: fixed;
+        left: ${playerX - 50}px;
+        top: ${playerY - 50}px;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, 
+            rgba(255, 192, 203, 0.8) 0%, 
+            rgba(255, 182, 193, 0.9) 25%, 
+            rgba(255, 20, 147, 0.8) 50%, 
+            rgba(255, 105, 180, 0.9) 75%, 
+            rgba(255, 192, 203, 0.8) 100%);
+        border: 3px solid rgba(255, 20, 147, 0.8);
+        border-radius: 10px;
+        backdrop-filter: blur(3px);
+        box-shadow: 0 0 30px rgba(255, 20, 147, 0.6);
+        z-index: 1000;
+        pointer-events: none;
+        animation: barrierCreate 1s ease-out;
+    `;
+    document.body.appendChild(barrierEffect);
+    
+    // Update barrier display
+    setTimeout(() => {
+        updateBarrierDisplay();
+    }, 1000);
+    
+    // Cleanup
+    setTimeout(() => {
+        barrierEffect.remove();
+        style.remove();
+    }, 1500);
 }

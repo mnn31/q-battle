@@ -161,9 +161,9 @@ class SampleGame:
             self.ability_name = "QUANTUM BULWARK"
             self.ability_desc = "Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each"
             self.moves = [
-                ("Q-VOID RIFT", "Deals damage + 10% of Defense, heals per barrier behind, shatters back barriers"),
-                ("PRISMATIC LASER", "Deals 90 damage, shatters one random barrier, puts qubit in superposition"),
-                ("SHADOW FORCE", "If |0⟩ deals 70 damage, if |1⟩ becomes invincible and strikes next turn, moves up one barrier"),
+                ("Q-VOID RIFT", "Deals damage + 10% of Defense, heals per barrier behind, shatters all front barriers"),
+                ("PRISMATIC LASER", "Deals 120 damage, shatters one random barrier, puts qubit in superposition"),
+                ("SHADOW FORCE", "If |0⟩ deals 100 damage, if |1⟩ becomes invincible and strikes next turn, moves up one barrier"),
                 ("BARRIER", "Increases defense if max barriers, creates new barrier if not, puts qubit in superposition")
             ]
             self.move_functions = [

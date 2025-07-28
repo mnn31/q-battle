@@ -75,7 +75,7 @@ def start_game(character="Bitzy"):
     elif character == "Higscrozma":
         print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = higscrozma_state
-        hp = 100
+        hp = 110
         moves = ["Q-VOID RIFT", "PRISMATIC LASER", "SHADOW FORCE", "BARRIER"]
     else:
         return {"error": f"Unknown character: {character}"}
@@ -87,7 +87,10 @@ def start_game(character="Bitzy"):
             "character": character,
             "qubit_state": "|0⟩",  # Player qubit state
             "waveform_stacks": 0,  # Resona's waveform stacks
-            "next_turn_collapse_bonus": 0  # Resona's collapse bonus
+            "next_turn_collapse_bonus": 0,  # Resona's collapse bonus
+            "next_turn_strike": False,  # Higscrozma's next turn strike
+            "next_turn_strike_damage": 0,  # Damage for next turn strike
+            "cannot_move_next_turn": False  # Higscrozma's cannot move flag
         },
         "enemy": {
             "hp": 400,  # Singulon's HP
@@ -107,6 +110,13 @@ def start_game(character="Bitzy"):
     # Explicitly reset Resona's waveform stacks
     if character == "Resona":
         resona_state.waveform_stacks = 0
+    
+    # Initialize Higscrozma's barrier state
+    if character == "Higscrozma":
+        higscrozma_state.barriers_in_front = 3
+        higscrozma_state.barriers_behind = 0
+        game_state["player"]["barriers_in_front"] = 3
+        game_state["player"]["barriers_behind"] = 0
     
     # Reset entanglement state
     if hasattr(player_state, 'is_entangled'):
@@ -131,6 +141,10 @@ def process_move(move):
     if move not in valid_moves:
         print(f"[DEBUG] process_move: Move '{move}' is not in valid moves!")
         return {"error": f"Invalid move: {move}"}
+    
+    # Check if player cannot move next turn (Higscrozma SHADOW FORCE effect)
+    if character == "Higscrozma" and game_state["player"].get("cannot_move_next_turn", False):
+        return {"error": "Cannot use moves this turn due to SHADOW FORCE effect!"}
 
     log = game_state["log"]
 
@@ -215,6 +229,18 @@ def process_move(move):
         if "enemy_qubit_state" in result:
             game_state["enemy"]["qubit_state"] = result["enemy_qubit_state"]
             singulon_state.qubit_state = result["enemy_qubit_state"]
+    elif move == "BARRIER":
+        log.append(f"{character} puts its qubit into superposition!")
+        # Update qubit state immediately for real-time display
+        if "qubit_state" in result:
+            player_state.qubit_state = result["qubit_state"]
+            game_state["player"]["qubit_state"] = result["qubit_state"]
+    elif move == "PRISMATIC LASER":
+        log.append(f"{character} puts its qubit into superposition!")
+        # Update qubit state immediately for real-time display
+        if "qubit_state" in result:
+            player_state.qubit_state = result["qubit_state"]
+            game_state["player"]["qubit_state"] = result["qubit_state"]
     
     # Add specific move messages (like HP cost) AFTER the "used" message
     # Note: Q-PHOTON GEYSER and GLITCH CLAW already have their messages added above
@@ -230,6 +256,8 @@ def process_move(move):
     elif move == "METAL NOISE" and "message" in result:
         log.append(result["message"])
     elif move == "SHIFT GEAR" and "message" in result:
+        log.append(result["message"])
+    elif move in ["Q-VOID RIFT", "PRISMATIC LASER", "SHADOW FORCE", "BARRIER"] and "message" in result:
         log.append(result["message"])
     
     # Check if move failed
@@ -258,6 +286,16 @@ def process_move(move):
         # 6. Singulon's qubit is <state>.
         log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
         
+        # QUANTUM AFTERBURN: Apply at the very end of the turn after qubit state information
+        if character == "Neutrinette" and player_state.is_entangled and enemy_move_info.get("damage", 0) > 0:
+            from characters.neutrinette.ability import ability_quantum_afterburn
+            afterburn_result = ability_quantum_afterburn(player_state, enemy_move_info["damage"], is_attacking=False)
+            print(f"[DEBUG] QUANTUM AFTERBURN defending: {afterburn_result}")
+            if afterburn_result["recoil_damage"] > 0:
+                game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
+                log.append(afterburn_result["message"])
+                print(f"[DEBUG] Applied {afterburn_result['recoil_damage']} recoil damage to enemy")
+        
         return {"state": game_state, "enemy_move": enemy_move_info}
     
     # 2. Dealt <damage> damage! (only if damage > 0 and move doesn't already include damage in message)
@@ -278,7 +316,7 @@ def process_move(move):
     game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - damage)  # Prevent negative HP
 
     # Update player's qubit state (if not already updated)
-    if "qubit_state" in result and move != "DUALIZE" and move != "BIT-FLIP":
+    if "qubit_state" in result and move not in ["DUALIZE", "BIT-FLIP", "BARRIER", "PRISMATIC LASER"]:
         player_state.qubit_state = result["qubit_state"]
         game_state["player"]["qubit_state"] = result["qubit_state"]
     
@@ -299,6 +337,22 @@ def process_move(move):
             game_state["metal_noise_block_type"] = "q_moves"
         else:
             game_state["metal_noise_block_type"] = "state_changes"
+    
+    # Update barrier state for Higscrozma
+    if character == "Higscrozma" and "barriers_in_front" in result and "barriers_behind" in result:
+        player_state.barriers_in_front = result["barriers_in_front"]
+        player_state.barriers_behind = result["barriers_behind"]
+        game_state["player"]["barriers_in_front"] = result["barriers_in_front"]
+        game_state["player"]["barriers_behind"] = result["barriers_behind"]
+    
+    # Update next turn strike state for Higscrozma
+    if character == "Higscrozma" and "next_turn_strike" in result:
+        player_state.next_turn_strike = result["next_turn_strike"]
+        player_state.next_turn_strike_damage = result.get("next_turn_strike_damage", 0)
+        player_state.cannot_move_next_turn = result.get("cannot_move_next_turn", False)
+        game_state["player"]["next_turn_strike"] = result["next_turn_strike"]
+        game_state["player"]["next_turn_strike_damage"] = result.get("next_turn_strike_damage", 0)
+        game_state["player"]["cannot_move_next_turn"] = result.get("cannot_move_next_turn", False)
 
     # Update enemy's qubit state if changed (if not already updated)
     if "enemy_qubit_state" in result and move != "BIT-FLIP":
@@ -320,6 +374,16 @@ def process_move(move):
     log.append(f"Your qubit is {game_state['player']['qubit_state']}.")
     # 6. Singulon's qubit is <state>.
     log.append(f"Singulon's qubit is {game_state['enemy']['qubit_state']}.")
+    
+    # QUANTUM AFTERBURN: Apply at the very end of the turn after qubit state information
+    if character == "Neutrinette" and player_state.is_entangled and enemy_move_info.get("damage", 0) > 0:
+        from characters.neutrinette.ability import ability_quantum_afterburn
+        afterburn_result = ability_quantum_afterburn(player_state, enemy_move_info["damage"], is_attacking=False)
+        print(f"[DEBUG] QUANTUM AFTERBURN defending: {afterburn_result}")
+        if afterburn_result["recoil_damage"] > 0:
+            game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
+            log.append(afterburn_result["message"])
+            print(f"[DEBUG] Applied {afterburn_result['recoil_damage']} recoil damage to enemy")
 
     return {"state": game_state, "enemy_move": enemy_move_info}
 
@@ -398,6 +462,21 @@ def enemy_attack():
     # Apply damage to player
     if result.get("success", True):
         damage = result.get("damage", 0)
+        
+        # Apply Higscrozma's barrier damage reduction (will be logged in main process_move)
+        if character == "Higscrozma" and damage > 0:
+            from characters.higscrozma.ability import ability_quantum_bulwark
+            barrier_effect = ability_quantum_bulwark(player_state, player_state.barriers_in_front, player_state.barriers_behind)
+            damage_reduction = barrier_effect["damage_reduction"]
+            if damage_reduction > 0:
+                original_damage = damage
+                damage = int(damage * (1 - damage_reduction))
+                # Store barrier info for logging in main process_move
+                result["barrier_reduction"] = {
+                    "original_damage": original_damage,
+                    "reduced_damage": damage
+                }
+        
         game_state["player"]["hp"] = max(0, game_state["player"]["hp"] - damage)  # Prevent negative HP
         
         # 3. Singulon used <move>!
@@ -411,7 +490,7 @@ def enemy_attack():
                 singulon_state.qubit_state = result["qubit_state"]
                 game_state["enemy"]["qubit_state"] = result["qubit_state"]
         elif move_name == "HAZE":
-            log.append("Singulon reset its qubit to |0⟩!")
+            log.append("Both quantumon's qubits are now |0⟩!")
             # Update qubit state immediately for real-time display
             if "qubit_state" in result:
                 singulon_state.qubit_state = result["qubit_state"]
@@ -429,21 +508,32 @@ def enemy_attack():
         if damage > 0 and move_name not in ["BULLET MUONS", "Q-PRISMATIC LASER"]:
             log.append(f"Dealt {damage} damage!")
         
-        # QUANTUM AFTERBURN: Check if Neutrinette is entangled and apply recoil damage
-        if character == "Neutrinette" and player_state.is_entangled and damage > 0:
-            from characters.neutrinette.ability import ability_quantum_afterburn
-            afterburn_result = ability_quantum_afterburn(player_state, damage, is_attacking=False)
-            print(f"[DEBUG] QUANTUM AFTERBURN defending: {afterburn_result}")
-            if afterburn_result["recoil_damage"] > 0:
-                game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - afterburn_result["recoil_damage"])
-                log.append(afterburn_result["message"])
-                print(f"[DEBUG] Applied {afterburn_result['recoil_damage']} recoil damage to enemy")
+        # 4.5. Barrier damage reduction (if applicable)
+        if "barrier_reduction" in result:
+            barrier_info = result["barrier_reduction"]
+            log.append(f"Barrier reduced damage from {barrier_info['original_damage']} to {barrier_info['reduced_damage']}!")
+        
+        # QUANTUM AFTERBURN will be applied after qubit state information
     else:
         # 3. Singulon used <move>!
         log.append(f"Singulon used {move_name}!")
         # But it failed!
         log.append("But it failed!")
         # No damage message for failed moves
+
+    # Handle Higscrozma's next turn strike
+    if character == "Higscrozma" and game_state["player"].get("next_turn_strike", False):
+        strike_damage = game_state["player"].get("next_turn_strike_damage", 0)
+        game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - strike_damage)
+        log.append(f"Higscrozma strikes for {strike_damage} damage!")
+        
+        # Reset the next turn strike state
+        game_state["player"]["next_turn_strike"] = False
+        game_state["player"]["next_turn_strike_damage"] = 0
+        game_state["player"]["cannot_move_next_turn"] = False
+        player_state.next_turn_strike = False
+        player_state.next_turn_strike_damage = 0
+        player_state.cannot_move_next_turn = False
 
     if game_state["player"]["hp"] <= 0:
         log.append("You fainted! Game over.")

@@ -1,7 +1,7 @@
 # HIGSCROZMA - Quantum Tunneling Character
 
 ## Stats
-- **HP**: 85
+- **HP**: 110
 - **Attack**: 70  
 - **Defense**: 25 (extremely low, must use BARRIER to increase)
 - **Speed**: 12 (high speed for SHADOW FORCE priority)
@@ -12,13 +12,13 @@ HIGSCROZMA can utilize up to three QUANTUM BARRIERS, which act like screens whic
 ## Moves
 
 ### Q-VOID RIFT
-HIGSCROZMA's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers.
+HIGSCROZMA's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers.
 
 ### PRISMATIC LASER
-Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)
+Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 120)
 
 ### SHADOW FORCE
-If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)
+If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 100, DMG 1: 150)
 
 ### BARRIER
 Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION.

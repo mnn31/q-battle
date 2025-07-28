@@ -26,15 +26,22 @@ class HigscrozmaQuantumState:
         self.next_turn_strike_damage = 0  # Damage for next turn strike
         self.cannot_move_next_turn = False  # For SHADOW FORCE |1⟩ effect
 
-def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85, defender_defense=50):
-    """Q-VOID RIFT: Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers."""
+def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=110, max_hp=110, defender_defense=50):
+    """Q-VOID RIFT: Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers."""
     # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate base damage (150 base power for Q-Move) with proper RPG formula
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 150, defender_defense)
+    # Apply barrier effects
+    barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
+    
+    # Calculate base damage (200 base power for Q-Move) with proper RPG formula
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 200, defender_defense)
+    
+    # Apply barrier damage boost/reduction
+    if barrier_effect["damage_boost"] > 0:
+        base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
     
     # Add 10% of Defense stat as additional damage
     defense_bonus = int(quantum_state.defense * 0.10)
@@ -46,9 +53,9 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85,
     # Calculate healing (10% max HP per barrier behind)
     heal_amount = int(max_hp * 0.10 * quantum_state.barriers_behind)
     
-    # Shatter barriers behind (they get destroyed)
-    barriers_shattered = quantum_state.barriers_behind
-    quantum_state.barriers_behind = 0
+    # Shatter all front barriers (they get destroyed)
+    barriers_shattered = quantum_state.barriers_in_front
+    quantum_state.barriers_in_front = 0
     
     # Collapse qubit randomly
     if "1" in result:
@@ -79,14 +86,22 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=85, max_hp=85,
     }
 
 def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
-    """PRISMATIC LASER: Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 90)"""
+    """PRISMATIC LASER: Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 120)"""
     # Create circuit for quantum randomness
     qc = create_superposition(0)
     qc = measure_qubit(qc, 0)
     result = run_quantum_circuit(qc, shots=1)
     
-    # Calculate damage (90 base power) with proper RPG formula and damage roll
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 90, defender_defense)
+    # Apply barrier effects
+    barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
+    
+    # Calculate damage (120 base power) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
+    
+    # Apply barrier damage boost/reduction
+    if barrier_effect["damage_boost"] > 0:
+        base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
+    
     damage = apply_damage_roll(base_damage)
     
     # Shatter one random barrier
@@ -128,7 +143,7 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     }
 
 def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
-    """SHADOW FORCE: If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 70, DMG 1: 110)"""
+    """SHADOW FORCE: If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, the user does damage. If 1, the user becomes invincible for the current turn, but strikes for massive damage next turn. Moves up one barrier. (DMG 0: 100, DMG 1: 150)"""
     if quantum_state.qubit_state != "superposition":
         return {
             "success": False,
@@ -155,13 +170,21 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         quantum_state.qubit_state = "|1⟩"
         # User becomes invincible for current turn, strikes for massive damage next turn
         quantum_state.next_turn_strike = True
-        quantum_state.next_turn_strike_damage = 110  # Massive damage next turn
+        quantum_state.next_turn_strike_damage = 150  # Massive damage next turn
         quantum_state.cannot_move_next_turn = True  # Set flag to prevent move usage next turn
-        message = f"SHADOW FORCE collapses to |1⟩! User becomes invincible this turn, will strike for {110} damage next turn!"
+        message = f"SHADOW FORCE collapses to |1⟩! User becomes invincible this turn, will strike for {150} damage next turn!"
     else:
         quantum_state.qubit_state = "|0⟩"
-        # Deal damage immediately (70 base power)
-        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 70, defender_defense)
+        # Apply barrier effects
+        barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
+        
+        # Deal damage immediately (100 base power)
+        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 100, defender_defense)
+        
+        # Apply barrier damage boost/reduction
+        if barrier_effect["damage_boost"] > 0:
+            base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
+        
         damage = apply_damage_roll(base_damage)
         message = f"SHADOW FORCE deals {damage} damage! (collapsed to |0⟩)"
     
