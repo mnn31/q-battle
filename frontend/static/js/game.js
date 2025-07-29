@@ -479,21 +479,21 @@ function updateBattleDisplay() {
     
     // Only update HP bars if we haven't already updated them in real-time
     if (!window.visualPlayerHpUpdated) {
-        playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-        const playerHp = document.getElementById('player-hp');
-        if (playerHp) {
-            playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
-        }
+    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+    const playerHp = document.getElementById('player-hp');
+    if (playerHp) {
+        playerHp.textContent = `${Math.max(0, gameState.player.hp)}/${maxPlayerHp}`;
+    }
         updateHealthBarColor(playerHealthFill, playerHpPercent);
     }
     
     if (!window.visualEnemyHpUpdated) {
         enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
         const enemyHp = document.getElementById('enemy-hp');
-        if (enemyHp) {
-            enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
-        }
-        updateHealthBarColor(enemyHealthFill, enemyHpPercent);
+    if (enemyHp) {
+        enemyHp.textContent = `${Math.max(0, gameState.enemy.hp)}/400`;
+    }
+    updateHealthBarColor(enemyHealthFill, enemyHpPercent);
     }
     
     // Clear visual HP flags after sync
@@ -770,21 +770,21 @@ async function executeMove(moveName) {
     
     // Wait for animations to complete before processing response
     setTimeout(async () => {
-        
-        try {
+    
+    try {
             // Store current log length
             const oldLogLength = gameState.log ? gameState.log.length : 0;
             
-            // Send move to backend
-            const response = await fetch('/move', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ move: moveName })
-            });
-            
-            const result = await response.json();
-            
-            if (result.state) {
+        // Send move to backend
+        const response = await fetch('/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ move: moveName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.state) {
                 gameState = result.state;
                 
                 // Get new log entries
@@ -794,44 +794,44 @@ async function executeMove(moveName) {
                 // Display each new log entry one at a time with real-time updates
                 for (let i = 0; i < newEntries.length; i++) {
                     const entry = newEntries[i];
-                    showBattleMessage(entry, 3000);
-                    
-                    // Update qubit states based on the message being displayed
-                    updateQubitStatesFromMessage(entry);
-                    
-                    // Wait for message to be seen
-                    await new Promise(resolve => setTimeout(resolve, 3000));
-                }
+                showBattleMessage(entry, 3000);
                 
+                // Update qubit states based on the message being displayed
+                updateQubitStatesFromMessage(entry);
+                
+                // Wait for message to be seen
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            
                 // Sync HP bars with backend state after all real-time updates
-                updateBattleDisplay();
-                
-            } else {
-                showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
-            }
+            updateBattleDisplay();
             
-            // Check for game end
-            if (gameState.enemy.hp <= 0) {
-                showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
-                setTimeout(() => endBattle(true), 4000);
-            } else if (gameState.player.hp <= 0) {
-                showBattleMessage("💀 You fainted! Game over.", 4000);
-                setTimeout(() => endBattle(false), 4000);
-            } else {
-                // Clear message screen and continue to next turn
-                clearBattleMessage();
-                turnCount++;
-                turnNumber.textContent = `Turn ${turnCount}`;
-                enableMoveButtons();
-            }
-            
-        } catch (error) {
-            console.error('Error executing move:', error);
-            showBattleMessage('Error executing move', 3000);
-            enableMoveButtons();
-        } finally {
-            isProcessingMove = false;
+        } else {
+            showBattleMessage(`Error: ${result.error || 'Unknown error'}`, 3000);
         }
+        
+        // Check for game end
+        if (gameState.enemy.hp <= 0) {
+            showBattleMessage("🎉 You defeated Singulon! Victory!", 4000);
+            setTimeout(() => endBattle(true), 4000);
+        } else if (gameState.player.hp <= 0) {
+            showBattleMessage("💀 You fainted! Game over.", 4000);
+            setTimeout(() => endBattle(false), 4000);
+        } else {
+            // Clear message screen and continue to next turn
+            clearBattleMessage();
+            turnCount++;
+            turnNumber.textContent = `Turn ${turnCount}`;
+            enableMoveButtons();
+        }
+        
+    } catch (error) {
+        console.error('Error executing move:', error);
+        showBattleMessage('Error executing move', 3000);
+        enableMoveButtons();
+    } finally {
+        isProcessingMove = false;
+    }
     }, 1000); // Wait for animations to complete
 }
 
@@ -1229,7 +1229,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
     
     // Create multiple photon beams
     for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const photonBeam = document.createElement('div');
             photonBeam.style.cssText = `
                 position: fixed;
@@ -1247,7 +1247,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
             document.body.appendChild(photonBeam);
             
             // Animate beam to enemy
-            setTimeout(() => {
+        setTimeout(() => {
                 photonBeam.style.left = `${enemyRect.left + enemyRect.width / 2}px`;
                 photonBeam.style.top = `${enemyRect.top + enemyRect.height / 2}px`;
                 photonBeam.style.width = '400px';
@@ -1264,7 +1264,7 @@ function triggerPhotonGeyserAnimation(playerSprite, enemySprite) {
     }
     
     // Create MUCH BIGGER psychic orbs around enemy (10x size)
-    setTimeout(() => {
+        setTimeout(() => {
         for (let i = 0; i < 8; i++) {
             const orb = document.createElement('div');
             const angle = (i / 8) * 2 * Math.PI;
@@ -1505,7 +1505,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
     
     // Create MUCH BIGGER quantum particles along the link
     for (let i = 0; i < 15; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const particle = document.createElement('div');
             const progress = i / 15;
             const x = playerX + (enemyX - playerX) * progress;
@@ -1526,7 +1526,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
             `;
             document.body.appendChild(particle);
             
-            setTimeout(() => {
+        setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
@@ -1535,7 +1535,7 @@ function triggerEntangleAnimation(playerSprite, enemySprite) {
     }
     
     // Clean up
-    setTimeout(() => {
+        setTimeout(() => {
         if (document.body.contains(entangleEffect)) {
             document.body.removeChild(entangleEffect);
         }
@@ -1635,7 +1635,7 @@ function triggerSwitcherooAnimation(playerSprite, enemySprite) {
     }, 200);
     
     // Reset sprite animations
-    setTimeout(() => {
+            setTimeout(() => {
         playerSprite.style.animation = '';
         enemySprite.style.animation = '';
     }, 800);
@@ -1643,7 +1643,7 @@ function triggerSwitcherooAnimation(playerSprite, enemySprite) {
     // Clean up
     setTimeout(() => {
         if (document.body.contains(swapEffect)) {
-            document.body.removeChild(swapEffect);
+                document.body.removeChild(swapEffect);
         }
         if (document.head.contains(style)) {
             document.head.removeChild(style);
@@ -1835,7 +1835,7 @@ function triggerQMetronomeAnimation(playerSprite, enemySprite) {
     
     // Create additional energy waves (20 waves)
     for (let i = 0; i < 20; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const wave = document.createElement('div');
             wave.style.cssText = `
                 position: absolute;
@@ -2229,7 +2229,7 @@ function triggerBossHazeAnimation(enemySprite) {
     // Phase 1: MASSIVE Background effect with gray cycling
     const backgroundEffect = document.createElement('div');
     backgroundEffect.style.cssText = `
-        position: fixed;
+            position: fixed;
         top: 0;
         left: 0;
         width: 100%;
@@ -2451,7 +2451,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                 border-bottom: 35px solid #808080;
                 transform: translate(-50%, -50%) rotate(${angle}rad);
                 pointer-events: none;
-                z-index: 1000;
+            z-index: 1000;
                 animation: metalTriangleRadiateIntense 2s ease-out;
             `;
             
@@ -2537,7 +2537,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                 border-right: 12px solid transparent;
                 border-bottom: 22px solid #A0A0A0;
                 transform: translate(-50%, -50%) rotate(${angle}rad);
-                pointer-events: none;
+            pointer-events: none;
                 z-index: 1001;
                 animation: mediumMetalTriangleRadiate 1.8s ease-out;
             `;
@@ -2580,17 +2580,17 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
                     }
                     100% { 
                         transform: translate(-50%, -50%) rotate(${angle}rad) scale(0) translateX(${distance}px) translateY(${Math.cos(angle * 5) * 15}px); 
-                        opacity: 0; 
+            opacity: 0;
                         border-bottom-color: #303030;
                         filter: brightness(0.7) contrast(1.3);
                     }
                 }
-            `;
-            
+        `;
+        
             document.head.appendChild(mediumTriangleStyle);
             
             // Clean up medium triangle
-            setTimeout(() => {
+        setTimeout(() => {
                 if (document.body.contains(mediumTriangle)) {
                     document.body.removeChild(mediumTriangle);
                 }
@@ -2603,7 +2603,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
     
     // Create tertiary triangles (48 small triangles) - 4x more
     for (let i = 0; i < 48; i++) {
-        setTimeout(() => {
+            setTimeout(() => {
             const smallTriangle = document.createElement('div');
             const angle = (i * 7.5) * (Math.PI / 180); // 48 triangles
             const distance = 80 + (i * 15);
@@ -2671,7 +2671,7 @@ function triggerMetalNoiseAnimation(playerSprite, enemySprite) {
             document.head.appendChild(smallTriangleStyle);
             
             // Clean up small triangle
-            setTimeout(() => {
+                setTimeout(() => {
                 if (document.body.contains(smallTriangle)) {
                     document.body.removeChild(smallTriangle);
                 }
@@ -2794,24 +2794,24 @@ function triggerShiftGearAnimation(playerSprite) {
     
     // Create quantum particles around the gear on top of Resona
     for (let i = 0; i < 12; i++) {
-        setTimeout(() => {
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: fixed;
+    setTimeout(() => {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: fixed;
                 top: ${playerTop - 50}px;
                 left: ${playerCenterX}px;
                 width: 30px;
                 height: 30px;
                 background: radial-gradient(circle, #4a90e2, #357abd);
-                border-radius: 50%;
-                pointer-events: none;
+            border-radius: 50%;
+            pointer-events: none;
                 z-index: 1001;
                 animation: quantumParticleOnResona 1.2s ease-out;
-            `;
+        `;
             
-            document.body.appendChild(particle);
-            
-            setTimeout(() => {
+        document.body.appendChild(particle);
+        
+        setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
@@ -2841,7 +2841,7 @@ function triggerShiftGearAnimation(playerSprite) {
     document.head.appendChild(particleStyle);
     
     // Clean up
-    setTimeout(() => {
+            setTimeout(() => {
         if (document.body.contains(gear)) {
             document.body.removeChild(gear);
         }
@@ -2879,7 +2879,7 @@ function updateQubitStatesFromMessage(message) {
         const playerSprite = document.getElementById('player-sprite');
         if (playerSprite) {
             playerSprite.style.filter = 'drop-shadow(0 0 40px yellow) brightness(1.4)';
-            setTimeout(() => {
+                setTimeout(() => {
                 playerSprite.style.filter = '';
             }, 2000); // Glow for 2 seconds
         }
@@ -2913,7 +2913,7 @@ function updateQubitStatesFromMessage(message) {
         // Hide Metal Noise indicator after blocking
         const metalNoiseIndicator = document.getElementById('metal-noise-indicator');
         if (metalNoiseIndicator) {
-            setTimeout(() => {
+    setTimeout(() => {
                 metalNoiseIndicator.style.display = 'none';
             }, 3000); // Hide after 3 seconds
         }
@@ -3385,7 +3385,7 @@ function triggerBossQPrismaticLaserAnimation(enemySprite, playerSprite) {
     // Phase 1: MASSIVE Background effect with color cycling
     const backgroundEffect = document.createElement('div');
     backgroundEffect.style.cssText = `
-        position: fixed;
+            position: fixed;
         top: 0;
         left: 0;
         width: 100%;
@@ -3659,7 +3659,7 @@ function triggerBossBulletMuonsAnimation(enemySprite, playerSprite) {
     document.body.style.animation = 'massiveShadowBallScreenShake 2s ease-in-out';
     
     // Phase 6: MASSIVE Explosion effect at player
-    setTimeout(() => {
+            setTimeout(() => {
         const explosion = document.createElement('div');
         explosion.style.cssText = `
             position: absolute;
@@ -3679,7 +3679,7 @@ function triggerBossBulletMuonsAnimation(enemySprite, playerSprite) {
         // Player sprite effect (more dramatic)
         playerSprite.style.animation = 'massiveShadowBallDefender 0.8s ease-out';
         
-        setTimeout(() => {
+                setTimeout(() => {
             explosion.remove();
             playerSprite.style.animation = '';
         }, 800);
@@ -3763,19 +3763,19 @@ function triggerQVoidRiftAnimation(playerSprite, enemySprite) {
     
     // Phase 3: Orbital effects
     for (let i = 0; i < 8; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const orb = document.createElement('div');
             orb.style.cssText = `
-                position: fixed;
+            position: fixed;
                 left: ${enemyX + (Math.random() - 0.5) * 100}px;
                 top: ${enemyY + (Math.random() - 0.5) * 100}px;
-                width: 30px;
-                height: 30px;
+            width: 30px;
+            height: 30px;
                 background: radial-gradient(circle, #8B5CF6, #EC4899, #8B5CF6);
-                border-radius: 50%;
+            border-radius: 50%;
                 box-shadow: 0 0 20px #8B5CF6;
-                z-index: 1000;
-                pointer-events: none;
+            z-index: 1000;
+            pointer-events: none;
                 animation: voidRiftOrb 1s ease-out;
             `;
             document.body.appendChild(orb);
@@ -3836,7 +3836,7 @@ function triggerPrismaticLaserAnimation(playerSprite, enemySprite) {
         width: 100%;
         height: 100%;
         background: #000000;
-        opacity: 0;
+            opacity: 0;
         z-index: 998;
         pointer-events: none;
         animation: prismaticLaserBackground 2s ease-in-out;
@@ -3887,7 +3887,7 @@ function triggerPrismaticLaserAnimation(playerSprite, enemySprite) {
     }
     
     // Cleanup
-    setTimeout(() => {
+                setTimeout(() => {
         backgroundEffect.remove();
         laserBeam.remove();
         style.remove();
@@ -3940,31 +3940,31 @@ function triggerShadowForceAnimation(playerSprite, enemySprite) {
     
     // Phase 2: Shadow force strikes
     for (let i = 0; i < 5; i++) {
-        setTimeout(() => {
+    setTimeout(() => {
             const strike = document.createElement('div');
             strike.style.cssText = `
-                position: fixed;
+            position: fixed;
                 left: ${enemyX + (Math.random() - 0.5) * 120}px;
                 top: ${enemyY + (Math.random() - 0.5) * 120}px;
                 width: 40px;
                 height: 40px;
                 background: radial-gradient(circle, #4C1D95, #7C3AED, #A855F7);
-                border-radius: 50%;
+            border-radius: 50%;
                 box-shadow: 0 0 25px #4C1D95;
-                z-index: 1000;
-                pointer-events: none;
+            z-index: 1000;
+            pointer-events: none;
                 animation: shadowForceStrike 0.8s ease-out;
-            `;
+        `;
             document.body.appendChild(strike);
-            
-            setTimeout(() => {
+        
+        setTimeout(() => {
                 strike.remove();
             }, 800);
         }, i * 300);
     }
     
     // Cleanup
-    setTimeout(() => {
+            setTimeout(() => {
         backgroundEffect.remove();
         style.remove();
     }, 2000);
