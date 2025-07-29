@@ -237,17 +237,18 @@ function updateBarrierDisplay() {
     const barrierFront = document.getElementById('barrier-front');
     const barrierMiddle = document.getElementById('barrier-middle');
     const barrierBack = document.getElementById('barrier-back');
+    const barrierBackLeft = document.getElementById('barrier-back-left');
+    const barrierBackMiddle = document.getElementById('barrier-back-middle');
+    const barrierBackRight = document.getElementById('barrier-back-right');
     
-    if (!barrierContainer || !barrierFront || !barrierMiddle || !barrierBack) return;
+    if (!barrierContainer || !barrierFront || !barrierMiddle || !barrierBack || 
+        !barrierBackLeft || !barrierBackMiddle || !barrierBackRight) return;
     
     // Show barrier system only for Higscrozma
     if (currentCharacter === "Higscrozma" && barrierState.isActive) {
         barrierContainer.style.display = 'block';
         
-        // Show barriers based on their actual positions
-        // barrierFront = closest to enemy (35%), barrierMiddle = middle (50%), barrierBack = closest to Higscrozma (65%)
-        
-        // Show front barriers (in front of Higscrozma) - these should be in front and middle positions
+        // Show front barriers (between Higscrozma and Singulon) - positioned on the right
         if (barrierState.barriersInFront >= 1) {
             barrierFront.style.display = 'block';
         } else {
@@ -260,11 +261,29 @@ function updateBarrierDisplay() {
             barrierMiddle.style.display = 'none';
         }
         
-        // Show back barriers (behind Higscrozma) - these should be in the back position
-        if (barrierState.barriersBehind >= 1) {
+        if (barrierState.barriersInFront >= 3) {
             barrierBack.style.display = 'block';
         } else {
             barrierBack.style.display = 'none';
+        }
+        
+        // Show back barriers (behind Higscrozma) - positioned on the far left
+        if (barrierState.barriersBehind >= 1) {
+            barrierBackLeft.style.display = 'block';
+        } else {
+            barrierBackLeft.style.display = 'none';
+        }
+        
+        if (barrierState.barriersBehind >= 2) {
+            barrierBackMiddle.style.display = 'block';
+        } else {
+            barrierBackMiddle.style.display = 'none';
+        }
+        
+        if (barrierState.barriersBehind >= 3) {
+            barrierBackRight.style.display = 'block';
+        } else {
+            barrierBackRight.style.display = 'none';
         }
         
         // Update Higscrozma's position based on barriers behind
@@ -302,7 +321,22 @@ function updateHigscrozmaPosition() {
 }
 
 function shatterBarrier(barrierType) {
-    const barrierElement = document.getElementById(`barrier-${barrierType}`);
+    let barrierElement;
+    
+    if (barrierType === 'front') {
+        barrierElement = document.getElementById('barrier-front');
+    } else if (barrierType === 'middle') {
+        barrierElement = document.getElementById('barrier-middle');
+    } else if (barrierType === 'back') {
+        barrierElement = document.getElementById('barrier-back');
+    } else if (barrierType === 'back-left') {
+        barrierElement = document.getElementById('barrier-back-left');
+    } else if (barrierType === 'back-middle') {
+        barrierElement = document.getElementById('barrier-back-middle');
+    } else if (barrierType === 'back-right') {
+        barrierElement = document.getElementById('barrier-back-right');
+    }
+    
     if (barrierElement) {
         barrierElement.classList.add('barrier-shatter');
         setTimeout(() => {
@@ -2143,6 +2177,7 @@ function triggerWaveCrashAnimation(playerSprite, enemySprite) {
 // BOSS HAZE Animation - MASSIVE & VIVID VERSION
 function triggerBossHazeAnimation(enemySprite) {
     console.log('BOSS HAZE MASSIVE animation triggered');
+    console.log('Enemy sprite:', enemySprite);
     
     const enemyRect = enemySprite.getBoundingClientRect();
     const enemyX = enemyRect.left + enemyRect.width / 2;
@@ -2900,9 +2935,9 @@ function updateQubitStatesFromMessage(message) {
         if (message.includes("front barrier")) {
             shatterBarrier('front');
         } else if (message.includes("back barrier")) {
-            shatterBarrier('back');
+            shatterBarrier('back-left');
         } else if (message.includes("barriers")) {
-            // Multiple barriers shattered
+            // Multiple barriers shattered - shatter all front barriers
             shatterBarrier('front');
             shatterBarrier('middle');
             shatterBarrier('back');
@@ -3006,17 +3041,27 @@ function updateQubitStatesFromMessage(message) {
                 enemyQubit.textContent = "|0⟩";
             }
         }
-    } else if (message.includes("Singulon reset its qubit to |0⟩")) {
+    } else if (message.includes("Both quantumon's qubits are now |0⟩")) {
         // Enemy used HAZE
+        console.log('HAZE detected! Triggering animation...');
         const enemyQubit = document.getElementById('enemy-qubit');
         if (enemyQubit) {
             enemyQubit.textContent = "|0⟩";
         }
         
+        // Reset player qubit to |0⟩ for HAZE
+        const playerQubit = document.getElementById('player-qubit');
+        if (playerQubit) {
+            playerQubit.textContent = "|0⟩";
+        }
+        
         // Trigger boss HAZE animation
         const enemySprite = document.querySelector('.enemy-sprite img');
         if (enemySprite) {
+            console.log('Enemy sprite found, triggering HAZE animation');
             triggerBossHazeAnimation(enemySprite);
+        } else {
+            console.log('Enemy sprite not found for HAZE animation');
         }
     } else if (message.includes("Your qubit is")) {
         // End of turn qubit state update

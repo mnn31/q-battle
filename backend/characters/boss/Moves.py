@@ -31,13 +31,14 @@ def quantum_move_singulon_dualize(quantum_state):
     }
 
 def quantum_move_singulon_haze(quantum_state):
-    """HAZE: Reset the boss's qubit to |0⟩"""
+    """HAZE: Reset both qubits to |0⟩"""
     quantum_state.qubit_state = "|0⟩"
     return {
         "success": True,
         "damage": 0,
         "message": "Singulon's qubit is now |0⟩!",
-        "qubit_state": quantum_state.qubit_state
+        "qubit_state": quantum_state.qubit_state,
+        "player_qubit_state": "|0⟩"
     }
 
 def quantum_move_singulon_bullet_muons(quantum_state, defender_defense=50):

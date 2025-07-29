@@ -807,14 +807,14 @@ body {
 }
 
 .barrier-front {
-    left: 35%;
+    left: 45%;
     top: 50%;
     z-index: 6;
     transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
 }
 
 .barrier-middle {
-    left: 50%;
+    left: 55%;
     top: 50%;
     z-index: 7;
     transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
@@ -822,6 +822,28 @@ body {
 
 .barrier-back {
     left: 65%;
+    top: 50%;
+    z-index: 8;
+    transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
+}
+
+/* Back barriers (behind Higscrozma) - positioned on far left */
+.barrier-back-left {
+    left: 5%;
+    top: 50%;
+    z-index: 6;
+    transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
+}
+
+.barrier-back-middle {
+    left: 15%;
+    top: 50%;
+    z-index: 7;
+    transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
+}
+
+.barrier-back-right {
+    left: 25%;
     top: 50%;
     z-index: 8;
     transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
