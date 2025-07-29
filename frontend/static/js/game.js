@@ -2929,11 +2929,15 @@ function updateQubitStatesFromMessage(message) {
             const frontBarriers = parseInt(barrierMatch[1]);
             const backBarriers = parseInt(barrierMatch[2]);
             
+            console.log('Parsed barriers - Front:', frontBarriers, 'Back:', backBarriers);
+            
             barrierState.barriersInFront = frontBarriers;
             barrierState.barriersBehind = backBarriers;
             
             console.log('Updated barrier state:', barrierState);
             updateBarrierDisplay();
+        } else {
+            console.log('Failed to parse barrier information from message:', message);
         }
     }
     
@@ -2957,6 +2961,7 @@ function updateQubitStatesFromMessage(message) {
     if (currentCharacter === "Higscrozma" && message.includes("Moved up one barrier")) {
         console.log('Detected barrier movement:', message);
         console.log('Current barrier state before move:', barrierState);
+        console.log('Full message for debugging:', message);
         moveBarrier();
         console.log('Barrier state after move:', barrierState);
     }
