@@ -474,7 +474,8 @@ def enemy_attack():
                 # Store barrier info for logging in main process_move
                 result["barrier_reduction"] = {
                     "original_damage": original_damage,
-                    "reduced_damage": damage
+                    "reduced_damage": damage,
+                    "barrier_count": player_state.barriers_in_front
                 }
         
         game_state["player"]["hp"] = max(0, game_state["player"]["hp"] - damage)  # Prevent negative HP
@@ -511,7 +512,8 @@ def enemy_attack():
         # 4.5. Barrier damage reduction (if applicable)
         if "barrier_reduction" in result:
             barrier_info = result["barrier_reduction"]
-            log.append(f"Barrier reduced damage from {barrier_info['original_damage']} to {barrier_info['reduced_damage']}!")
+            barrier_count = barrier_info.get('barrier_count', 0)
+            log.append(f"Damage reduced from {barrier_info['original_damage']} to {barrier_info['reduced_damage']} because of {barrier_count} barriers in front!")
         
         # QUANTUM AFTERBURN will be applied after qubit state information
     else:

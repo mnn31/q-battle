@@ -233,6 +233,8 @@ function initializeBarrierSystem() {
 }
 
 function updateBarrierDisplay() {
+    console.log('updateBarrierDisplay called with barrierState:', barrierState);
+    
     const barrierContainer = document.getElementById('barrier-container');
     const barrierFront = document.getElementById('barrier-front');
     const barrierMiddle = document.getElementById('barrier-middle');
@@ -2954,7 +2956,9 @@ function updateQubitStatesFromMessage(message) {
     // Check for barrier movement
     if (currentCharacter === "Higscrozma" && message.includes("Moved up one barrier")) {
         console.log('Detected barrier movement:', message);
+        console.log('Current barrier state before move:', barrierState);
         moveBarrier();
+        console.log('Barrier state after move:', barrierState);
     }
     
     // Real-time qubit state updates based on specific messages
