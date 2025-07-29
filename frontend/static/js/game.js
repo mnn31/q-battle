@@ -380,6 +380,10 @@ function selectCharacter(character) {
     currentCharacter = character;
     const charData = characterData[character];
     
+    // Clear any existing waveform balls when switching characters
+    const existingBalls = document.querySelectorAll('.waveform-ball');
+    existingBalls.forEach(ball => ball.remove());
+    
     // Update player sprite and name
     playerSprite.src = charData.sprite;
     playerName.textContent = character;
@@ -2861,6 +2865,9 @@ function updateQubitStatesFromMessage(message) {
             const stacks = gameState.player.waveform_stacks || 0;
             waveformStacks.textContent = stacks;
             console.log('Updated waveform stacks to:', stacks);
+            
+            // Create light blue balls for waveform stacks
+            createWaveformBalls(stacks);
         }
     }
     
@@ -3952,6 +3959,53 @@ function triggerShadowForceAnimation(playerSprite, enemySprite) {
         backgroundEffect.remove();
         style.remove();
     }, 2000);
+}
+
+// Create light blue balls for Resona's waveform stacks
+function createWaveformBalls(stacks) {
+    console.log('Creating waveform balls for', stacks, 'stacks');
+    
+    // Clear existing balls
+    const existingBalls = document.querySelectorAll('.waveform-ball');
+    existingBalls.forEach(ball => ball.remove());
+    
+    if (stacks <= 0) return;
+    
+    const playerSprite = document.getElementById('player-sprite');
+    if (!playerSprite) return;
+    
+    const playerRect = playerSprite.getBoundingClientRect();
+    const centerX = playerRect.left + playerRect.width / 2;
+    const topY = playerRect.top - 20; // Above the sprite
+    
+    // Create balls in an arc formation
+    for (let i = 0; i < stacks; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'waveform-ball';
+        
+        // Calculate position in arc
+        const angle = (i - (stacks - 1) / 2) * 30; // Spread balls in 30-degree arc
+        const radius = 40; // Distance from center
+        const x = centerX + Math.sin(angle * Math.PI / 180) * radius;
+        const y = topY - Math.cos(angle * Math.PI / 180) * radius;
+        
+        ball.style.cssText = `
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(45deg, #87CEEB, #00BFFF);
+            border-radius: 50%;
+            z-index: 1000;
+            pointer-events: none;
+            left: ${x}px;
+            top: ${y}px;
+            animation: waveformBallFloat 3s ease-in-out infinite;
+            animation-delay: ${i * 0.2}s;
+            box-shadow: 0 0 10px #87CEEB;
+        `;
+        
+        document.body.appendChild(ball);
+    }
 }
 
 function triggerBarrierAnimation(playerSprite) {

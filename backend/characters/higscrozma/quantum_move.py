@@ -41,7 +41,11 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=110, max_hp=11
     
     # Apply barrier damage boost/reduction
     if barrier_effect["damage_boost"] > 0:
+        original_damage = base_damage
         base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
+        damage_boost_message = f" Back barriers boost damage from {original_damage} to {base_damage}!"
+    else:
+        damage_boost_message = ""
     
     # Add 10% of Defense stat as additional damage
     defense_bonus = int(quantum_state.defense * 0.10)
@@ -71,7 +75,7 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=110, max_hp=11
     
     # Print barrier effects
     barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
-    message += barrier_effect
+    message += barrier_effect + damage_boost_message
     
     return {
         "success": True,
@@ -100,7 +104,11 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     
     # Apply barrier damage boost/reduction
     if barrier_effect["damage_boost"] > 0:
+        original_damage = base_damage
         base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
+        damage_boost_message = f" Back barriers boost damage from {original_damage} to {base_damage}!"
+    else:
+        damage_boost_message = ""
     
     damage = apply_damage_roll(base_damage)
     
@@ -129,7 +137,7 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     
     # Print barrier effects
     barrier_effect = f" (Barriers: {quantum_state.barriers_in_front} front, {quantum_state.barriers_behind} back)"
-    message += barrier_effect
+    message += barrier_effect + damage_boost_message
     
     return {
         "success": True,
@@ -183,10 +191,14 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         
         # Apply barrier damage boost/reduction
         if barrier_effect["damage_boost"] > 0:
+            original_damage = base_damage
             base_damage = int(base_damage * (1 + barrier_effect["damage_boost"]))
+            damage_boost_message = f" Back barriers boost damage from {original_damage} to {base_damage}!"
+        else:
+            damage_boost_message = ""
         
         damage = apply_damage_roll(base_damage)
-        message = f"SHADOW FORCE deals {damage} damage! (collapsed to |0⟩)"
+        message = f"SHADOW FORCE deals {damage} damage! (collapsed to |0⟩)" + damage_boost_message
     
     if barrier_moved:
         message += " Moved up one barrier!"
@@ -246,11 +258,11 @@ def quantum_move_higscrozma_barrier(quantum_state):
 
 def ability_quantum_bulwark(quantum_state, barriers_in_front=2, barriers_behind=0):
     """QUANTUM BULWARK: Provides barrier-based damage reduction and power modification"""
-    # Calculate damage reduction from front barriers (10% per barrier)
-    damage_reduction = barriers_in_front * 0.10
+    # Calculate damage reduction from front barriers (20% per barrier)
+    damage_reduction = barriers_in_front * 0.20
     
-    # Calculate damage boost from back barriers (10% per barrier)
-    damage_boost = barriers_behind * 0.10
+    # Calculate damage boost from back barriers (20% per barrier)
+    damage_boost = barriers_behind * 0.20
     
     return {
         "damage_reduction": damage_reduction,

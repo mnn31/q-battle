@@ -159,7 +159,7 @@ class SampleGame:
             self.player_hp = 95  # Increased by 10
             self.character_name = "Higscrozma"
             self.ability_name = "QUANTUM BULWARK"
-            self.ability_desc = "Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each"
+            self.ability_desc = "Barriers in front reduce damage taken/dealt by 20% each, barriers behind increase damage dealt by 20% each"
             self.moves = [
                 ("Q-VOID RIFT", "Deals damage + 10% of Defense, heals per barrier behind, shatters all front barriers"),
                 ("PRISMATIC LASER", "Deals 120 damage, shatters one random barrier, puts qubit in superposition"),
@@ -244,7 +244,7 @@ class SampleGame:
             print("4. BARRIER")
             print("   Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION.")
             print("\nAbility: QUANTUM BULWARK")
-            print("Barriers in front reduce damage taken/dealt by 10% each, barriers behind increase damage dealt by 10% each.")
+            print("Barriers in front reduce damage taken/dealt by 20% each, barriers behind increase damage dealt by 20% each.")
             print(f"Current Barriers - Front: {self.player_state.barriers_in_front}, Back: {self.player_state.barriers_behind}")
         
         print(f"\nYour Qubit: {self.player_state.qubit_state}")
