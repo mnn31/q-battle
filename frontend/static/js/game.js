@@ -290,12 +290,12 @@ function updateBarrierDisplay() {
     const barrierFront = document.getElementById('barrier-front');
     const barrierMiddle = document.getElementById('barrier-middle');
     const barrierBack = document.getElementById('barrier-back');
-    const barrierBackLeft = document.getElementById('barrier-back-left');
-    const barrierBackMiddle = document.getElementById('barrier-back-middle');
-    const barrierBackRight = document.getElementById('barrier-back-right');
+    const backBarriersCounter = document.getElementById('back-barriers-counter');
+    const pinkCrystal = document.getElementById('pink-crystal');
+    const barrierCount = document.getElementById('barrier-count');
     
     if (!barrierContainer || !barrierFront || !barrierMiddle || !barrierBack || 
-        !barrierBackLeft || !barrierBackMiddle || !barrierBackRight) return;
+        !backBarriersCounter || !pinkCrystal || !barrierCount) return;
     
     // Show barrier system only for Higscrozma
     if (currentCharacter === "Higscrozma" && barrierState.isActive) {
@@ -320,23 +320,15 @@ function updateBarrierDisplay() {
             barrierBack.style.display = 'none';
         }
         
-        // Show back barriers (behind Higscrozma) - positioned on the far left
-        if (barrierState.barriersBehind >= 1) {
-            barrierBackLeft.style.display = 'block';
+        // Show back barriers counter (behind Higscrozma) - positioned on the far left
+        if (barrierState.barriersBehind > 0) {
+            backBarriersCounter.style.display = 'flex';
+            pinkCrystal.style.display = 'block';
+            barrierCount.textContent = barrierState.barriersBehind;
         } else {
-            barrierBackLeft.style.display = 'none';
-        }
-        
-        if (barrierState.barriersBehind >= 2) {
-            barrierBackMiddle.style.display = 'block';
-        } else {
-            barrierBackMiddle.style.display = 'none';
-        }
-        
-        if (barrierState.barriersBehind >= 3) {
-            barrierBackRight.style.display = 'block';
-        } else {
-            barrierBackRight.style.display = 'none';
+            backBarriersCounter.style.display = 'none';
+            pinkCrystal.style.display = 'none';
+            barrierCount.textContent = '0';
         }
         
         // Update Higscrozma's position based on barriers behind
@@ -382,12 +374,22 @@ function shatterBarrier(barrierType) {
         barrierElement = document.getElementById('barrier-middle');
     } else if (barrierType === 'back') {
         barrierElement = document.getElementById('barrier-back');
-    } else if (barrierType === 'back-left') {
-        barrierElement = document.getElementById('barrier-back-left');
-    } else if (barrierType === 'back-middle') {
-        barrierElement = document.getElementById('barrier-back-middle');
-    } else if (barrierType === 'back-right') {
-        barrierElement = document.getElementById('barrier-back-right');
+    } else if (barrierType === 'all-front') {
+        // Shatter all front barriers
+        const frontBarriers = ['barrier-front', 'barrier-middle', 'barrier-back'];
+        frontBarriers.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.add('barrier-shatter');
+                setTimeout(() => {
+                    element.classList.remove('barrier-shatter');
+                }, 500);
+            }
+        });
+        setTimeout(() => {
+            updateBarrierDisplay();
+        }, 500);
+        return;
     }
     
     if (barrierElement) {
@@ -3234,7 +3236,7 @@ function updateQubitStatesFromMessage(message) {
     // Check for SPECIFIC damage messages and healing messages and update HP bars visually in real-time
     // Only update HP for actual damage/healing messages, not move usage messages
     if ((message.includes("Dealt") && message.includes("damage!")) || 
-        (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW") || message.includes("Q-METRONOME") || message.includes("WAVE CRASH") || message.includes("METAL NOISE"))) ||
+        (message.includes("deals") && message.includes("damage") && (message.includes("BULLET MUONS") || message.includes("Q-PRISMATIC LASER") || message.includes("Q-PHOTON GEYSER") || message.includes("GLITCH CLAW") || message.includes("Q-METRONOME") || message.includes("WAVE CRASH") || message.includes("METAL NOISE") || message.includes("Q-VOID RIFT") || message.includes("PRISMATIC LASER") || message.includes("SHADOW FORCE"))) ||
         (message.includes("QUANTUM AFTERBURN") && message.includes("extra damage")) ||
         (message.includes("heals") && message.includes("HP"))) {
         console.log('Detected damage/healing message:', message);

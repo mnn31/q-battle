@@ -868,6 +868,44 @@ body {
     transform: rotateY(15deg) rotateX(5deg) rotateZ(90deg) translateZ(0px);
 }
 
+/* Back Barriers Counter System */
+.back-barriers-counter {
+    position: absolute;
+    left: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.pink-crystal {
+    width: 40px;
+    height: 60px;
+    background: linear-gradient(45deg, #FF69B4, #FF1493, #FF69B4);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    box-shadow: 
+        0 0 20px rgba(255, 20, 147, 0.6),
+        0 0 40px rgba(255, 20, 147, 0.4),
+        inset 0 0 10px rgba(255, 255, 255, 0.3);
+    animation: barrier3DGlow 2s ease-in-out infinite;
+}
+
+.barrier-count {
+    background: rgba(255, 20, 147, 0.9);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    min-width: 30px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
 @keyframes barrier3DGlow {
     0%, 100% {
         box-shadow: 
