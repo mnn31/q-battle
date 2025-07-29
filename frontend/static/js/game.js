@@ -72,6 +72,16 @@ function applyBackground(backgroundUrl) {
         battleScreen.style.backgroundPosition = 'center';
         battleScreen.style.backgroundRepeat = 'no-repeat';
         currentBackground = backgroundUrl;
+        
+        // Hide the texture overlay (brown dots and green shading) when we have a background image
+        const textureOverlay = battleScreen.querySelector('::before');
+        if (textureOverlay) {
+            textureOverlay.style.display = 'none';
+        }
+        
+        // Alternative approach: hide the ::before pseudo-element by adding a class
+        battleScreen.classList.add('has-background-image');
+        
         console.log('Applied background:', backgroundUrl);
         console.log('Background properties set:', {
             backgroundImage: battleScreen.style.backgroundImage,

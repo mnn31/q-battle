@@ -158,6 +158,11 @@ body {
     z-index: 1;
 }
 
+/* Hide texture overlay when background image is applied */
+.battle-screen.has-background-image::before {
+    display: none;
+}
+
 /* Battle arena container */
 .battle-arena {
     display: flex;
@@ -194,6 +199,11 @@ body {
     z-index: -1;
 }
 
+/* Hide character platform shading when background image is applied */
+.battle-screen.has-background-image .player-side::before {
+    display: none;
+}
+
 .enemy-side {
     display: flex;
     flex-direction: column;
@@ -215,6 +225,11 @@ body {
     height: 100px;
     background: radial-gradient(ellipse 100px 50px, rgba(34, 139, 34, 0.4) 0%, rgba(34, 139, 34, 0.2) 50%, transparent 70%);
     z-index: -1;
+}
+
+/* Hide character platform shading when background image is applied */
+.battle-screen.has-background-image .enemy-side::before {
+    display: none;
 }
 
 /* Sprite positioning - Much bigger sprites */
