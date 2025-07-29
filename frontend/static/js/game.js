@@ -9,6 +9,9 @@ let backgroundMusic = null;
 let musicVolume = 0.5; // Default volume 50%
 let isMusicMuted = false;
 
+// Background system
+let currentBackground = null;
+
 // Music functions
 function initializeMusic() {
     // Create audio element for Ultra Necrozma background music
@@ -39,6 +42,34 @@ function initializeMusic() {
     });
     
     console.log('Music system initialized');
+}
+
+// Background functions
+async function fetchRandomBackground() {
+    try {
+        const response = await fetch('/random-background');
+        const result = await response.json();
+        
+        if (result.url) {
+            console.log('Fetched random background:', result.background);
+            return result.url;
+        } else {
+            console.error('Failed to fetch random background:', result.error);
+            return '/static/images/battle-bg.png'; // Fallback to default
+        }
+    } catch (error) {
+        console.error('Error fetching random background:', error);
+        return '/static/images/battle-bg.png'; // Fallback to default
+    }
+}
+
+function applyBackground(backgroundUrl) {
+    const battleScreen = document.querySelector('.battle-screen');
+    if (battleScreen) {
+        battleScreen.style.backgroundImage = `url('${backgroundUrl}')`;
+        currentBackground = backgroundUrl;
+        console.log('Applied background:', backgroundUrl);
+    }
 }
 
 function setupMusicControls() {
@@ -436,6 +467,10 @@ async function startBattle(character) {
             turnNumber.textContent = `Turn ${turnCount}`;
             updateBattleDisplay();
             showBattleScreen();
+            
+            // Fetch and apply random background
+            const backgroundUrl = await fetchRandomBackground();
+            applyBackground(backgroundUrl);
             
             // Initialize barrier system for Higscrozma
             if (character === "Higscrozma") {

@@ -34,6 +34,12 @@ app.register_blueprint(game_api)
 bitzy_state = BitzyQuantumState()
 neutrinette_state = NeutrinetteQuantumState()
 
+# Route to serve background files from possible-bg directory
+@app.route("/static/backgrounds/<filename>")
+def serve_background(filename):
+    """Serve background files from the possible-bg directory"""
+    possible_bg_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'possible-bg')
+    return send_from_directory(possible_bg_dir, filename)
 
 # Removed duplicate /start route - now handled by routes.py
 
