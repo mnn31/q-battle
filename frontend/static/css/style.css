@@ -46,6 +46,11 @@ body {
     background: rgba(44, 95, 95, 0.8); /* Semi-transparent dark teal */
 }
 
+/* Remove teal background when background image is applied */
+.battle-screen.has-background-image .battle-container {
+    background: transparent;
+}
+
 /* Character Selection */
 .character-selection {
     display: flex;
