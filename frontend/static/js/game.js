@@ -66,9 +66,19 @@ async function fetchRandomBackground() {
 function applyBackground(backgroundUrl) {
     const battleScreen = document.querySelector('.battle-screen');
     if (battleScreen) {
+        // Set all background properties explicitly to ensure proper scaling
         battleScreen.style.backgroundImage = `url('${backgroundUrl}')`;
+        battleScreen.style.backgroundSize = 'cover';
+        battleScreen.style.backgroundPosition = 'center';
+        battleScreen.style.backgroundRepeat = 'no-repeat';
         currentBackground = backgroundUrl;
         console.log('Applied background:', backgroundUrl);
+        console.log('Background properties set:', {
+            backgroundImage: battleScreen.style.backgroundImage,
+            backgroundSize: battleScreen.style.backgroundSize,
+            backgroundPosition: battleScreen.style.backgroundPosition,
+            backgroundRepeat: battleScreen.style.backgroundRepeat
+        });
     }
 }
 

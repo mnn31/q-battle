@@ -128,7 +128,6 @@ body {
     align-items: center;
     padding: 20px;
     position: relative;
-    background: rgba(70, 130, 180, 0.7); /* Semi-transparent steel blue */
     min-height: 100vh;
 }
 
