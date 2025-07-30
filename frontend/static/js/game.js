@@ -287,14 +287,14 @@ function updateBarrierDisplay() {
     console.log('updateBarrierDisplay called with barrierState:', barrierState);
     
     const barrierContainer = document.getElementById('barrier-container');
-    const barrierFront = document.getElementById('barrier-front');
-    const barrierMiddle = document.getElementById('barrier-middle');
-    const barrierBack = document.getElementById('barrier-back');
+    const barrierFront1 = document.getElementById('barrier-front-1');
+    const barrierFront2 = document.getElementById('barrier-front-2');
+    const barrierFront3 = document.getElementById('barrier-front-3');
     const backBarriersCounter = document.getElementById('back-barriers-counter');
     const pinkCrystal = document.getElementById('pink-crystal');
     const barrierCount = document.getElementById('barrier-count');
     
-    if (!barrierContainer || !barrierFront || !barrierMiddle || !barrierBack || 
+    if (!barrierContainer || !barrierFront1 || !barrierFront2 || !barrierFront3 || 
         !backBarriersCounter || !pinkCrystal || !barrierCount) return;
     
     // Show barrier system only for Higscrozma
@@ -303,21 +303,21 @@ function updateBarrierDisplay() {
         
         // Show front barriers (between Higscrozma and Singulon) - positioned on the right
         if (barrierState.barriersInFront >= 1) {
-            barrierFront.style.display = 'block';
+            barrierFront1.style.display = 'block';
         } else {
-            barrierFront.style.display = 'none';
+            barrierFront1.style.display = 'none';
         }
         
         if (barrierState.barriersInFront >= 2) {
-            barrierMiddle.style.display = 'block';
+            barrierFront2.style.display = 'block';
         } else {
-            barrierMiddle.style.display = 'none';
+            barrierFront2.style.display = 'none';
         }
         
         if (barrierState.barriersInFront >= 3) {
-            barrierBack.style.display = 'block';
+            barrierFront3.style.display = 'block';
         } else {
-            barrierBack.style.display = 'none';
+            barrierFront3.style.display = 'none';
         }
         
         // Show back barriers counter (behind Higscrozma) - positioned on the far left
@@ -368,15 +368,15 @@ function updateHigscrozmaPosition() {
 function shatterBarrier(barrierType) {
     let barrierElement;
     
-    if (barrierType === 'front') {
-        barrierElement = document.getElementById('barrier-front');
-    } else if (barrierType === 'middle') {
-        barrierElement = document.getElementById('barrier-middle');
-    } else if (barrierType === 'back') {
-        barrierElement = document.getElementById('barrier-back');
+    if (barrierType === 'front-1') {
+        barrierElement = document.getElementById('barrier-front-1');
+    } else if (barrierType === 'front-2') {
+        barrierElement = document.getElementById('barrier-front-2');
+    } else if (barrierType === 'front-3') {
+        barrierElement = document.getElementById('barrier-front-3');
     } else if (barrierType === 'all-front') {
         // Shatter all front barriers
-        const frontBarriers = ['barrier-front', 'barrier-middle', 'barrier-back'];
+        const frontBarriers = ['barrier-front-1', 'barrier-front-2', 'barrier-front-3'];
         frontBarriers.forEach(id => {
             const element = document.getElementById(id);
             if (element) {
