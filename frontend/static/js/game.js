@@ -285,6 +285,7 @@ function initializeBarrierSystem() {
 
 function updateBarrierDisplay() {
     console.log('updateBarrierDisplay called with barrierState:', barrierState);
+    console.log('barriersInFront:', barrierState.barriersInFront, 'barriersBehind:', barrierState.barriersBehind);
     
     const barrierContainer = document.getElementById('barrier-container');
     const barrierFront1 = document.getElementById('barrier-front-1');
@@ -302,33 +303,43 @@ function updateBarrierDisplay() {
         barrierContainer.style.display = 'block';
         
         // Show front barriers (between Higscrozma and Singulon) - positioned on the right
+        console.log('Setting front barriers - barriersInFront:', barrierState.barriersInFront);
         if (barrierState.barriersInFront >= 1) {
             barrierFront1.style.display = 'block';
+            console.log('Showing barrierFront1');
         } else {
             barrierFront1.style.display = 'none';
+            console.log('Hiding barrierFront1');
         }
         
         if (barrierState.barriersInFront >= 2) {
             barrierFront2.style.display = 'block';
+            console.log('Showing barrierFront2');
         } else {
             barrierFront2.style.display = 'none';
+            console.log('Hiding barrierFront2');
         }
         
         if (barrierState.barriersInFront >= 3) {
             barrierFront3.style.display = 'block';
+            console.log('Showing barrierFront3');
         } else {
             barrierFront3.style.display = 'none';
+            console.log('Hiding barrierFront3');
         }
         
         // Show back barriers counter (behind Higscrozma) - positioned on the far left
+        console.log('Setting back barriers - barriersBehind:', barrierState.barriersBehind);
         if (barrierState.barriersBehind > 0) {
             backBarriersCounter.style.display = 'flex';
             pinkCrystal.style.display = 'block';
             barrierCount.textContent = barrierState.barriersBehind;
+            console.log('Showing back barriers counter with count:', barrierState.barriersBehind);
         } else {
             backBarriersCounter.style.display = 'none';
             pinkCrystal.style.display = 'none';
             barrierCount.textContent = '0';
+            console.log('Hiding back barriers counter');
         }
         
         // Update Higscrozma's position based on barriers behind
@@ -402,6 +413,7 @@ function shatterBarrier(barrierType) {
 }
 
 function moveBarrier() {
+    console.log('moveBarrier called - before update:', barrierState);
     // Update barrier state: move one barrier from front to back
     if (barrierState.barriersInFront > 0) {
         barrierState.barriersInFront -= 1;
@@ -3021,6 +3033,8 @@ function updateQubitStatesFromMessage(message) {
         console.log('Full message for debugging:', message);
         moveBarrier();
         console.log('Barrier state after move:', barrierState);
+        console.log('Calling updateBarrierDisplay after move...');
+        updateBarrierDisplay();
     }
     
     // Real-time qubit state updates based on specific messages
