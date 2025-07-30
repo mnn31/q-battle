@@ -191,8 +191,8 @@ const characterData = {
         sprite: "/static/sprites/blitzle.gif",
         speed: 85, // Speed stat for turn order
         moves: [
-            { name: "Q-THUNDER", desc: "Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails. (DMG: 150)" },
-            { name: "SHOCK", desc: "Deals damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states. (DMG: 30 + 20)" },
+            { name: "Q-THUNDER", desc: "Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails. (DMG: 172)" },
+            { name: "SHOCK", desc: "Deals damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states. (DMG: 34 + 20)" },
             { name: "DUALIZE", desc: "Puts the qubit in a state of SUPERPOSITION if it wasn't previously." },
             { name: "BIT-FLIP", desc: "Flips the state of the enemy's qubit." }
         ],
@@ -227,9 +227,9 @@ const characterData = {
         sprite: "/static/sprites/higscrozma.gif",
         speed: 60, // Speed stat for turn order
         moves: [
-                    { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals 80 damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers. (DMG: 80)" },
-        { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 120)" },
-        { name: "SHADOW FORCE", desc: "If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, deals 100 damage. If 1, deals 150 damage. Moves up one barrier. (DMG 0: 100, DMG 1: 150)" },
+                    { name: "Q-VOID RIFT", desc: "Higscrozma's Q-Move. Deals 64 damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers. (DMG: 64)" },
+        { name: "PRISMATIC LASER", desc: "Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 96)" },
+        { name: "SHADOW FORCE", desc: "If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, deals 80 damage. If 1, deals 120 damage. Moves up one barrier. (DMG 0: 80, DMG 1: 120)" },
             { name: "BARRIER", desc: "Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION." }
         ],
         maxHp: 110

@@ -34,8 +34,8 @@ def quantum_move_higscrozma_q_void_rift(quantum_state, current_hp=110, max_hp=11
     # Apply barrier effects
     barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
     
-    # Calculate base damage (80 base power for Q-Move) with proper RPG formula
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 80, defender_defense)
+    # Calculate base damage (64 base power for Q-Move) with proper RPG formula
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 64, defender_defense)
     
     # Apply barrier damage boost/reduction
     if barrier_effect["damage_boost"] > 0:
@@ -97,8 +97,8 @@ def quantum_move_higscrozma_prismatic_laser(quantum_state, defender_defense=50):
     # Apply barrier effects
     barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
     
-    # Calculate damage (120 base power) with proper RPG formula and damage roll
-    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
+    # Calculate damage (96 base power) with proper RPG formula and damage roll
+    base_damage = calculate_damage_rpg(quantum_state.attack_stat, 96, defender_defense)
     
     # Apply barrier damage boost/reduction
     if barrier_effect["damage_boost"] > 0:
@@ -177,8 +177,8 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         # Apply barrier effects
         barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
         
-        # Deal damage immediately (150 base power for collapse to 1)
-        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 150, defender_defense)
+        # Deal damage immediately (120 base power for collapse to 1)
+        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 120, defender_defense)
         
         # Apply barrier damage boost/reduction
         if barrier_effect["damage_boost"] > 0:
@@ -195,8 +195,8 @@ def quantum_move_higscrozma_shadow_force(quantum_state, defender_defense=50):
         # Apply barrier effects
         barrier_effect = ability_quantum_bulwark(quantum_state, quantum_state.barriers_in_front, quantum_state.barriers_behind)
         
-        # Deal damage immediately (100 base power)
-        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 100, defender_defense)
+        # Deal damage immediately (80 base power)
+        base_damage = calculate_damage_rpg(quantum_state.attack_stat, 80, defender_defense)
         
         # Apply barrier damage boost/reduction
         if barrier_effect["damage_boost"] > 0:

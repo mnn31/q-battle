@@ -16,13 +16,13 @@ Deals an additional 10 damage to the opponent if the enemy's qubit is in the sta
 
 ### Q-THUNDER* (Signature Quantum Move)
 - **Description**: Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails.
-- **Base Damage**: 150
+- **Base Damage**: 172
 - **Quantum Logic**: Requires superposition state, then collapses it
 - **Effect**: Massive damage when qubit is in superposition
 
 ### SHOCK (Regular Move)
 - **Description**: Does damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states.
-- **Base Damage**: 30 + 20 (additional if states differ)
+- **Base Damage**: 34 + 20 (additional if states differ)
 - **Quantum Logic**: Compares qubit states between players
 - **Effect**: Variable damage based on state comparison
 

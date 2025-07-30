@@ -19,7 +19,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 
 ### **Bitzy** - The Superposition Master
 - **Theme**: Superposition manipulation and state control
-- **Signature Move**: Q-THUNDER (150 damage if in superposition)
+- **Signature Move**: Q-THUNDER (172 damage if in superposition)
 - **Ability**: QUANTUM HIJACK (+10 damage if enemy qubit is |1⟩)
 
 ### **Neutrinette** - The Entanglement Specialist  
@@ -34,7 +34,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 
 ### **HIGSCROZMA** - The Quantum Tunneler
 - **Theme**: Quantum tunneling through energy barriers
-- **Signature Move**: Q-VOID RIFT (80 damage + 10% Defense, heals per barrier behind, shatters all front barriers)
+- **Signature Move**: Q-VOID RIFT (64 damage + 10% Defense, heals per barrier behind, shatters all front barriers)
 - **Ability**: QUANTUM BULWARK (front barriers reduce damage taken/dealt by 15% each, back barriers boost damage by 20% each)
 
 A sample CLI game (`backend/sample_game.py`) lets you pick a character and battle a boss in a turn-based quantum duel, with full move descriptions, quantum state tracking, and battle logs.

@@ -104,8 +104,8 @@ class SampleGame:
             self.ability_name = "QUANTUM HIJACK"
             self.ability_desc = "Deals +10 damage when using Q-Thunder or Shock if enemy qubit is |1⟩"
             self.moves = [
-                ("Q-THUNDER", "Deals 90 damage if in superposition, fails otherwise"),
-                ("SHOCK", "Deals 30 damage + 20 if different states"),
+                ("Q-THUNDER", "Deals 172 damage if in superposition, fails otherwise"),
+                ("SHOCK", "Deals 34 damage + 20 if different states"),
                 ("DUALIZE", "Creates superposition if not already"),
                 ("BIT-FLIP", "Flips enemy qubit state")
             ]
@@ -161,9 +161,9 @@ class SampleGame:
             self.ability_name = "QUANTUM BULWARK"
                           self.ability_desc = "Barriers in front reduce damage taken/dealt by 15% each, barriers behind increase damage dealt by 20% each"
             self.moves = [
-                ("Q-VOID RIFT", "Deals 80 damage + 10% of Defense, heals per barrier behind, shatters all front barriers"),
-                ("PRISMATIC LASER", "Deals 120 damage, shatters one random barrier, puts qubit in superposition"),
-                ("SHADOW FORCE", "If |0⟩ deals 100 damage, if |1⟩ deals 150 damage, moves up one barrier"),
+                ("Q-VOID RIFT", "Deals 64 damage + 10% of Defense, heals per barrier behind, shatters all front barriers"),
+                ("PRISMATIC LASER", "Deals 96 damage, shatters one random barrier, puts qubit in superposition"),
+                ("SHADOW FORCE", "If |0⟩ deals 80 damage, if |1⟩ deals 120 damage, moves up one barrier"),
                 ("BARRIER", "Increases defense if max barriers, creates new barrier if not, puts qubit in superposition")
             ]
             self.move_functions = [
