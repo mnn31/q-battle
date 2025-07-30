@@ -509,8 +509,16 @@ async function startBattle(character) {
             // Initialize barrier system for Higscrozma
             if (character === "Higscrozma") {
                 barrierState.isActive = true;
-                barrierState.barriersInFront = 3;
-                barrierState.barriersBehind = 0;
+                // Sync barrier state with backend game state
+                if (result.state.player && result.state.player.barriers_in_front !== undefined) {
+                    barrierState.barriersInFront = result.state.player.barriers_in_front;
+                    barrierState.barriersBehind = result.state.player.barriers_behind || 0;
+                } else {
+                    // Fallback to initial state if backend doesn't have barrier info
+                    barrierState.barriersInFront = 3;
+                    barrierState.barriersBehind = 0;
+                }
+                console.log('Initialized barrier state from backend:', barrierState);
                 updateBarrierDisplay();
             }
             
@@ -855,6 +863,16 @@ async function executeMove(moveName) {
         
         if (result.state) {
                 gameState = result.state;
+                
+                // Sync barrier state with backend for Higscrozma
+                if (currentCharacter === "Higscrozma" && gameState.player) {
+                    if (gameState.player.barriers_in_front !== undefined) {
+                        barrierState.barriersInFront = gameState.player.barriers_in_front;
+                        barrierState.barriersBehind = gameState.player.barriers_behind || 0;
+                        console.log('Synced barrier state from backend:', barrierState);
+                        updateBarrierDisplay();
+                    }
+                }
                 
                 // Get new log entries
                 const newLog = gameState.log || [];
