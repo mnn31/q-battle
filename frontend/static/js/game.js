@@ -3044,15 +3044,10 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
-    // Check for barrier movement
+    // Check for barrier movement - REMOVED: Backend already handles barrier state updates
     if (currentCharacter === "Higscrozma" && message.includes("Moved up one barrier")) {
-        console.log('Detected barrier movement:', message);
-        console.log('Current barrier state before move:', barrierState);
-        console.log('Full message for debugging:', message);
-        moveBarrier();
-        console.log('Barrier state after move:', barrierState);
-        console.log('Calling updateBarrierDisplay after move...');
-        updateBarrierDisplay();
+        console.log('Detected barrier movement message:', message);
+        console.log('Backend will handle barrier state update - no frontend action needed');
     }
     
     // Real-time qubit state updates based on specific messages
