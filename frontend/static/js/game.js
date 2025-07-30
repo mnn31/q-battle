@@ -3891,91 +3891,146 @@ function triggerPrismaticLaserAnimation(playerSprite, enemySprite) {
     // Add CSS animations
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes prismaticLaserBackground {
-            0% { opacity: 0; background: #000000; }
-            25% { opacity: 0.6; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
-            50% { opacity: 0.8; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
-            75% { opacity: 0.6; background: linear-gradient(45deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3); }
-            100% { opacity: 0; background: #000000; }
+        @keyframes prismaticLaserCharge {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
         }
         @keyframes prismaticLaserBeam {
-            0% { transform: scaleX(0) scaleY(0); opacity: 1; }
+            0% { transform: scaleX(0) scaleY(0); opacity: 0; }
+            20% { transform: scaleX(0.1) scaleY(1); opacity: 0.3; }
             50% { transform: scaleX(1) scaleY(1); opacity: 1; }
+            80% { transform: scaleX(1) scaleY(1); opacity: 0.8; }
             100% { transform: scaleX(1) scaleY(1); opacity: 0; }
         }
-        @keyframes prismaticLaserOrb {
-            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+        @keyframes prismaticLaserImpact {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
             50% { transform: scale(1.5) rotate(180deg); opacity: 0.9; }
-            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+        @keyframes prismaticLaserPulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
     `;
     document.head.appendChild(style);
     
-    // Phase 1: Prismatic background effect
-    const backgroundEffect = document.createElement('div');
-    backgroundEffect.style.cssText = `
+    // Phase 1: Charge up effect at player
+    const chargeEffect = document.createElement('div');
+    chargeEffect.style.cssText = `
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #000000;
-            opacity: 0;
-        z-index: 998;
+        left: ${playerX - 25}px;
+        top: ${playerY - 25}px;
+        width: 50px;
+        height: 50px;
+        background: conic-gradient(from 0deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3, #FF0000);
+        border-radius: 50%;
+        z-index: 999;
         pointer-events: none;
-        animation: prismaticLaserBackground 2s ease-in-out;
+        animation: prismaticLaserCharge 0.8s ease-out;
+        box-shadow: 0 0 20px #FF0000, 0 0 40px #FF7F00, 0 0 60px #FFFF00;
     `;
-    document.body.appendChild(backgroundEffect);
+    document.body.appendChild(chargeEffect);
     
-    // Phase 2: Prismatic laser beam
-    const laserBeam = document.createElement('div');
-    laserBeam.style.cssText = `
-        position: fixed;
-        left: ${playerX}px;
-        top: ${playerY}px;
-        width: 20px;
-        height: ${Math.sqrt(Math.pow(enemyX - playerX, 2) + Math.pow(enemyY - playerY, 2))}px;
-        background: linear-gradient(90deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
-        transform-origin: top;
-        transform: rotate(${Math.atan2(enemyY - playerY, enemyX - playerX) * 180 / Math.PI}deg);
-        z-index: 1000;
-        pointer-events: none;
-        animation: prismaticLaserBeam 1.5s ease-out;
-        box-shadow: 0 0 30px #FF0000;
-    `;
-    document.body.appendChild(laserBeam);
-    
-    // Phase 3: Prismatic orbs
-    for (let i = 0; i < 8; i++) {
+    // Phase 2: Smooth laser beam
+    setTimeout(() => {
+        const laserBeam = document.createElement('div');
+        const distance = Math.sqrt(Math.pow(enemyX - playerX, 2) + Math.pow(enemyY - playerY, 2));
+        const angle = Math.atan2(enemyY - playerY, enemyX - playerX) * 180 / Math.PI;
+        
+        laserBeam.style.cssText = `
+            position: fixed;
+            left: ${playerX}px;
+            top: ${playerY}px;
+            width: 8px;
+            height: ${distance}px;
+            background: linear-gradient(90deg, 
+                #FF0000 0%, #FF7F00 14%, #FFFF00 28%, #00FF00 42%, 
+                #0000FF 56%, #4B0082 70%, #9400D3 84%, #FF0000 100%);
+            transform-origin: top;
+            transform: rotate(${angle}deg);
+            z-index: 1000;
+            pointer-events: none;
+            animation: prismaticLaserBeam 1.2s ease-out;
+            box-shadow: 
+                0 0 10px #FF0000,
+                0 0 20px #FF7F00,
+                0 0 30px #FFFF00,
+                0 0 40px #00FF00;
+            border-radius: 4px;
+        `;
+        document.body.appendChild(laserBeam);
+        
+        // Phase 3: Impact effect at enemy
         setTimeout(() => {
-            const orb = document.createElement('div');
-            orb.style.cssText = `
+            const impactEffect = document.createElement('div');
+            impactEffect.style.cssText = `
                 position: fixed;
-                left: ${enemyX + (Math.random() - 0.5) * 100}px;
-                top: ${enemyY + (Math.random() - 0.5) * 100}px;
-                width: 35px;
-                height: 35px;
-                background: radial-gradient(circle, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #4B0082, #9400D3);
+                left: ${enemyX - 30}px;
+                top: ${enemyY - 30}px;
+                width: 60px;
+                height: 60px;
+                background: radial-gradient(circle, 
+                    #FF0000 0%, #FF7F00 20%, #FFFF00 40%, #00FF00 60%, 
+                    #0000FF 80%, #4B0082 90%, #9400D3 100%);
                 border-radius: 50%;
-                box-shadow: 0 0 25px #FF0000;
-                z-index: 1000;
+                z-index: 1001;
                 pointer-events: none;
-                animation: prismaticLaserOrb 1s ease-out;
+                animation: prismaticLaserImpact 0.8s ease-out;
+                box-shadow: 
+                    0 0 30px #FF0000,
+                    0 0 60px #FF7F00,
+                    0 0 90px #FFFF00;
             `;
-            document.body.appendChild(orb);
+            document.body.appendChild(impactEffect);
+            
+            // Phase 4: Multiple prismatic orbs
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const orb = document.createElement('div');
+                    const orbSize = 20 + Math.random() * 15;
+                    const orbX = enemyX + (Math.random() - 0.5) * 80;
+                    const orbY = enemyY + (Math.random() - 0.5) * 80;
+                    
+                    orb.style.cssText = `
+                        position: fixed;
+                        left: ${orbX}px;
+                        top: ${orbY}px;
+                        width: ${orbSize}px;
+                        height: ${orbSize}px;
+                        background: radial-gradient(circle, 
+                            #FF0000 0%, #FF7F00 25%, #FFFF00 50%, #00FF00 75%, 
+                            #0000FF 90%, #4B0082 95%, #9400D3 100%);
+                        border-radius: 50%;
+                        z-index: 1002;
+                        pointer-events: none;
+                        animation: prismaticLaserPulse 0.6s ease-in-out infinite;
+                        box-shadow: 0 0 15px #FF0000;
+                    `;
+                    document.body.appendChild(orb);
+                    
+                    setTimeout(() => {
+                        orb.remove();
+                    }, 1200);
+                }, i * 150);
+            }
             
             setTimeout(() => {
-                orb.remove();
-            }, 1000);
-        }, i * 200);
-    }
+                impactEffect.remove();
+            }, 800);
+        }, 600);
+        
+        setTimeout(() => {
+            laserBeam.remove();
+        }, 1200);
+    }, 800);
     
     // Cleanup
-                setTimeout(() => {
-        backgroundEffect.remove();
-        laserBeam.remove();
+    setTimeout(() => {
+        chargeEffect.remove();
         style.remove();
-    }, 2500);
+    }, 2000);
 }
 
 function triggerShadowForceAnimation(playerSprite, enemySprite) {
