@@ -88,9 +88,8 @@ def start_game(character="Bitzy"):
             "qubit_state": "|0⟩",  # Player qubit state
             "waveform_stacks": 0,  # Resona's waveform stacks
             "next_turn_collapse_bonus": 0,  # Resona's collapse bonus
-            "next_turn_strike": False,  # Higscrozma's next turn strike
-            "next_turn_strike_damage": 0,  # Damage for next turn strike
-            "cannot_move_next_turn": False  # Higscrozma's cannot move flag
+            
+
         },
         "enemy": {
             "hp": 400,  # Singulon's HP
@@ -142,9 +141,7 @@ def process_move(move):
         print(f"[DEBUG] process_move: Move '{move}' is not in valid moves!")
         return {"error": f"Invalid move: {move}"}
     
-    # Check if player cannot move next turn (Higscrozma SHADOW FORCE effect)
-    if character == "Higscrozma" and game_state["player"].get("cannot_move_next_turn", False):
-        return {"error": "Cannot use moves this turn due to SHADOW FORCE effect!"}
+
 
     log = game_state["log"]
 
@@ -346,13 +343,7 @@ def process_move(move):
         game_state["player"]["barriers_behind"] = result["barriers_behind"]
     
     # Update next turn strike state for Higscrozma
-    if character == "Higscrozma" and "next_turn_strike" in result:
-        player_state.next_turn_strike = result["next_turn_strike"]
-        player_state.next_turn_strike_damage = result.get("next_turn_strike_damage", 0)
-        player_state.cannot_move_next_turn = result.get("cannot_move_next_turn", False)
-        game_state["player"]["next_turn_strike"] = result["next_turn_strike"]
-        game_state["player"]["next_turn_strike_damage"] = result.get("next_turn_strike_damage", 0)
-        game_state["player"]["cannot_move_next_turn"] = result.get("cannot_move_next_turn", False)
+
 
     # Update enemy's qubit state if changed (if not already updated)
     if "enemy_qubit_state" in result and move != "BIT-FLIP":
@@ -523,19 +514,7 @@ def enemy_attack():
         log.append("But it failed!")
         # No damage message for failed moves
 
-    # Handle Higscrozma's next turn strike
-    if character == "Higscrozma" and game_state["player"].get("next_turn_strike", False):
-        strike_damage = game_state["player"].get("next_turn_strike_damage", 0)
-        game_state["enemy"]["hp"] = max(0, game_state["enemy"]["hp"] - strike_damage)
-        log.append(f"Higscrozma strikes for {strike_damage} damage!")
-        
-        # Reset the next turn strike state
-        game_state["player"]["next_turn_strike"] = False
-        game_state["player"]["next_turn_strike_damage"] = 0
-        game_state["player"]["cannot_move_next_turn"] = False
-        player_state.next_turn_strike = False
-        player_state.next_turn_strike_damage = 0
-        player_state.cannot_move_next_turn = False
+
 
     if game_state["player"]["hp"] <= 0:
         log.append("You fainted! Game over.")
