@@ -26,6 +26,6 @@ Increases the defense stat by 10 if the maximum number of barriers are active. C
 ## Quantum Tunneling Mechanic
 - **Barrier System**: 3 barriers total, positioned in front/behind HIGSCROZMA
 - **Starting Position**: Behind first barrier (2 barriers in front, 0 behind)
-- **Barrier Effects**: Front barriers reduce damage taken by 10% each, reduce damage dealt by 10% each
-- **Barrier Effects**: Back barriers increase damage dealt by 10% each
+- **Barrier Effects**: Front barriers reduce damage taken by 15% each, reduce damage dealt by 15% each
+- **Barrier Effects**: Back barriers increase damage dealt by 20% each
 - **Tunneling**: Moves can change barrier positioning 

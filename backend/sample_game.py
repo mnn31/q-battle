@@ -159,7 +159,7 @@ class SampleGame:
             self.player_hp = 95  # Increased by 10
             self.character_name = "Higscrozma"
             self.ability_name = "QUANTUM BULWARK"
-            self.ability_desc = "Barriers in front reduce damage taken/dealt by 20% each, barriers behind increase damage dealt by 20% each"
+                          self.ability_desc = "Barriers in front reduce damage taken/dealt by 15% each, barriers behind increase damage dealt by 20% each"
             self.moves = [
                 ("Q-VOID RIFT", "Deals 80 damage + 10% of Defense, heals per barrier behind, shatters all front barriers"),
                 ("PRISMATIC LASER", "Deals 120 damage, shatters one random barrier, puts qubit in superposition"),
