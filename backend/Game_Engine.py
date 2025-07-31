@@ -189,7 +189,9 @@ def process_move(move):
     elif character == "Higscrozma":
         player_state = higscrozma_state
         if move == "Q-VOID RIFT":
-            result = quantum_move_higscrozma_q_void_rift(player_state, game_state["player"]["hp"], 100, singulon_state.defense)
+            result = quantum_move_higscrozma_q_void_rift(player_state, game_state["player"]["hp"], 110, singulon_state.defense)
+            if result.get("heal", 0) > 0:
+                game_state["player"]["hp"] = min(110, game_state["player"]["hp"] + result["heal"])
         elif move == "PRISMATIC LASER":
             result = quantum_move_higscrozma_prismatic_laser(player_state, singulon_state.defense)
         elif move == "SHADOW FORCE":
