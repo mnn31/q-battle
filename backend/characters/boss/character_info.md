@@ -21,7 +21,7 @@ Puts Singulon's qubit in a state of SUPERPOSITION if it wasn't previously.
 - **Base Power**: 0 (no damage)
 
 ### HAZE
-Resets Singulon's qubit to |0⟩ state.
+Resets both Singulon's qubit and the qubit to |0⟩ state.
 - **Type**: Status
 - **Base Power**: 0 (no damage)
 
