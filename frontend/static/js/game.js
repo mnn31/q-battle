@@ -3006,6 +3006,44 @@ function updateQubitStatesFromMessage(message) {
         }
     }
     
+    // Check for healing messages and update HP bar
+    if (message.includes("Heals") && message.includes("HP")) {
+        console.log('Detected healing message:', message);
+        
+        // Extract healing amount from message
+        const healMatch = message.match(/Heals (\d+) HP/);
+        if (healMatch) {
+            const healAmount = parseInt(healMatch[1]);
+            console.log('Healing amount:', healAmount);
+            
+            // Update player HP immediately
+            if (gameState && gameState.player) {
+                const charData = characterData[currentCharacter];
+                const maxHp = charData ? charData.maxHp : 90;
+                
+                // Calculate new HP (don't exceed max)
+                const newHp = Math.min(maxHp, gameState.player.hp + healAmount);
+                gameState.player.hp = newHp;
+                
+                // Update HP bar immediately
+                const playerHpPercent = (newHp / maxHp) * 100;
+                const playerHealthFill = document.getElementById('player-health-fill');
+                const playerHp = document.getElementById('player-hp');
+                
+                if (playerHealthFill) {
+                    playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+                    updateHealthBarColor(playerHealthFill, playerHpPercent);
+                }
+                
+                if (playerHp) {
+                    playerHp.textContent = `${Math.max(0, newHp)}/${maxHp}`;
+                }
+                
+                console.log('Updated HP to:', newHp, '/', maxHp);
+            }
+        }
+    }
+    
     // Higscrozma Barrier System Integration
     if (currentCharacter === "Higscrozma" && message.includes("Barriers:")) {
         console.log('Detected barrier update:', message);
