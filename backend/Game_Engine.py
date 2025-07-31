@@ -70,7 +70,7 @@ def start_game(character="Bitzy"):
     elif character == "Resona":
         print(f"[DEBUG] Game engine start_game called with character: {character}")
         player_state = resona_state
-        hp = 95
+        hp = 110
         moves = ["Q-METRONOME", "WAVE CRASH", "METAL NOISE", "SHIFT GEAR"]
     elif character == "Higscrozma":
         print(f"[DEBUG] Game engine start_game called with character: {character}")
