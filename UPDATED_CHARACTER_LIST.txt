@@ -1,0 +1,113 @@
+UPDATED CHARACTER LIST - ALL CHANGES APPLIED
+
+BITZY
+
+Ability: QUANTUM HIJACK.
+Bitzy deals an additional 10 damage when using Q-Thunder or Shock if the enemy's qubit is in the state of 1.
+
+Moves:
+Q-THUNDER*
+Bitzy's Q-Move. If the qubit is in a state of SUPERPOSITION, this move deals massive damage and collapses the qubit randomly. Else, fails. (DMG: 172) [UPDATED: Increased from 150 to 172]
+
+SHOCK.
+Deals damage. Additional damage is dealt if the qubit and the enemy's qubit are in different states. (DMG: 34 + 20) [UPDATED: Increased from 30 to 34]
+
+DUALIZE.
+Puts the qubit in a state of SUPERPOSITION if it wasn't previously.
+
+BIT-FLIP.
+Flips the state of the enemy's qubit.
+
+HP: 90
+Attack: 75
+
+NEUTRINETTE
+
+Ability: QUANTUM AFTERBURN.
+When Neutrinette is entangled:
+- When taking damage: 75% of that damage is reflected back to the enemy
+- When attacking: Deals 30 extra HP damage to the enemy
+
+Q-PHOTON GEYSER*
+Neutrinette's Q-Move. Deals massive damage and collapses the qubit randomly. (DMG: 100) [UPDATED: Increased from 75 to 100, removed HP cost]
+
+GLITCH CLAW.
+Deals damage and has a chance of healing the user for 20% max HP. (DMG: 40)
+
+ENTANGLE.
+Puts the qubit and the enemy's qubit in a state of ENTANGLEMENT with each other if it wasn't previously.
+
+SWITCHEROO.
+Swaps the states of the qubit and the enemy's qubit.
+
+HP: 90 [UPDATED: Increased from 80 to 90]
+Attack: 85 [UPDATED: Increased from 80 to 85]
+
+RESONA
+
+Ability: QUANTUM WAVEFORM.
+Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 15. [UPDATED: Increased from 1 to 15]
+
+Q-METRONOME*
+Resona's Q-Move. Requires superposition state. Collapses the qubit. If it collapses to |1⟩, deals 100% of max HP as damage. If it collapses to |0⟩, deals base damage (10). Gains a waveform stack. Each waveform stack adds +15 damage. [UPDATED: Clarified mechanics and damage bonus]
+
+WAVE CRASH.
+Deals damage and deals additional damage if the qubit and/or the enemy's qubit is in a state of SUPERPOSITION. Collapses the qubit. (DMG: 15 + 20) [UPDATED: Reduced from 20+40 to 15+20]
+
+METAL NOISE.
+Prevents the enemy from using moves that change their qubit state for the next turn. If the enemy's qubit is in a state of 1, they may not use a Q-Move. If it is in a state of 0, deal damage. (DMG: 20)
+
+SHIFT GEAR.
+Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%.
+
+HP: 95
+Attack: 55 [UPDATED: Reduced from 65 to 55]
+
+HIGSCROZMA
+
+Ability: QUANTUM BULWARK.
+Higscrozma can utilize up to three QUANTUM BARRIERS, which act like screens which stack up between it and the enemy. Barriers in front of Higscrozma decrease the damage received by 15% per barrier but also decrease the power of moves used by 15%. Barriers behind Higscrozma act like power-ups, increasing the power of moves by 20%. Higscrozma can tunnel between these barriers using moves, which changes the number of barriers in front and behind. The battle starts with exactly three barriers active, with Higscrozma being behind the first barrier. [UPDATED: Front barrier reduction changed from 10% to 15%, back barrier boost increased from 10% to 20%]
+
+Q-VOID RIFT*
+Higscrozma's Q-Move. Deals 64 damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters all front barriers. (DMG: 64) [UPDATED: Reduced from 80 to 64]
+
+PRISMATIC LASER.
+Deals damage and shatters one random barrier. Places the qubit in a state of SUPERPOSITION. (DMG: 96) [UPDATED: Reduced from 120 to 96]
+
+SHADOW FORCE.
+If the qubit is not in SUPERPOSITION, this move fails. Collapses the qubit. If 0, deals 80 damage. If 1, deals 120 damage. Moves up one barrier. (DMG 0: 80, DMG 1: 120) [UPDATED: Reduced from 100/150 to 80/120, removed invincibility mechanics]
+
+BARRIER.
+Increases the defense stat by 10 if the maximum number of barriers are active. Creates a new barrier in front of the user's current position if not. Puts the qubit in a state of SUPERPOSITION.
+
+HP: 110 [UPDATED: Increased from 100 to 110]
+Attack: 70
+
+SUMMARY OF MAJOR CHANGES:
+
+BITZY:
+- Q-THUNDER: 150 → 172 damage (+15% buff)
+- SHOCK: 30 → 34 damage (+15% buff)
+
+NEUTRINETTE:
+- Q-PHOTON GEYSER: 75 → 100 damage, removed HP cost
+- HP: 80 → 90
+- Attack: 80 → 85
+
+RESONA:
+- Q-METRONOME: Waveform bonus increased from +1 to +15 damage
+- WAVE CRASH: 20+40 → 15+20 damage (reduced)
+- Attack: 65 → 55 (reduced)
+
+HIGSCROZMA:
+- Q-VOID RIFT: 80 → 64 damage (-20% nerf)
+- PRISMATIC LASER: 120 → 96 damage (-20% nerf)
+- SHADOW FORCE: 100/150 → 80/120 damage (-20% nerf)
+- QUANTUM BULWARK: Front barriers 10% → 15% reduction, back barriers 10% → 20% boost
+- HP: 100 → 110
+- Removed invincibility mechanics from SHADOW FORCE
+
+ANIMATION IMPROVEMENTS:
+- PRISMATIC LASER: Completely redesigned animation to be smoother and less glitchy
+- Added charge-up effects, smooth laser beams, impact effects, and prismatic orbs
+- Removed glitchy rainbow line effects 

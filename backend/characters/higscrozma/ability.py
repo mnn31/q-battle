@@ -1,4 +1,4 @@
-def ability_quantum_bulwark(quantum_state, barriers_in_front=2, barriers_behind=0):
+def ability_quantum_bulwark(quantum_state, barriers_in_front=3, barriers_behind=0):
     """QUANTUM BULWARK: Provides barrier-based damage reduction and power modification"""
     # Calculate damage reduction from front barriers (15% per barrier)
     damage_reduction = barriers_in_front * 0.15
