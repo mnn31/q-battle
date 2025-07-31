@@ -18,13 +18,13 @@ class ResonaQuantumState:
     """Manages Resona's quantum state throughout battle"""
     def __init__(self):
         self.qubit_state = "|0⟩"  # |0⟩, |1⟩, or "superposition"
-        self.attack_stat = 55  # Reduced by 10
+        self.attack_stat = 75  # Buffed by 20
         self.defense = 100  # Updated to 100
         self.speed = 6
         self.waveform_stacks = 0  # Track waveform stacks
         self.next_turn_collapse_bonus = 0  # For SHIFT GEAR effect
 
-def quantum_move_resona_q_metronome(quantum_state, current_hp=95, enemy_qubit_state="|0⟩", defender_defense=50):
+def quantum_move_resona_q_metronome(quantum_state, current_hp=110, enemy_qubit_state="|0⟩", defender_defense=50):
     """Q-METRONOME: Requires superposition, collapses qubit, deals 100% max HP if |1⟩, base damage if |0⟩"""
     
     # Check if qubit is in superposition - if not, fail

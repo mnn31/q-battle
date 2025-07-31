@@ -233,7 +233,7 @@ class SampleGame:
             print("4. SHIFT GEAR")
             print("   Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%.")
             print("\nAbility: QUANTUM WAVEFORM")
-            print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 15.")
+            print("Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 50.")
         elif self.character_name == "Higscrozma":
             print("1. Q-VOID RIFT")
             print("   Higscrozma's Q-Move. Deals damage and additional damage equal to 10% of Defense stat. Heals the user 10% max HP per barrier behind the user, and then shatters those barriers.")

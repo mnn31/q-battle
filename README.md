@@ -29,7 +29,7 @@ A quantum-powered battle game where you fight using quantum abilities! This proj
 
 ### **Resona** - The Interference Scaler
 - **Theme**: Waveform stacking and interference patterns
-- **Signature Move**: Q-METRONOME (95 damage if |1⟩, 10 if |0⟩, scales with stacks)
+- **Signature Move**: Q-METRONOME (110 damage if |1⟩, 10 if |0⟩, scales with stacks)
 - **Ability**: QUANTUM WAVEFORM (stacks increase collapse probability and damage)
 
 ### **HIGSCROZMA** - The Quantum Tunneler

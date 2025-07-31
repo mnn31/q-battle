@@ -213,7 +213,7 @@ const characterData = {
     "Resona": {
         sprite: "/static/sprites/resona.gif",
         speed: 70, // Speed stat for turn order
-        hp: 95,
+        hp: 110,
         defense: 100,
         moves: [
             { name: "Q-METRONOME", desc: "Resona's Q-Move. Requires superposition state. Collapses the qubit. If it collapses to |1⟩, deals 100% of max HP as damage. If it collapses to |0⟩, deals base damage (10). Gains a waveform stack. Each waveform stack adds +50 damage." },
@@ -221,7 +221,7 @@ const characterData = {
             { name: "METAL NOISE", desc: "Prevents the enemy from using moves that change their qubit state for the next turn. If the enemy's qubit is in a state of 1, they may not use a Q-Move. If it is in a state of 0, deal damage. (DMG: 20)" },
             { name: "SHIFT GEAR", desc: "Puts the qubit in a state of SUPERPOSITION. For the next turn, increase the probability of the qubit collapsing to 1 by 25%." }
         ],
-        maxHp: 95
+        maxHp: 110
     },
     "Higscrozma": {
         sprite: "/static/sprites/higscrozma.gif",

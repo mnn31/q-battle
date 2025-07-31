@@ -1,8 +1,8 @@
 # Resona
 
 ## Stats
-- **HP**: 95
-- **Attack**: 55
+- **HP**: 110
+- **Attack**: 75
 - **Defense**: 100
 - **Speed**: 6
 
