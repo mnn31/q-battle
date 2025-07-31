@@ -7,7 +7,7 @@
 - **Speed**: 6
 
 ## Ability: Quantum Waveform
-Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 15.
+Every time Resona collapses the qubit, it gains one Waveform stack. A Waveform stack increases the probability of collapsing to a 1 by an additional 2% and increases the damage of Q-Metronome by 50.
 
 ## Moves
 
@@ -38,5 +38,5 @@ Where Level = 50, Attack = 65, Defense = 50 (placeholder)
 ## Waveform Stacking Mechanics
 - Each collapse grants +1 waveform stack
 - Each stack: +2% probability of collapsing to |1⟩
-- Each stack: +15 damage to Q-METRONOME
+- Each stack: +50 damage to Q-METRONOME
 - Stacks persist throughout battle 
