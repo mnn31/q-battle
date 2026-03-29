@@ -77,3 +77,15 @@ def quantum_move_singulon_q_prismatic_laser(quantum_state, player_qubit_state="|
         "message": f"{message} Dealt {damage} damage!",
         "qubit_state": quantum_state.qubit_state
     }
+
+
+
+
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(2, 2)
+qc.h(0)        # Put qubit 0 into superposition
+qc.cx(0, 1)    # Entangle qubit 0 and 1
+qc.measure(0, 0)
+qc.measure(1, 1)
+qc.draw('mpl')

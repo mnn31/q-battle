@@ -1,31 +1,31 @@
 from flask import Flask, jsonify, request, render_template, send_from_directory
 import os
-from characters.bitzy.quantum_move import (
+from .characters.bitzy.quantum_move import (
     quantum_move_bitzy_q_thunder,
     quantum_move_bitzy_shock,
     quantum_move_bitzy_dualize,
     quantum_move_bitzy_bit_flip,
     BitzyQuantumState
 )
-from characters.bitzy.ability import ability_superhijack
-from characters.neutrinette.quantum_move import (
+from .characters.bitzy.ability import ability_superhijack
+from .characters.neutrinette.quantum_move import (
     quantum_move_neutrinette_q_photon_geyser,
     quantum_move_neutrinette_glitch_claw,
     quantum_move_neutrinette_entangle,
     quantum_move_neutrinette_switcheroo,
     NeutrinetteQuantumState
 )
-from characters.neutrinette.ability import ability_quantum_afterburn
-from characters.resona.quantum_move import (
+from .characters.neutrinette.ability import ability_quantum_afterburn
+from .characters.resona.quantum_move import (
     quantum_move_resona_q_metronome,
     quantum_move_resona_wave_crash,
     quantum_move_resona_metal_noise,
     quantum_move_resona_shift_gear,
     ResonaQuantumState
 )
-from characters.resona.ability import ability_quantum_waveform
-from routes import game_api
-from Game_Engine import start_game, process_move, get_game_state
+from .characters.resona.ability import ability_quantum_waveform
+from .routes import game_api
+from .Game_Engine import start_game, process_move, get_game_state
 
 app = Flask(__name__, static_folder='../frontend/static', template_folder='../frontend')
 app.register_blueprint(game_api)
