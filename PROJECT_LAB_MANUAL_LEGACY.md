@@ -6,10 +6,9 @@
 **Group Name:** Quantum Gaming Team
 
 **Group Members:**
-- [Your Name] - Project Lead & Full-Stack Developer
-- [Additional members if any]
+- Manan Gupta, Rohan Khanna, Peng Shen, Peter Wu
 
----
+
 
 ### Project Description
 
