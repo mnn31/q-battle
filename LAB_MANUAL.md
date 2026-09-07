@@ -5,8 +5,7 @@
 Quantum Gaming Team
 
 ### Group Members
-- [Your Name] - Project Lead & Full-Stack Developer
-- [Additional members if any]
+- Manan Gupta, Rohan Khanna, Peng Shen, Peter Wu
 
 ### Project Description
 Quantum Battle is an innovative educational web-based game that teaches quantum computing concepts through interactive turn-based battles. Players control "Quantumons" - characters with abilities based on real quantum phenomena like superposition, entanglement, and quantum tunneling. The game uses actual Qiskit quantum circuits to determine move outcomes, making it the first educational game to integrate real quantum computing into gameplay mechanics.
